@@ -1,8 +1,9 @@
 [![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
 
-# [Name of Project] [build badges go here when available]
+# JFR Mappers [build badges go here when available]
 
->[Brief description - what value does this software provide? How often should users expect to get releases? How is versioning set up? Where does this project want to go?]
+Java Flight Recorder (JFR) Mappers and Transformers to convert to New Relic data models. For use
+with the New Relic Telemetry SDK.
 
 ## Installation
 
