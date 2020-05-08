@@ -1,5 +1,6 @@
 package com.newrelic.jfr.toevent;
 
+import com.newrelic.jfr.stacktrace.StackTraceBlob;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import jdk.jfr.consumer.RecordedEvent;
@@ -34,7 +35,7 @@ public class MethodSampleMapper implements EventToEvent {
             var attr = new Attributes();
             attr.put("threadName", ev.getThread("sampledThread").getJavaName());
             attr.put("threadState", ev.getString("state"));
-            // FIXME Handle stack trace
+            attr.put("stackTrace", StackTraceBlob.encodeB64(ev.getStackTrace()));
 
             return List.of(new Event("jfr:MethodSample", attr, timestamp));
         }
