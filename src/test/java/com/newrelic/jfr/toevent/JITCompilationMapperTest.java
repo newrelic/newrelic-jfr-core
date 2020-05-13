@@ -11,7 +11,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-import static com.newrelic.jfr.toevent.JITCompilationMapper.EVENT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,7 +28,7 @@ class JITCompilationMapperTest {
                 .put("duration", duration.toMillis())
                 .put("class", monitorClassName)
                 .put("succeeded", true);
-        var expectedEvent = new Event(EVENT_NAME, expectedAttrs, startTime.toEpochMilli());
+        var expectedEvent = new Event("jfr:Compilation", expectedAttrs, startTime.toEpochMilli());
         var expected = List.of(expectedEvent);
 
         var event = mock(RecordedEvent.class);

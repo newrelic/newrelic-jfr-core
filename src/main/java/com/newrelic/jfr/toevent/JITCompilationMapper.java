@@ -31,7 +31,7 @@ public class JITCompilationMapper implements EventToEvent {
         attr.put("duration", duration.toMillis());
         attr.put("succeeded", event.getBoolean("succeeded"));
 
-        return List.of(new Event(EVENT_NAME, attr, timestamp));
+        return List.of(new Event("jfr:Compilation", attr, timestamp));
     }
 
     @Override
