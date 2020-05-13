@@ -4,6 +4,7 @@
 .idea/
 .settings/
 .vscode/
+.gradle/
 
 target/
 
