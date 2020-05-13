@@ -70,7 +70,7 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
                 endTimeMs,
                 attr);
         var outDuration  = new Summary(
-                "jfr:SocketWrite.duration",
+                "jfr:SocketRead.duration",
                 count,
                 duration.toMillis(),
                 minDuration.toMillis(),
