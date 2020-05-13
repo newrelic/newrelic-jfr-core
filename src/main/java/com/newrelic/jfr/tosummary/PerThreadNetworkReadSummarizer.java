@@ -33,7 +33,8 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
 
     @Override
     public void accept(RecordedEvent ev) {
-        endTimeMs = ev.getStartTime().toEpochMilli();
+        var duration = ev.getDuration();
+        endTimeMs = ev.getStartTime().plus(duration).toEpochMilli();
         count++;
         var bytesRead = ev.getLong("bytesRead");
         bytes = bytes + bytesRead;
@@ -45,14 +46,13 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
             minBytes = bytesRead;
         }
 
-        var du = ev.getDuration();
-        duration = duration.plus(du);
+        this.duration = this.duration.plus(duration);
 
-        if (du.compareTo(maxDuration) > 0) {
-            maxDuration = du;
+        if (duration.compareTo(maxDuration) > 0) {
+            maxDuration = duration;
         }
-        if (du.compareTo(minDuration) < 0) {
-            minDuration = du;
+        if (duration.compareTo(minDuration) < 0) {
+            minDuration = duration;
         }
     }
 
@@ -70,7 +70,7 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
                 endTimeMs,
                 attr);
         var outDuration  = new Summary(
-                "jfr:SocketWrite.duration",
+                "jfr:SocketRead.duration",
                 count,
                 duration.toMillis(),
                 minDuration.toMillis(),
