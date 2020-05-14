@@ -5,7 +5,7 @@
 .settings/
 .vscode/
 .gradle/
-
+build/
 target/
 
 pom.xml.tag
