@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Interface used to turn JFR RecordedEvent instances into
+ * lists of New Relic telemetry Events, with a one-to-many
+ * mapping. The target Event is a type from the New Relic
+ * Telemetry SDK.
+ */
 public interface EventToEvent extends Function<RecordedEvent, List<Event>> {
 
     /**

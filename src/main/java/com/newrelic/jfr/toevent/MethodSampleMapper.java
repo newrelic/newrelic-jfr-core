@@ -29,17 +29,16 @@ public class MethodSampleMapper implements EventToEvent {
     public List<Event> apply(RecordedEvent ev) {
         var trace = ev.getStackTrace();
         if (trace == null) {
-            var timestamp = ev.getStartTime().toEpochMilli();
-
-            var attr = new Attributes();
-            attr.put("threadName", ev.getThread("sampledThread").getJavaName());
-            attr.put("threadState", ev.getString("state"));
-            // FIXME Handle stack trace
-
-            return List.of(new Event("jfr:MethodSample", attr, timestamp));
+            return List.of();
         }
 
-        return List.of();
+        var timestamp = ev.getStartTime().toEpochMilli();
+        var attr = new Attributes();
+        attr.put("thread.name", ev.getThread("sampledThread").getJavaName());
+        attr.put("thread.state", ev.getString("state"));
+        // FIXME Handle stack trace
+
+        return List.of(new Event("jfr:MethodSample", attr, timestamp));
     }
 
     @Override
