@@ -23,4 +23,18 @@ public class Workarounds {
         }
         return Optional.empty();
     }
+
+
+    /**
+     * There is a typo in the field names in JFR.  This unifies
+     * them in a way that is forward compatible when the mistake
+     * is fixed.
+     * See https://github.com/openjdk/jdk/blob/d74e4f22374b35ff5f84d320875b00313acdb14d/src/hotspot/share/jfr/metadata/metadata.xml#L494
+     */
+    public static boolean getSucceeded(RecordedEvent ev) {
+        if(ev.hasField("succeeded")){
+            return ev.getBoolean("succeeded");
+        }
+        return ev.getBoolean("succeded");
+    }
 }
