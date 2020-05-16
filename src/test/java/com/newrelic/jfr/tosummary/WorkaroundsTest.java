@@ -28,4 +28,20 @@ class WorkaroundsTest {
         when(ev.getValue("eventThread")).thenReturn(new Object[]{"aa", 21, "bbbbbbb"});
         assertTrue(Workarounds.getThreadName(ev).isEmpty());
     }
+
+    @Test
+    public void testGetSucceededCorrect() throws Exception {
+        var ev = mock(RecordedEvent.class);
+        when(ev.hasField("succeeded")).thenReturn(true);
+        when(ev.getBoolean("succeeded")).thenReturn(true);
+        assertTrue(Workarounds.getSucceeded(ev));
+    }
+
+    @Test
+    public void testGetSucceededIncorrect() throws Exception {
+        var ev = mock(RecordedEvent.class);
+        when(ev.hasField("succeeded")).thenReturn(false);
+        when(ev.getBoolean("succeded")).thenReturn(true);
+        assertTrue(Workarounds.getSucceeded(ev));
+    }
 }
