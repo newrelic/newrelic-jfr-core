@@ -4,18 +4,25 @@ import jdk.jfr.consumer.RecordedEvent;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.function.Supplier;
 
 public class DurationSummarizer {
 
+    private final Supplier<Long> clock;
     private long startTimeMs;
     private long endTimeMs;
     private Duration duration = Duration.ofNanos(0L);
     private Duration minDuration = Duration.ofNanos(Long.MAX_VALUE);
-    private Duration maxDuration = Duration.ofNanos(0L);
+    private Duration maxDuration = Duration.ofNanos(Long.MIN_VALUE);
 
     public DurationSummarizer(long startTimeMs) {
+        this(startTimeMs, () -> Instant.now().toEpochMilli());
+    }
+
+    public DurationSummarizer(long startTimeMs, Supplier<Long> clock) {
         this.startTimeMs = startTimeMs;
         this.endTimeMs = this.startTimeMs;
+        this.clock = clock;
     }
 
     public void accept(RecordedEvent ev) {
@@ -31,11 +38,11 @@ public class DurationSummarizer {
     }
 
     public void reset() {
-        startTimeMs = Instant.now().toEpochMilli();
+        startTimeMs = clock.get();
         endTimeMs = 0L;
         duration = Duration.ofNanos(0L);
         minDuration = Duration.ofNanos(Long.MAX_VALUE);
-        maxDuration = Duration.ofNanos(0L);
+        maxDuration = Duration.ofNanos(Long.MIN_VALUE);
     }
 
 
