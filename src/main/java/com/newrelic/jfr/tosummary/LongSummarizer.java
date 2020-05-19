@@ -8,7 +8,7 @@ public class LongSummarizer {
     private int count = 0;
     private long sum = 0L;
     private long min = Long.MAX_VALUE;
-    private long max = 0L;
+    private long max = Long.MIN_VALUE;
 
     public LongSummarizer(String fieldName) {
         this.fieldName = fieldName;
