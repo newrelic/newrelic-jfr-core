@@ -11,12 +11,12 @@ class LongSummarizerTest {
 
     @Test
     void testAccept() {
-        RecordedEvent ev = mock(RecordedEvent.class);
+        var ev = mock(RecordedEvent.class);
 
-        String fieldName = "theGoodData";
+        var fieldName = "theGoodData";
         when(ev.getLong(fieldName)).thenReturn(11L, 12L);
 
-        LongSummarizer testClass = new LongSummarizer(fieldName);
+        var testClass = new LongSummarizer(fieldName);
         testClass.accept(ev);
         testClass.accept(ev);
 
@@ -28,11 +28,9 @@ class LongSummarizerTest {
 
     @Test
     void testDefaultState() {
-        RecordedEvent ev = mock(RecordedEvent.class);
+        var fieldName = "theGoodData";
 
-        String fieldName = "theGoodData";
-
-        LongSummarizer testClass = new LongSummarizer(fieldName);
+        var testClass = new LongSummarizer(fieldName);
 
         assertEquals(0, testClass.getCount());
         assertEquals(0, testClass.getSum());
@@ -42,12 +40,12 @@ class LongSummarizerTest {
 
     @Test
     void testReset() {
-        RecordedEvent ev = mock(RecordedEvent.class);
+        var ev = mock(RecordedEvent.class);
 
-        String fieldName = "theGoodData";
+        var fieldName = "theGoodData";
         when(ev.getLong(fieldName)).thenReturn(101L, 102L);
 
-        LongSummarizer testClass = new LongSummarizer(fieldName);
+        var testClass = new LongSummarizer(fieldName);
         testClass.accept(ev);
         testClass.reset();
         testClass.accept(ev);
