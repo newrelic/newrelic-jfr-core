@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,6 +20,24 @@ public class StackTraceBlobTest {
   private RecordingFile loadFile(String fName) throws IOException, URISyntaxException {
     URL url = StackTraceBlobTest.class.getClassLoader().getResource(fName);
     return new RecordingFile(Paths.get(url.toURI()));
+  }
+
+  @Test
+  void testJsonWriteWithTruncate() throws Exception {
+    var rf = new HashMap<String, String>();
+    rf.put("desc", "Foo.meth:()V");
+    rf.put("bytecodeIndex", "14");
+
+    var frames = new ArrayList<Map<String, String>>();
+    for (int i = 0; i < 8; i++) {
+      rf.put("line", "" + (i + 10));
+      frames.add((Map<String, String>) rf.clone());
+    }
+
+    var expected =
+        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[{\"desc\":\"Foo.meth:()V\",\"line\":\"10\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth:()V\",\"line\":\"11\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth:()V\",\"line\":\"12\",\"bytecodeIndex\":\"14\"}]}";
+    var result = StackTraceBlob.jsonWrite(frames, Optional.of(3));
+    assertEquals(expected, result);
   }
 
   @Test

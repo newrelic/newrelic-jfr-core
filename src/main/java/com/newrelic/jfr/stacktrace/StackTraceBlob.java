@@ -13,14 +13,14 @@ public class StackTraceBlob {
     var payload = new ArrayList<Map<String, String>>();
     var frames = trace.getFrames();
     for (int i = 0; i < frames.size(); i++) {
-      var jsonObj = new HashMap<String, String>();
+      var frameData = new HashMap<String, String>();
       var frame = frames.get(i);
       var method = frame.getMethod();
       var methodDesc = method.getType().getName() + "." + method.getName() + method.getDescriptor();
-      jsonObj.put("desc", methodDesc);
-      jsonObj.put("line", "" + frame.getLineNumber());
-      jsonObj.put("bytecodeIndex", "" + frame.getBytecodeIndex());
-      payload.add(jsonObj);
+      frameData.put("desc", methodDesc);
+      frameData.put("line", "" + frame.getLineNumber());
+      frameData.put("bytecodeIndex", "" + frame.getBytecodeIndex());
+      payload.add(frameData);
     }
 
     String out = null;
@@ -37,13 +37,18 @@ public class StackTraceBlob {
     var strOut = new StringWriter();
     var jsonWriter = new JsonWriter(strOut);
     var isTruncated = !limit.isEmpty();
+    var frameCount = frames.size();
+    if (isTruncated && limit.get() < frameCount) {
+      frameCount = limit.get();
+    }
     jsonWriter.beginObject();
     jsonWriter.name("type").value("stacktrace");
     jsonWriter.name("language").value("java");
     jsonWriter.name("version").value(JSON_SCHEMA_VERSION);
     jsonWriter.name("truncated").value(isTruncated);
     jsonWriter.name("payload").beginArray();
-    for (final var frame : frames) {
+    for (int i = 0; i < frameCount; i++) {
+      var frame = frames.get(i);
       jsonWriter.beginObject();
       jsonWriter.name("desc").value(frame.get("desc"));
       jsonWriter.name("line").value(frame.get("line"));
@@ -58,7 +63,7 @@ public class StackTraceBlob {
     if (length > 3 * 1024) {
       // Truncate the stack frame and try again
       int numFrames = frames.size() * 3 * 1024 / length;
-      return jsonWrite(frames.subList(0, numFrames), Optional.of(numFrames));
+      return jsonWrite(frames, Optional.of(numFrames));
     } else {
       return out;
     }
