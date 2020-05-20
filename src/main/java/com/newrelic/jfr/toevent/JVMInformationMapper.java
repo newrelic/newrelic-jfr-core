@@ -2,17 +2,18 @@ package com.newrelic.jfr.toevent;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
-import java.util.List;
-
 // Only occurs at process startup
-//jdk.JVMInformation {
+// jdk.JVMInformation {
 //        startTime = 10:37:04.314
 //        jvmName = "OpenJDK 64-Bit Server VM"
-//        jvmVersion = "OpenJDK 64-Bit Server VM (11.0.4+11) for bsd-amd64 JRE (11.0.4+11), built on Aug
+//        jvmVersion = "OpenJDK 64-Bit Server VM (11.0.4+11) for bsd-amd64 JRE (11.0.4+11), built on
+// Aug
 //        5 2019 02:57:07 by "jenkins" with gcc 4.2.1 Compatible Apple LLVM 7.0.2 (clang-700.1.81)"
-//        jvmArguments = "-XX:+PrintCompilation -XX:StartFlightRecording:disk=true,filename=opt-java.jfr
+//        jvmArguments = "-XX:+PrintCompilation
+// -XX:StartFlightRecording:disk=true,filename=opt-java.jfr
 //        ,maxage=12h,settings=profile"
 //        jvmFlags = N/A
 //        javaArguments = "optjava.StringHash"
@@ -20,21 +21,21 @@ import java.util.List;
 //        pid = 13612
 //        }
 public class JVMInformationMapper implements EventToEvent {
-    public static final String EVENT_NAME = "jdk.JVMInformation";
+  public static final String EVENT_NAME = "jdk.JVMInformation";
 
-    @Override
-    public String getEventName() {
-        return EVENT_NAME;
-    }
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
+  }
 
-    @Override
-    public List<Event> apply(RecordedEvent event) {
-        var timestamp = event.getStartTime().toEpochMilli();
-        var attr = new Attributes();
-        attr.put("jvmArguments", event.getString("jvmArguments"));
-        attr.put("jvmStartTime", event.getInstant("jvmStartTime").toEpochMilli());
-        attr.put("jvmVersion", event.getString("jvmVersion"));
+  @Override
+  public List<Event> apply(RecordedEvent event) {
+    var timestamp = event.getStartTime().toEpochMilli();
+    var attr = new Attributes();
+    attr.put("jvmArguments", event.getString("jvmArguments"));
+    attr.put("jvmStartTime", event.getInstant("jvmStartTime").toEpochMilli());
+    attr.put("jvmVersion", event.getString("jvmVersion"));
 
-        return List.of(new Event("jfr:JVMInformation", attr, timestamp));
-    }
+    return List.of(new Event("jfr:JVMInformation", attr, timestamp));
+  }
 }

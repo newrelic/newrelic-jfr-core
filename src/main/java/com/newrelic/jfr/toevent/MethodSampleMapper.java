@@ -1,15 +1,13 @@
 package com.newrelic.jfr.toevent;
 
-import com.newrelic.jfr.stacktrace.StackTraceBlob;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
-import jdk.jfr.consumer.RecordedEvent;
-
 import java.util.List;
+import jdk.jfr.consumer.RecordedEvent;
 
 // Need to handle both jdk.ExecutionSample and jdk.NativeMethodSample...
 
-//jdk.NativeMethodSample {
+// jdk.NativeMethodSample {
 //        startTime = 10:37:26.131
 //        sampledThread = "JFR Periodic Tasks" (javaThreadId = 12)
 //        state = "STATE_IN_OBJECT_WAIT_TIMED"
@@ -23,27 +21,27 @@ import java.util.List;
 //        ]
 //        }
 public class MethodSampleMapper implements EventToEvent {
-    public static final String EVENT_NAME = "jdk.ExecutionSample";
-    public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
+  public static final String EVENT_NAME = "jdk.ExecutionSample";
+  public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
 
-    @Override
-    public List<Event> apply(RecordedEvent ev) {
-        var trace = ev.getStackTrace();
-        if (trace == null) {
-            return List.of();
-        }
-
-        var timestamp = ev.getStartTime().toEpochMilli();
-        var attr = new Attributes();
-        attr.put("thread.name", ev.getThread("sampledThread").getJavaName());
-        attr.put("thread.state", ev.getString("state"));
-//        attr.put("stackTrace", StackTraceBlob.encodeB64(ev.getStackTrace()));
-
-        return List.of(new Event("jfr:MethodSample", attr, timestamp));
+  @Override
+  public List<Event> apply(RecordedEvent ev) {
+    var trace = ev.getStackTrace();
+    if (trace == null) {
+      return List.of();
     }
 
-    @Override
-    public String getEventName() {
-        return EVENT_NAME;
-    }
+    var timestamp = ev.getStartTime().toEpochMilli();
+    var attr = new Attributes();
+    attr.put("thread.name", ev.getThread("sampledThread").getJavaName());
+    attr.put("thread.state", ev.getString("state"));
+    //        attr.put("stackTrace", StackTraceBlob.encodeB64(ev.getStackTrace()));
+
+    return List.of(new Event("jfr:MethodSample", attr, timestamp));
+  }
+
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
+  }
 }

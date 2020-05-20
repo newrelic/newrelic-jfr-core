@@ -3,11 +3,10 @@ package com.newrelic.jfr.toevent;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
-import java.util.List;
-
-//jdk.Compilation {
+// jdk.Compilation {
 //        startTime = 16:04:14.403
 //        duration = LGTM - but I'm not a reviewer :( ms
 //        method = org.apache.kafka.clients.Metadata.update(Cluster, Set, long)
@@ -20,23 +19,23 @@ import java.util.List;
 //        eventThread = "C2 CompilerThread0" (javaThreadId = 5)
 //        }
 public class JITCompilationMapper implements EventToEvent {
-    public static final String EVENT_NAME = "jdk.Compilation";
+  public static final String EVENT_NAME = "jdk.Compilation";
 
-    @Override
-    public List<Event> apply(RecordedEvent event) {
-        var timestamp = event.getStartTime().toEpochMilli();
-        var duration = event.getDuration();
-        var attr = new Attributes();
-        attr.put("thread.name", event.getThread("eventThread").getJavaName());
-        attr.put("class", event.getClass("monitorClass").getName());
-        attr.put("duration", duration.toMillis());
-        attr.put("succeeded", Workarounds.getSucceeded(event));
+  @Override
+  public List<Event> apply(RecordedEvent event) {
+    var timestamp = event.getStartTime().toEpochMilli();
+    var duration = event.getDuration();
+    var attr = new Attributes();
+    attr.put("thread.name", event.getThread("eventThread").getJavaName());
+    attr.put("class", event.getClass("monitorClass").getName());
+    attr.put("duration", duration.toMillis());
+    attr.put("succeeded", Workarounds.getSucceeded(event));
 
-        return List.of(new Event("jfr:Compilation", attr, timestamp));
-    }
+    return List.of(new Event("jfr:Compilation", attr, timestamp));
+  }
 
-    @Override
-    public String getEventName() {
-        return EVENT_NAME;
-    }
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
+  }
 }

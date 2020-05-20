@@ -2,6 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    dependencies {
+        classpath("gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.8")
+    }
 }
 
 repositories {
@@ -11,6 +14,8 @@ repositories {
 plugins {
     id("java-library")
 }
+
+apply(plugin = "com.github.sherter.google-java-format")
 
 group = "com.newrelic.telemetry"
 
