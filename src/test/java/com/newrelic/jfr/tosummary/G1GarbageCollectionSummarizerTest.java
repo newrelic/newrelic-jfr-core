@@ -27,7 +27,7 @@ class G1GarbageCollectionSummarizerTest {
                 0,
                 Duration.ofNanos(0L).toMillis(),
                 Duration.ofNanos(Long.MAX_VALUE).toMillis(),
-                Duration.ofNanos(0L).toMillis(),
+                Duration.ofNanos(Long.MIN_VALUE).toMillis(),
                 Instant.now().toEpochMilli(),
                 0L,
                 new Attributes());
@@ -106,7 +106,7 @@ class G1GarbageCollectionSummarizerTest {
                 event3StartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of each RecordedEvent
                 new Attributes());
 
-        List<Metric> expected = List.of(expectedSummaryMetric);
+        var expected = List.of(expectedSummaryMetric);
 
         var testClass = new G1GarbageCollectionSummarizer(summaryStartTime);
 
@@ -124,10 +124,10 @@ class G1GarbageCollectionSummarizerTest {
         testClass.accept(event2);
         testClass.accept(event3);
 
-        final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-        final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
-
+        var result = testClass.summarizeAndReset().collect(toList());
         assertEquals(expected, result);
+
+        var resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
 
         // Summary should be reset to default values
         assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
