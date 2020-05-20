@@ -4,8 +4,10 @@
 .idea/
 .settings/
 .vscode/
+.gradle/
 
 target/
+build/
 
 pom.xml.tag
 pom.xml.releaseBackup
