@@ -32,7 +32,8 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
 
     @Override
     public void accept(RecordedEvent ev) {
-        endTimeMs = ev.getStartTime().toEpochMilli();
+        var duration = ev.getDuration();
+        endTimeMs = ev.getStartTime().plus(duration).toEpochMilli();
         count++;
         var bytesWritten = ev.getLong("bytesWritten");
         bytes = bytes + bytesWritten;
@@ -44,14 +45,13 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
             minBytes = bytesWritten;
         }
 
-        var du = ev.getDuration();
-        duration = duration.plus(du);
+        this.duration = this.duration.plus(duration);
 
-        if (du.compareTo(maxDuration) > 0) {
-            maxDuration = du;
+        if (duration.compareTo(maxDuration) > 0) {
+            maxDuration = duration;
         }
-        if (du.compareTo(minDuration) < 0) {
-            minDuration = du;
+        if (duration.compareTo(minDuration) < 0) {
+            minDuration = duration;
         }
     }
 

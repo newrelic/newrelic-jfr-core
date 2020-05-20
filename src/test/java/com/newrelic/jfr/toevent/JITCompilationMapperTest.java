@@ -39,6 +39,7 @@ class JITCompilationMapperTest {
         when(event.getDuration()).thenReturn(duration);
         when(event.getThread("eventThread")).thenReturn(eventThread);
         when(event.getClass("monitorClass")).thenReturn(monitorClass);
+        when(event.hasField("succeeded")).thenReturn(true);
         when(event.getBoolean("succeeded")).thenReturn(true);
         when(monitorClass.getName()).thenReturn(monitorClassName);
         when(eventThread.getJavaName()).thenReturn(threadName);
