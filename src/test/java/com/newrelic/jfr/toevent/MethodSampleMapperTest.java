@@ -21,13 +21,20 @@ class MethodSampleMapperTest {
     var threadState = "almost_asleep";
     var startTime = Instant.now();
     var expectedAttrs =
-        new Attributes().put("thread.name", threadName).put("thread.state", threadState);
+        new Attributes()
+            .put("thread.name", threadName)
+            .put("thread.state", threadState)
+            .put(
+                "stackTrace",
+                "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":[]}");
     var expectedEvent = new Event("jfr:MethodSample", expectedAttrs, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);
     var stack = mock(RecordedStackTrace.class);
     var sampledThread = mock(RecordedThread.class);
+
+    when(stack.getFrames()).thenReturn(List.of());
 
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getStackTrace()).thenReturn(stack);

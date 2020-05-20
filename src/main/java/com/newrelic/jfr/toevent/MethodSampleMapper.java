@@ -1,5 +1,6 @@
 package com.newrelic.jfr.toevent;
 
+import com.newrelic.jfr.stacktrace.StackTraceBlob;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.List;
@@ -35,7 +36,7 @@ public class MethodSampleMapper implements EventToEvent {
     var attr = new Attributes();
     attr.put("thread.name", ev.getThread("sampledThread").getJavaName());
     attr.put("thread.state", ev.getString("state"));
-    //        attr.put("stackTrace", StackTraceBlob.encodeB64(ev.getStackTrace()));
+    attr.put("stackTrace", StackTraceBlob.encode(ev.getStackTrace()));
 
     return List.of(new Event("jfr:MethodSample", attr, timestamp));
   }

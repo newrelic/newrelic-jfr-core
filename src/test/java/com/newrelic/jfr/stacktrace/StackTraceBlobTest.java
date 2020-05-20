@@ -33,7 +33,7 @@ public class StackTraceBlobTest {
           if (eventType.equals("jdk.ExecutionSample")
               || eventType.equals("jdk.NativeMethodSample")) {
             var trace = event.getStackTrace();
-            var b64 = StackTraceBlob.encodeB64(trace);
+            var b64 = StackTraceBlob.encode(trace);
             assertTrue(b64.startsWith("eyJ0eXBlIjoic3RhY2t0cmFjZSIsImxhbmd1YWdlIjoiamF2Y"));
             //                        assertEquals("XXeyJ0eXBlIjoic3",
             // StackTraceBlob.encodeB64(trace));

@@ -30,7 +30,7 @@ public class StackTraceSummarizer implements EventToSummaryEvent {
       endTimeMs = ev.getStartTime().toEpochMilli();
       count++;
 
-      String b64 = StackTraceBlob.encodeB64(trace);
+      String b64 = StackTraceBlob.encode(trace);
 
       var frames = trace.getFrames();
       for (int i = 0; i < frames.size(); i++) {
