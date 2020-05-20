@@ -4,11 +4,14 @@ import jdk.jfr.consumer.RecordedEvent;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DurationSummarizer {
 
+    public static final Supplier<Long> DEFAULT_CLOCK = () -> Instant.now().toEpochMilli();
     private final Supplier<Long> clock;
+    private final Optional<String> durationName;
     private long startTimeMs;
     private long endTimeMs;
     private Duration duration = Duration.ofNanos(0L);
@@ -16,17 +19,22 @@ public class DurationSummarizer {
     private Duration maxDuration = Duration.ofNanos(Long.MIN_VALUE);
 
     public DurationSummarizer(long startTimeMs) {
-        this(startTimeMs, () -> Instant.now().toEpochMilli());
+        this(startTimeMs, DEFAULT_CLOCK);
     }
 
     public DurationSummarizer(long startTimeMs, Supplier<Long> clock) {
+        this(startTimeMs, clock, null);
+    }
+
+    public DurationSummarizer(long startTimeMs, Supplier<Long> clock, String durationName) {
         this.startTimeMs = startTimeMs;
         this.endTimeMs = this.startTimeMs;
         this.clock = clock;
+        this.durationName = Optional.ofNullable(durationName);
     }
 
     public void accept(RecordedEvent ev) {
-        Duration duration = ev.getDuration();
+        Duration duration = getDuration(ev);
         endTimeMs = ev.getStartTime().plus(duration).toEpochMilli();
         this.duration = this.duration.plus(duration);
         if (duration.compareTo(maxDuration) > 0) {
@@ -35,6 +43,11 @@ public class DurationSummarizer {
         if (duration.compareTo(minDuration) < 0) {
             minDuration = duration;
         }
+    }
+
+    private Duration getDuration(RecordedEvent ev) {
+        return durationName.map(ev::getDuration)
+                .orElse(ev.getDuration());
     }
 
     public void reset() {

@@ -78,4 +78,20 @@ class DurationSummarizerTest {
         assertEquals(23000, testClass.getMinDurationMillis());
     }
 
+    @Test
+    void testNamedDurationField() {
+        var start  = System.currentTimeMillis();
+        var duration = Duration.ofSeconds(1101);
+
+        var ev = mock(RecordedEvent.class);
+
+        when(ev.getStartTime()).thenReturn(Instant.ofEpochMilli(start));
+        when(ev.getDuration()).thenReturn(duration);
+
+        DurationSummarizer testClass = new DurationSummarizer(start, DurationSummarizer.DEFAULT_CLOCK, "myDuration");
+        testClass.accept(ev);
+        testClass.reset();
+        testClass.accept(ev);
+    }
+
 }
