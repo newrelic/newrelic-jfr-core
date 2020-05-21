@@ -55,7 +55,6 @@ compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.0.1'
 New Relic hosts and moderates an online forum where customers can interact with New Relic employees as well as other customers to get help and share best practices. Like all official New Relic open source projects, there's a related Community topic in the New Relic Explorers Hub.
 
 ## Contributing
-Full details about how to contribute to
 Contributions to improve `jfr-mappers` are encouraged! Keep in mind when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
 To execute our corporate CLA, which is required if your contribution is on behalf of a company, or if you have any questions, please drop us an email at open-source@newrelic.com.
 
