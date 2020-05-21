@@ -2,8 +2,8 @@
 
 # JFR Mappers
 
-This repository is a library of reusable JFR (Java Flight Recorder) mappers
-that are used to transform JFR `RecordedEvent` instances into collections 
+This repository is a library of reusable JFR (Java Flight Recorder) mappers, 
+used to transform JFR `RecordedEvent` instances into collections 
 of New Relic telemetry, compatible with the 
 [telemetry SDK](https://github.com/newrelic/newrelic-telemetry-sdk-java).
 
