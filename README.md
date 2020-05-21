@@ -1,28 +1,54 @@
 [![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
 
-# JFR Mappers [build badges go here when available]
+# JFR Mappers
 
-Java Flight Recorder (JFR) Mappers and Transformers to convert to New Relic data models. For use
-with the New Relic Telemetry SDK.
+This repository is a library of reusable JFR (Java Flight Recorder) mappers
+that are used to transform JFR `RecordedEvent` instances into collections 
+of New Relic telemetry, compatible with the 
+[telemetry SDK](https://github.com/newrelic/newrelic-telemetry-sdk-java).
 
-## Installation
+In general, users will not use this library directly, but will instead leverage
+higher-level tooling built upon this library, such as
+[the JFR reporter extension](https://docs.newrelic.com/docs/agents/java-agent/features/real-time-java-profiling-using-jfr-metrics).
 
-> [Include a step-by-step procedure on how to get your code installed. Be sure to include any third party dependencies that need to be installed separately]
+## Building
 
-## Getting Started
->Simple steps to start working with the software similar to a "Hello World"
+This library uses the gradle wrapper.  To build:
 
-## Usage - optional
->Include more thorough instructions on how to use the software. This section may not be needed if the Getting Started section is enough.
+```
+$ git clone https://github.com/newrelic/newrelic-jfr-mappers.git
+$ cd jfr-mappers
+$ ./gradlew build
+```
 
+The resulting library (jar) will be in `jfr-mappers/build/libs/`.
 
-## Building - optional
+## Running tests
 
->Include this section if users will need to follow specific instructions to build the software from source. Be sure to include any third party build dependencies that need to be installed separately
+Unit tests are run with gradlew:
 
-## Testing - optional
+```
+$ ./gradlew test
+```
 
->Include instructions on how to run tests if we include tests with the codebase
+## As a dependency
+
+PRELIMINARY - ARTIFACTS ARE NOT YET BEING PUBLISHED
+
+### maven dependency
+```
+<dependency>
+    <groupId>com.newrelic</groupId>
+    <artifactId>jfr-mappers</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+### gradle dependency
+
+```
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.0.1'
+```
 
 ## Support
 
@@ -32,9 +58,11 @@ New Relic hosts and moderates an online forum where customers can interact with 
 
 ## Contributing
 Full details about how to contribute to
-Contributions to improve [Project Name] are encouraged! Keep in mind when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
+Contributions to improve `jfr-mappers` are encouraged! Keep in mind when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
 To execute our corporate CLA, which is required if your contribution is on behalf of a company, or if you have any questions, please drop us an email at open-source@newrelic.com.
 
 ## License
-[Project Name] is licensed under the [Apache 2.0](http://apache.org/licenses/LICENSE-2.0.txt) License.
->[If applicable: The [Project Name] also uses source code from third party libraries. Full details on which libraries are used and the terms under which they are licensed can be found in the third party notices document.]
+`jfr-mappers` is licensed under the [Apache 2.0](http://apache.org/licenses/LICENSE-2.0.txt) License.
+
+`jfr-mappers` also uses source code from [third party libraries](THIRD_PARTY_NOTICES.md). Full details on which libraries are used and the terms 
+under which they are licensed can be found in the third party notices document.
