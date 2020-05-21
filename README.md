@@ -13,7 +13,7 @@ higher-level tooling built upon this library, such as
 
 ## Building
 
-This library uses the gradle wrapper.  To build:
+This library uses Java 11 and the gradle wrapper.  To build:
 
 ```
 $ git clone https://github.com/newrelic/newrelic-jfr-mappers.git
