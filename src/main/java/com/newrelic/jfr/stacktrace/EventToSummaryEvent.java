@@ -1,19 +1,19 @@
-package com.newrelic.jfr.tosummary;
+package com.newrelic.jfr.stacktrace;
 
 import com.newrelic.jfr.Constants;
-import com.newrelic.telemetry.metrics.Summary;
+import com.newrelic.telemetry.events.Event;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 
-public interface EventToSummary extends Consumer<RecordedEvent> {
+public interface EventToSummaryEvent extends Consumer<RecordedEvent> {
 
   /**
    * JFR event name (e.g. jdk.ObjectAllocationInNewTLAB)
    *
    * @return String representation of JFR event name
    */
-  String getEventName();
+  //    String getEventName();
 
   /**
    * Aggregates JFR Events into a collection based on thread or class name
@@ -23,11 +23,11 @@ public interface EventToSummary extends Consumer<RecordedEvent> {
   void accept(RecordedEvent ev);
 
   /**
-   * Summarizes data on a collection of JFR Events
+   * Summarizes data from a collection of JFR Events
    *
-   * @return List of Summary metrics for JFR Events
+   * @return Stream of Events comprising the summarized
    */
-  Stream<Summary> summarizeAndReset();
+  Stream<Event> summarizeAndReset();
 
   /**
    * Returns the Java version where particular JFR events were added.

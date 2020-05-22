@@ -2,31 +2,30 @@ package com.newrelic.jfr.toevent;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
-import java.util.List;
-
 // Only occurs at process startup
-//jdk.InitialSystemProperty {
+// jdk.InitialSystemProperty {
 //        startTime = 10:37:04.315
 //        key = "java.vm.specification.name"
 //        value = "Java Virtual Machine Specification"
 // }
 public class JVMSystemPropertyMapper implements EventToEvent {
-    public static final String EVENT_NAME = "jdk.InitialSystemProperty";
+  public static final String EVENT_NAME = "jdk.InitialSystemProperty";
 
-    @Override
-    public String getEventName() {
-        return EVENT_NAME;
-    }
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
+  }
 
-    @Override
-    public List<Event> apply(RecordedEvent event) {
-        var timestamp = event.getStartTime().toEpochMilli();
-        var attr = new Attributes();
-        attr.put("jvmProperty", event.getString("key"));
-        attr.put("jvmPropertyValue", event.getString("value"));
+  @Override
+  public List<Event> apply(RecordedEvent event) {
+    var timestamp = event.getStartTime().toEpochMilli();
+    var attr = new Attributes();
+    attr.put("jvmProperty", event.getString("key"));
+    attr.put("jvmPropertyValue", event.getString("value"));
 
-        return List.of(new Event("jfr:JVMInformation", attr, timestamp));
-    }
+    return List.of(new Event("jfr:JVMInformation", attr, timestamp));
+  }
 }
