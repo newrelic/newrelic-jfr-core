@@ -53,8 +53,6 @@ public final class PerThreadObjectAllocationInNewTLABSummarizer implements Event
             attr);
     reset();
     return Stream.of(out);
-    // Probably too high a cardinality
-    // ev.getClass("objectClass").getName();
   }
 
   public void reset() {

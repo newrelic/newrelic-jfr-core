@@ -8,7 +8,9 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.time.Instant;
 import java.util.List;
-import jdk.jfr.consumer.*;
+import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedStackTrace;
+import jdk.jfr.consumer.RecordedThread;
 import org.junit.jupiter.api.Test;
 
 class MethodSampleMapperTest {
