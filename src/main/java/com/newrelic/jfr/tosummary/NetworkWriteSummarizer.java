@@ -1,10 +1,9 @@
 package com.newrelic.jfr.tosummary;
 
 import com.newrelic.jfr.Workarounds;
-import com.newrelic.telemetry.metrics.Summary;
 import jdk.jfr.consumer.RecordedEvent;
 
-//jdk.SocketWrite {
+// jdk.SocketWrite {
 //        startTime = 20:22:57.161
 //        duration = 87.4 ms
 //        host = "mysql-staging-agentdb-2"
@@ -20,26 +19,27 @@ import jdk.jfr.consumer.RecordedEvent;
 //        com.mysql.cj.protocol.a.SimplePacketSender.send(byte[], int, byte) line: 55
 //        ...
 //        ]
-//}
+// }
 
 public class NetworkWriteSummarizer extends AbstractThreadDispatchingSummarizer {
-    public static final String EVENT_NAME = "jdk.SocketWrite";
+  public static final String EVENT_NAME = "jdk.SocketWrite";
 
-    @Override
-    public void accept(RecordedEvent ev) {
-        var possibleThreadName = Workarounds.getThreadName(ev);
-        possibleThreadName.ifPresent(threadName -> {
-            if (perThread.get(threadName) == null) {
-                perThread.put(threadName,
-                    new PerThreadNetworkWriteSummarizer(threadName, ev.getStartTime().toEpochMilli()));
-            }
-            perThread.get(threadName).accept(ev);
+  @Override
+  public void accept(RecordedEvent ev) {
+    var possibleThreadName = Workarounds.getThreadName(ev);
+    possibleThreadName.ifPresent(
+        threadName -> {
+          if (perThread.get(threadName) == null) {
+            perThread.put(
+                threadName,
+                new PerThreadNetworkWriteSummarizer(threadName, ev.getStartTime().toEpochMilli()));
+          }
+          perThread.get(threadName).accept(ev);
         });
-    }
+  }
 
-    @Override
-    public String getEventName() {
-        return EVENT_NAME;
-    }
-
+  @Override
+  public String getEventName() {
+    return EVENT_NAME;
+  }
 }
