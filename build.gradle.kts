@@ -2,6 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    dependencies {
+        classpath("gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.8")
+    }
 }
 
 repositories {
@@ -14,6 +17,8 @@ plugins {
 }
 
 group = "com.newrelic"
+
+apply(plugin = "com.github.sherter.google-java-format")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
