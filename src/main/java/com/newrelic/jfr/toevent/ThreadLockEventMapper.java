@@ -1,7 +1,7 @@
 package com.newrelic.jfr.toevent;
 
-import com.newrelic.telemetry.events.Event;
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.events.Event;
 import jdk.jfr.consumer.RecordedEvent;
 
 import java.time.Duration;
@@ -19,7 +19,7 @@ public class ThreadLockEventMapper implements EventToEvent {
         if (duration.toMillis() > 20) {
             var timestamp = ev.getStartTime().toEpochMilli();
             var attr = new Attributes();
-            attr.put("name", ev.getThread("eventThread").getJavaName());
+            attr.put("thread.name", ev.getThread("eventThread").getJavaName());
             attr.put("class", ev.getClass("monitorClass").getName());
             attr.put("duration", duration.toMillis());
 

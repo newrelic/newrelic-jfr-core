@@ -1,5 +1,6 @@
 package com.newrelic.jfr.toevent;
 
+import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import jdk.jfr.consumer.RecordedEvent;
@@ -26,10 +27,10 @@ public class JITCompilationMapper implements EventToEvent {
         var timestamp = event.getStartTime().toEpochMilli();
         var duration = event.getDuration();
         var attr = new Attributes();
-        attr.put("name", event.getThread("eventThread").getJavaName());
+        attr.put("thread.name", event.getThread("eventThread").getJavaName());
         attr.put("class", event.getClass("monitorClass").getName());
         attr.put("duration", duration.toMillis());
-        attr.put("succeded", event.getBoolean("succeded"));
+        attr.put("succeeded", Workarounds.getSucceeded(event));
 
         return List.of(new Event("jfr:Compilation", attr, timestamp));
     }
