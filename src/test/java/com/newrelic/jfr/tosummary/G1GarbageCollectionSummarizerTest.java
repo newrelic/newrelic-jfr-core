@@ -52,7 +52,7 @@ class G1GarbageCollectionSummarizerTest {
             eventDurationMillis, // max
             summaryStartTime, // startTimeMs
             eventStartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of each
-                            // RecordedEvent
+            // RecordedEvent
             new Attributes());
 
     List<Metric> expected = List.of(expectedSummaryMetric);
@@ -107,7 +107,7 @@ class G1GarbageCollectionSummarizerTest {
             event2DurationMillis, // max
             summaryStartTime, // startTimeMs
             event3StartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of
-                             // each RecordedEvent
+            // each RecordedEvent
             new Attributes());
 
     var expected = List.of(expectedSummaryMetric);
