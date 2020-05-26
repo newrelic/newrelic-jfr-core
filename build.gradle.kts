@@ -68,6 +68,7 @@ publishing {
             groupId = "com.newrelic"
             artifactId = "jfr-mappers"
             version = version
+            from(components["java"])
         }
     }
 }
