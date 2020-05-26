@@ -1,8 +1,6 @@
-name: Java CI with Gradle
+name: Java PR build (gradle)
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -18,4 +16,5 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build publish
+      run: ./gradlew build
+
