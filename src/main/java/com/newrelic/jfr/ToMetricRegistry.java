@@ -1,49 +1,76 @@
 package com.newrelic.jfr;
 
-import static java.util.stream.Collectors.toMap;
+import com.newrelic.jfr.tometric.AllocationRequiringGCMapper;
+import com.newrelic.jfr.tometric.CPUThreadLoadMapper;
+import com.newrelic.jfr.tometric.ContextSwitchRateMapper;
+import com.newrelic.jfr.tometric.EventToMetric;
+import com.newrelic.jfr.tometric.GCHeapSummaryMapper;
+import com.newrelic.jfr.tometric.GarbageCollectionMapper;
+import com.newrelic.jfr.tometric.MetaspaceSummaryMapper;
+import com.newrelic.jfr.tometric.OverallCPULoadMapper;
+import com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper;
 
-import com.newrelic.jfr.tometric.*;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class ToMetricRegistry {
 
-  private final Map<String, EventToMetric> mappers;
+    private final static List<EventToMetric> ALL_MAPPERS =
+            List.of(
+                    new AllocationRequiringGCMapper(),
+                    new ContextSwitchRateMapper(),
+                    new CPUThreadLoadMapper(),
+                    new GarbageCollectionMapper(),
+                    new GCHeapSummaryMapper(),
+                    new MetaspaceSummaryMapper(),
+                    new OverallCPULoadMapper(),
+                    new ThreadAllocationStatisticsMapper()
+            );
+    private final List<EventToMetric> mappers;
 
-  private ToMetricRegistry(Map<String, EventToMetric> mappers) {
-    this.mappers = mappers;
-  }
 
-  public static ToMetricRegistry createDefault() {
-    var mappers =
-        Map.of(
-            AllocationRequiringGCMapper.EVENT_NAME, new AllocationRequiringGCMapper(),
-            ContextSwitchRateMapper.EVENT_NAME, new ContextSwitchRateMapper(),
-            CPUThreadLoadMapper.EVENT_NAME, new CPUThreadLoadMapper(),
-            GarbageCollectionMapper.EVENT_NAME, new GarbageCollectionMapper(),
-            GCHeapSummaryMapper.EVENT_NAME, new GCHeapSummaryMapper(),
-            MetaspaceSummaryMapper.EVENT_NAME, new MetaspaceSummaryMapper(),
-            OverallCPULoadMapper.EVENT_NAME, new OverallCPULoadMapper(),
-            ThreadAllocationStatisticsMapper.EVENT_NAME, new ThreadAllocationStatisticsMapper());
-    return new ToMetricRegistry(mappers);
-  }
+    private ToMetricRegistry(List<EventToMetric> mappers) {
+        this.mappers = new ArrayList<>(mappers);
+    }
 
-  public static ToMetricRegistry create(Collection<String> eventNames) {
-    var all = createDefault();
-    var filtered =
-        all.getMappers()
-            .entrySet()
-            .stream()
-            .filter(e -> eventNames.contains(e.getKey()))
-            .collect(toMap(n -> n.getKey(), n -> n.getValue()));
-    return new ToMetricRegistry(filtered);
-  }
+    public static ToMetricRegistry createDefault() {
+        return create(allEventNames());
+    }
 
-  private Map<String, EventToMetric> getMappers() {
-    return mappers;
-  }
+    public static ToMetricRegistry create(Collection<String> eventNames) {
+        var filtered = ALL_MAPPERS.stream()
+                        .filter(mapper -> eventNames.contains(mapper.getEventName()))
+                        .collect(toList());
+        return new ToMetricRegistry(filtered);
+    }
 
-  public EventToMetric get(String eventName) {
-    return mappers.get(eventName);
-  }
+    private static List<String> allEventNames() {
+        return ALL_MAPPERS.stream()
+                .map(EventToMetric::getEventName)
+                .collect(toUnmodifiableList());
+    }
+
+    /**
+     * @return a stream of all EventToMetric entries in this registry.
+     */
+    public Stream<EventToMetric> all() {
+        return mappers.stream();
+    }
+
+    /**
+     * Returns an Optional<EventToMetric> containing the mapper with the given
+     * JFR event name.  If the event is not known to this registry, the
+     * returned Optional will be empty.
+     * @param eventName - the JFR name of the event to find
+     * @return - an optional EventToMetric.
+     */
+    public Optional<EventToMetric> get(String eventName) {
+        return mappers.stream().filter(toMetric -> toMetric.getEventName().equals(eventName)).findFirst();
+    }
 }
