@@ -1,15 +1,14 @@
 package com.newrelic.jfr;
 
-import com.newrelic.jfr.tosummary.EventToSummary;
-import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
-import com.newrelic.jfr.tosummary.NetworkReadSummarizer;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.newrelic.jfr.tosummary.EventToSummary;
+import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
+import com.newrelic.jfr.tosummary.NetworkReadSummarizer;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 class ToSummaryRegistryTest {
 

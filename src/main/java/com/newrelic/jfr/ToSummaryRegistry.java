@@ -1,19 +1,18 @@
 package com.newrelic.jfr;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
 import com.newrelic.jfr.tosummary.NetworkReadSummarizer;
 import com.newrelic.jfr.tosummary.NetworkWriteSummarizer;
 import com.newrelic.jfr.tosummary.ObjectAllocationInNewTLABSummarizer;
 import com.newrelic.jfr.tosummary.ObjectAllocationOutsideTLABSummarizer;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 public class ToSummaryRegistry {
 
