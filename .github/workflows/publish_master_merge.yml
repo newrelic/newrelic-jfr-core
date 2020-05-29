@@ -1,4 +1,4 @@
-name: Java publish on master merge
+name: Master build
 
 on:
   push:
