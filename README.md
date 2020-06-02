@@ -2,6 +2,8 @@
 
 # JFR Mappers
 
+![build badge](https://github.com/newrelic/newrelic-jfr-mappers/workflows/Master%20build/badge.svg)
+
 This repository is a library of reusable JFR (Java Flight Recorder) mappers 
 used to transform JFR `RecordedEvent` instances into New Relic telemetry collections 
 that are compatible with the 
@@ -32,21 +34,21 @@ $ ./gradlew test
 
 ## As a dependency
 
-PRELIMINARY - ARTIFACTS ARE NOT YET BEING PUBLISHED
+_Note: SNAPSHOT artifact is still preliminary._
 
 ### maven dependency
 ```
 <dependency>
     <groupId>com.newrelic</groupId>
     <artifactId>jfr-mappers</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0-SNAPSHOT</version>
 </dependency>
 ```
 
 ### gradle dependency
 
 ```
-compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.0.1'
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.1.0-SNAPSHOT'
 ```
 
 ## Support
