@@ -51,9 +51,9 @@ class ObjectAllocationInNewTLABSummarizerTest {
             eventTlabSize, // min
             eventTlabSize, // max
             eventStartTime, // startTimeMs: the summary metric startTimeMs is the eventStartTime of
-                            // the initial RecordedEvent
+            // the initial RecordedEvent
             eventStartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of the
-                            // last RecordedEvent
+            // last RecordedEvent
             attr); // attributes contain threadName
 
     List<Metric> expected = List.of(expectedSummaryMetric);
@@ -110,9 +110,9 @@ class ObjectAllocationInNewTLABSummarizerTest {
             event2TlabSize, // min
             event3TlabSize, // max
             event1StartTime, // startTimeMs: the summary metric startTimeMs is the eventStartTime of
-                             // the initial RecordedEvent
+            // the initial RecordedEvent
             event3StartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of the
-                             // last RecordedEvent
+            // last RecordedEvent
             attr); // attributes contain threadName
 
     List<Metric> expected = List.of(expectedSummaryMetric);

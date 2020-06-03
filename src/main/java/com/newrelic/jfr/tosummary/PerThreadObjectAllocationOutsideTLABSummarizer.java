@@ -10,16 +10,19 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class PerThreadObjectAllocationOutsideTLABSummarizer implements EventToSummary {
 
   private final String threadName;
-  private int count = 0;
-  private long sum = 0L;
-  private long min = Long.MAX_VALUE;
-  private long max = 0L;
+  private final LongSummarizer summarizer;
   private long startTimeMs;
   private long endTimeMs = 0L;
 
   public PerThreadObjectAllocationOutsideTLABSummarizer(String threadName, long startTimeMs) {
+    this(threadName, startTimeMs, new LongSummarizer("allocationSize"));
+  }
+
+  public PerThreadObjectAllocationOutsideTLABSummarizer(
+      String threadName, long startTimeMs, LongSummarizer summarizer) {
     this.threadName = threadName;
     this.startTimeMs = startTimeMs;
+    this.summarizer = summarizer;
   }
 
   @Override
@@ -30,16 +33,7 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
   @Override
   public void accept(RecordedEvent ev) {
     endTimeMs = ev.getStartTime().toEpochMilli();
-    count++;
-    var alloc = ev.getLong("allocationSize");
-    sum = sum + alloc;
-
-    if (alloc > max) {
-      max = alloc;
-    }
-    if (alloc < min) {
-      min = alloc;
-    }
+    summarizer.accept(ev);
     // Probably too high a cardinality
     // ev.getClass("objectClass").getName();
   }
@@ -50,10 +44,10 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
     var out =
         new Summary(
             "jfr:ObjectAllocationOutsideTLAB.allocation",
-            count,
-            sum,
-            min,
-            max,
+            summarizer.getCount(),
+            summarizer.getSum(),
+            summarizer.getMin(),
+            summarizer.getMax(),
             startTimeMs,
             endTimeMs,
             attr);
@@ -64,9 +58,6 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
   public void reset() {
     startTimeMs = Instant.now().toEpochMilli();
     endTimeMs = 0L;
-    count = 0;
-    sum = 0L;
-    min = Long.MAX_VALUE;
-    max = 0L;
+    summarizer.reset();
   }
 }

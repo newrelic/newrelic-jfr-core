@@ -1,48 +1,57 @@
 package com.newrelic.jfr;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 
-import com.newrelic.jfr.tosummary.*;
+import com.newrelic.jfr.tosummary.EventToSummary;
+import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
+import com.newrelic.jfr.tosummary.NetworkReadSummarizer;
+import com.newrelic.jfr.tosummary.NetworkWriteSummarizer;
+import com.newrelic.jfr.tosummary.ObjectAllocationInNewTLABSummarizer;
+import com.newrelic.jfr.tosummary.ObjectAllocationOutsideTLABSummarizer;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ToSummaryRegistry {
 
-  private final Map<String, EventToSummary> mappers;
+  private static final List<EventToSummary> ALL_MAPPERS =
+      List.of(
+          new G1GarbageCollectionSummarizer(),
+          new NetworkReadSummarizer(),
+          new NetworkWriteSummarizer(),
+          new ObjectAllocationInNewTLABSummarizer(),
+          new ObjectAllocationOutsideTLABSummarizer());
 
-  private ToSummaryRegistry(Map<String, EventToSummary> mappers) {
+  private final List<EventToSummary> mappers;
+
+  private ToSummaryRegistry(List<EventToSummary> mappers) {
     this.mappers = mappers;
   }
 
   public static ToSummaryRegistry createDefault() {
-    var mappers =
-        Map.of(
-            G1GarbageCollectionSummarizer.EVENT_NAME, new G1GarbageCollectionSummarizer(),
-            NetworkReadSummarizer.EVENT_NAME, new NetworkReadSummarizer(),
-            NetworkWriteSummarizer.EVENT_NAME, new NetworkWriteSummarizer(),
-            ObjectAllocationInNewTLABSummarizer.EVENT_NAME,
-                new ObjectAllocationInNewTLABSummarizer(),
-            ObjectAllocationOutsideTLABSummarizer.EVENT_NAME,
-                new ObjectAllocationOutsideTLABSummarizer());
-    return new ToSummaryRegistry(mappers);
+    return new ToSummaryRegistry(ALL_MAPPERS);
   }
 
   public static ToSummaryRegistry create(Collection<String> eventNames) {
-    var all = createDefault();
     var filtered =
-        all.getMappers()
-            .entrySet()
+        ALL_MAPPERS
             .stream()
-            .filter(e -> eventNames.contains(e.getKey()))
-            .collect(toMap(n -> n.getKey(), n -> n.getValue()));
+            .filter(mapper -> eventNames.contains(mapper.getEventName()))
+            .collect(toList());
     return new ToSummaryRegistry(filtered);
   }
 
-  private Map<String, EventToSummary> getMappers() {
-    return mappers;
+  private static List<String> allEventNames() {
+    return ALL_MAPPERS.stream().map(EventToSummary::getEventName).collect(toUnmodifiableList());
   }
 
-  public EventToSummary get(String eventName) {
-    return mappers.get(eventName);
+  public Stream<EventToSummary> all() {
+    return mappers.stream();
+  }
+
+  public Optional<EventToSummary> get(String eventName) {
+    return mappers.stream().filter(m -> m.getEventName().equals(eventName)).findFirst();
   }
 }

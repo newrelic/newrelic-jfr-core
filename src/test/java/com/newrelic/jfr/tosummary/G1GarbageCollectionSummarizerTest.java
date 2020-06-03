@@ -107,10 +107,10 @@ class G1GarbageCollectionSummarizerTest {
             event2DurationMillis, // max
             summaryStartTime, // startTimeMs
             event3StartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of
-                             // each RecordedEvent
+            // each RecordedEvent
             new Attributes());
 
-    List<Metric> expected = List.of(expectedSummaryMetric);
+    var expected = List.of(expectedSummaryMetric);
 
     var testClass = new G1GarbageCollectionSummarizer(summaryStartTime);
 
@@ -129,9 +129,9 @@ class G1GarbageCollectionSummarizerTest {
     testClass.accept(event3);
 
     final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
-
     assertEquals(expected, result);
+
+    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
 
     // Summary should be reset to default values
     assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
