@@ -1,19 +1,20 @@
 package com.newrelic.jfr.tosummary;
 
+import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.metrics.Metric;
+import com.newrelic.telemetry.metrics.Summary;
+import jdk.jfr.consumer.RecordedEvent;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.metrics.Metric;
-import com.newrelic.telemetry.metrics.Summary;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import jdk.jfr.consumer.RecordedEvent;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 class G1GarbageCollectionSummarizerTest {
 
@@ -27,7 +28,7 @@ class G1GarbageCollectionSummarizerTest {
             0,
             Duration.ofNanos(0L).toMillis(),
             Duration.ofNanos(Long.MAX_VALUE).toMillis(),
-            Duration.ofNanos(0L).toMillis(),
+            Duration.ofNanos(Long.MIN_VALUE).toMillis(),
             Instant.now().toEpochMilli(),
             0L,
             new Attributes());
@@ -128,10 +129,10 @@ class G1GarbageCollectionSummarizerTest {
     testClass.accept(event2);
     testClass.accept(event3);
 
-    final List<Summary> result = testClass.summarizeAndReset().collect(toList());
+    var result = testClass.summarizeAndReset().collect(toList());
     assertEquals(expected, result);
 
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+    var resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
 
     // Summary should be reset to default values
     assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
