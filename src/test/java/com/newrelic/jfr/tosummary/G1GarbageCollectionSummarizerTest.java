@@ -52,7 +52,7 @@ class G1GarbageCollectionSummarizerTest {
             eventDurationMillis, // max
             summaryStartTime, // startTimeMs
             eventStartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of each
-                            // RecordedEvent
+            // RecordedEvent
             new Attributes());
 
     List<Metric> expected = List.of(expectedSummaryMetric);

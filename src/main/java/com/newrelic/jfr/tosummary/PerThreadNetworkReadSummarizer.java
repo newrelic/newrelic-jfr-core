@@ -48,14 +48,13 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
     var outDuration =
         new Summary(
             "jfr:SocketRead.duration",
-                bytesSummary.getCount(),
-                duration.getDurationMillis(),
-                duration.getMinDurationMillis(),
-                duration.getMaxDurationMillis(),
-                duration.getStartTimeMs(),
-                duration.getEndTimeMs(),
+            bytesSummary.getCount(),
+            duration.getDurationMillis(),
+            duration.getMinDurationMillis(),
+            duration.getMaxDurationMillis(),
+            duration.getStartTimeMs(),
+            outRead.getEndTimeMs(),
             attr);
-
     reset();
     return Stream.of(outRead, outDuration);
   }
