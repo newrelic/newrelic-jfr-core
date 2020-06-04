@@ -56,9 +56,8 @@ public class StackTraceBlobTest {
               || eventType.equals("jdk.NativeMethodSample")) {
             var trace = event.getStackTrace();
             var b64 = StackTraceBlob.encode(trace);
+            // FIXME Base-64 is not currently supported, use unencoded instead
             assertTrue(b64.startsWith("eyJ0eXBlIjoic3RhY2t0cmFjZSIsImxhbmd1YWdlIjoiamF2Y"));
-            //                        assertEquals("XXeyJ0eXBlIjoic3",
-            // StackTraceBlob.encodeB64(trace));
             count = count + 1;
             if (max < b64.length()) {
               max = b64.length();
@@ -69,6 +68,7 @@ public class StackTraceBlobTest {
         }
       }
     }
+    // FIXME Counts are wrong, need to be adapted to the shape of the public file when this is re-enabled
     assertEquals(218684, count);
     assertEquals(16860, max);
     assertEquals(159, histo[0]);
