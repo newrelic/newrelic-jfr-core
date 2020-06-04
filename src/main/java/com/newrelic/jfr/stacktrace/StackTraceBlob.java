@@ -8,6 +8,7 @@ import jdk.jfr.consumer.RecordedStackTrace;
 
 public class StackTraceBlob {
   private static final int JSON_SCHEMA_VERSION = 1;
+  private static final int HEADROOM_75PC = 3 * 1024;
 
   public static String encode(RecordedStackTrace trace) {
     var payload = new ArrayList<Map<String, String>>();
@@ -23,20 +24,18 @@ public class StackTraceBlob {
       payload.add(frameData);
     }
 
-    String out = null;
     try {
-      out = new String(jsonWrite(payload, Optional.empty()).getBytes());
+      return new String(jsonWrite(payload, Optional.empty()).getBytes());
     } catch (IOException e) {
       throw new RuntimeException("Failed to generate stacktrace json", e);
     }
-    return out;
   }
 
   static String jsonWrite(List<Map<String, String>> frames, Optional<Integer> limit)
       throws IOException {
     var strOut = new StringWriter();
     var jsonWriter = new JsonWriter(strOut);
-    var isTruncated = !limit.isEmpty();
+    var isTruncated = limit.isPresent();
     var frameCount = frames.size();
     if (isTruncated && limit.get() < frameCount) {
       frameCount = limit.get();
@@ -60,19 +59,12 @@ public class StackTraceBlob {
     jsonWriter.endObject();
     var out = strOut.toString();
     var length = out.length();
-    if (length > 3 * 1024) {
+    if (length > HEADROOM_75PC) {
       // Truncate the stack frame and try again
-      int numFrames = frames.size() * 3 * 1024 / length;
+      int numFrames = frames.size() * HEADROOM_75PC / length;
       return jsonWrite(frames, Optional.of(numFrames));
     } else {
       return out;
     }
   }
-
-  //  static String jsonEncodeDummy(List<Map<String, String>> jsonObj) {
-  //    // Ensure the key ordering is always type, language, version, payload
-  //    // as this ensures that base-64 encoded versions can be compared
-  //    return "{\"type\":\"stacktrace\", \"language\":\"java\", \"version\":1, \"payload\":[ ...
-  // frames .... ], \"metadata\":{}}";
-  //  }
 }
