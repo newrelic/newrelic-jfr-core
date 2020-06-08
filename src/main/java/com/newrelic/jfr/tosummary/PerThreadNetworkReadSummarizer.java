@@ -55,7 +55,6 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
             duration.getStartTimeMs(),
             outRead.getEndTimeMs(),
             attr);
-
     reset();
     return Stream.of(outRead, outDuration);
   }
