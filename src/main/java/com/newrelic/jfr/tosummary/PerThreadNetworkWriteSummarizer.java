@@ -2,95 +2,62 @@ package com.newrelic.jfr.tosummary;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
+import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.stream.Stream;
-
 public class PerThreadNetworkWriteSummarizer implements EventToSummary {
-    private final String threadName;
-    private long startTimeMs;
-    private long endTimeMs = 0L;
-    private int count = 0;
-    private long bytes = 0L;
-    private long minBytes = Long.MAX_VALUE;
-    private long maxBytes = 0L;
-    private Duration duration = Duration.ofNanos(0L);
-    private Duration minDuration = Duration.ofNanos(Long.MAX_VALUE);
-    private Duration maxDuration = Duration.ofNanos(0L);
+  private final String threadName;
+  private final LongSummarizer bytesSummary;
+  private final DurationSummarizer duration;
 
-    public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
-        this.threadName = threadName;
-        this.startTimeMs = startTimeMs;
-    }
+  public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
+    this(threadName, new LongSummarizer("bytesWritten"), new DurationSummarizer(startTimeMs));
+  }
 
-    @Override
-    public String getEventName() {
-        return NetworkWriteSummarizer.EVENT_NAME;
-    }
+  public PerThreadNetworkWriteSummarizer(
+      String threadName, LongSummarizer longSummarizer, DurationSummarizer duration) {
+    this.threadName = threadName;
+    this.bytesSummary = longSummarizer;
+    this.duration = duration;
+  }
 
-    @Override
-    public void accept(RecordedEvent ev) {
-        var duration = ev.getDuration();
-        endTimeMs = ev.getStartTime().plus(duration).toEpochMilli();
-        count++;
-        var bytesWritten = ev.getLong("bytesWritten");
-        bytes = bytes + bytesWritten;
+  @Override
+  public String getEventName() {
+    return NetworkWriteSummarizer.EVENT_NAME;
+  }
 
-        if (bytesWritten > maxBytes) {
-            maxBytes = bytesWritten;
-        }
-        if (bytesWritten < minBytes) {
-            minBytes = bytesWritten;
-        }
+  @Override
+  public void accept(RecordedEvent ev) {
+    bytesSummary.accept(ev);
+    duration.accept(ev);
+  }
 
-        this.duration = this.duration.plus(duration);
+  @Override
+  public Stream<Summary> summarizeAndReset() {
+    var attr = new Attributes().put("thread.name", threadName);
+    var outWritten =
+        new Summary(
+            "jfr:SocketWrite.bytesWritten",
+            bytesSummary.getCount(),
+            bytesSummary.getSum(),
+            bytesSummary.getMin(),
+            bytesSummary.getMax(),
+            duration.getStartTimeMs(),
+            duration.getEndTimeMs(),
+            attr);
+    var outDuration =
+        new Summary(
+            "jfr:SocketWrite.duration",
+            bytesSummary.getCount(),
+            duration.getDurationMillis(),
+            duration.getMinDurationMillis(),
+            duration.getMaxDurationMillis(),
+            duration.getStartTimeMs(),
+            duration.getEndTimeMs(),
+            attr);
 
-        if (duration.compareTo(maxDuration) > 0) {
-            maxDuration = duration;
-        }
-        if (duration.compareTo(minDuration) < 0) {
-            minDuration = duration;
-        }
-    }
-
-    @Override
-    public Stream<Summary> summarizeAndReset() {
-        var attr = new Attributes()
-                .put("thread.name", threadName);
-        var outWritten = new Summary(
-                "jfr:SocketWrite.bytesWritten",
-                count,
-                bytes,
-                minBytes,
-                maxBytes,
-                startTimeMs,
-                endTimeMs,
-                attr);
-        var outDuration  = new Summary(
-                "jfr:SocketWrite.duration",
-                count,
-                duration.toMillis(),
-                minDuration.toMillis(),
-                maxDuration.toMillis(),
-                startTimeMs,
-                endTimeMs,
-                attr);
-
-        reset();
-        return Stream.of(outWritten, outDuration);
-    }
-
-    public void reset() {
-        startTimeMs = Instant.now().toEpochMilli();
-        endTimeMs = 0L;
-        count = 0;
-        bytes = 0L;
-        minBytes = Long.MAX_VALUE;
-        maxBytes = 0L;
-        duration = Duration.ofNanos(0L);
-        minDuration = Duration.ofNanos(Long.MAX_VALUE);
-        maxDuration = Duration.ofNanos(0L);
-    }
+    bytesSummary.reset();
+    duration.reset();
+    return Stream.of(outWritten, outDuration);
+  }
 }
