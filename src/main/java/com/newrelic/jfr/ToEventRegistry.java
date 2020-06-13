@@ -1,47 +1,64 @@
 package com.newrelic.jfr;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 import com.newrelic.jfr.toevent.*;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ToEventRegistry {
 
-  private final Map<String, EventToEvent> mappers;
+  private static final List<EventToEvent> ALL_MAPPERS =
+      List.of(
+          new JITCompilationMapper(),
+          new JVMInformationMapper(),
+          new JVMSystemPropertyMapper(),
+          new ThreadLockEventMapper(),
+          new MethodSampleMapper(MethodSampleMapper.EVENT_NAME),
+          new MethodSampleMapper(MethodSampleMapper.NATIVE_EVENT_NAME));
 
-  private ToEventRegistry(Map<String, EventToEvent> mappers) {
+  private final List<EventToEvent> mappers;
+
+  private ToEventRegistry(List<EventToEvent> mappers) {
     this.mappers = mappers;
   }
 
   public static ToEventRegistry createDefault() {
-    var mappers =
-        Map.of(
-            JITCompilationMapper.EVENT_NAME, new JITCompilationMapper(),
-            JVMInformationMapper.EVENT_NAME, new JVMInformationMapper(),
-            JVMSystemPropertyMapper.EVENT_NAME, new JVMSystemPropertyMapper(),
-            ThreadLockEventMapper.EVENT_NAME, new ThreadLockEventMapper(),
-            MethodSampleMapper.EVENT_NAME, new MethodSampleMapper(),
-            MethodSampleMapper.NATIVE_EVENT_NAME, new MethodSampleMapper());
-    return new ToEventRegistry(mappers);
+    return create(allEventNames());
   }
 
   public static ToEventRegistry create(Collection<String> eventNames) {
-    var all = createDefault();
     var filtered =
-        all.getMappers()
-            .entrySet()
+        ALL_MAPPERS
             .stream()
-            .filter(e -> eventNames.contains(e.getKey()))
-            .collect(toMap(n -> n.getKey(), n -> n.getValue()));
+            .filter(mapper -> eventNames.contains(mapper.getEventName()))
+            .collect(toList());
     return new ToEventRegistry(filtered);
   }
 
-  private Map<String, EventToEvent> getMappers() {
+  private List<EventToEvent> getMappers() {
     return mappers;
   }
 
-  public EventToEvent get(String eventName) {
-    return mappers.get(eventName);
+  private static List<String> allEventNames() {
+    return ALL_MAPPERS.stream().map(EventToEvent::getEventName).collect(toUnmodifiableList());
+  }
+
+  /** @return a stream of all EventToEvent entries in this registry. */
+  public Stream<EventToEvent> all() {
+    return mappers.stream();
+  }
+
+  /**
+   * Returns an Optional<EventToEvent> containing the mapper with the given JFR event name. If the
+   * event is not known to this registry, the returned Optional will be empty.
+   *
+   * @param eventName - the JFR name of the event to find
+   * @return - an optional EventToEvent.
+   */
+  public Optional<EventToEvent> get(String eventName) {
+    return mappers.stream().filter(toEvent -> toEvent.getEventName().equals(eventName)).findFirst();
   }
 }

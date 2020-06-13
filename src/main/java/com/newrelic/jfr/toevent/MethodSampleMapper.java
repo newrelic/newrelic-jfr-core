@@ -25,6 +25,12 @@ public class MethodSampleMapper implements EventToEvent {
   public static final String EVENT_NAME = "jdk.ExecutionSample";
   public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
 
+  private final String eventName;
+
+  public MethodSampleMapper(final String eventName) {
+    this.eventName = eventName;
+  }
+
   @Override
   public List<Event> apply(RecordedEvent ev) {
     var trace = ev.getStackTrace();
@@ -43,6 +49,6 @@ public class MethodSampleMapper implements EventToEvent {
 
   @Override
   public String getEventName() {
-    return EVENT_NAME;
+    return eventName;
   }
 }
