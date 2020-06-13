@@ -17,8 +17,13 @@ public class StackTraceBlob {
       var frameData = new HashMap<String, String>();
       var frame = frames.get(i);
       var method = frame.getMethod();
-      var methodDesc = method.getType().getName() + "." + method.getName() + method.getDescriptor();
-      frameData.put("desc", methodDesc);
+      if (method != null) {
+        var methodDesc =
+            method.getType().getName() + "." + method.getName() + method.getDescriptor();
+        frameData.put("desc", methodDesc);
+      } else {
+        frameData.put("desc", "[missing]");
+      }
       frameData.put("line", "" + frame.getLineNumber());
       frameData.put("bytecodeIndex", "" + frame.getBytecodeIndex());
       payload.add(frameData);
