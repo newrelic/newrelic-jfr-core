@@ -5,6 +5,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedMethod;
 
 // jdk.Compilation {
 //        startTime = 16:04:14.403
@@ -26,8 +27,14 @@ public class JITCompilationMapper implements EventToEvent {
     var timestamp = event.getStartTime().toEpochMilli();
     var duration = event.getDuration();
     var attr = new Attributes();
+    var method = (RecordedMethod) event.getValue("method");
+    if (method != null) {
+      var methodDesc = method.getType().getName() + "." + method.getName() + method.getDescriptor();
+      attr.put("desc", methodDesc);
+    } else {
+      attr.put("desc", "[missing]");
+    }
     attr.put("thread.name", event.getThread("eventThread").getJavaName());
-    attr.put("class", event.getClass("monitorClass").getName());
     attr.put("duration", duration.toMillis());
     attr.put("succeeded", Workarounds.getSucceeded(event));
 
