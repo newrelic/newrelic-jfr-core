@@ -1,7 +1,7 @@
 package com.newrelic.jfr.toevent;
 
+import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.Workarounds;
-import com.newrelic.jfr.stacktrace.StackTraceBlob;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.List;
@@ -28,7 +28,7 @@ public class JITCompilationMapper implements EventToEvent {
     var timestamp = event.getStartTime().toEpochMilli();
     var duration = event.getDuration();
     var attr = new Attributes();
-    attr.put("desc", StackTraceBlob.describeMethod((RecordedMethod) event.getValue("method")));
+    attr.put("desc", MethodSupport.describeMethod((RecordedMethod) event.getValue("method")));
     attr.put("thread.name", event.getThread("eventThread").getJavaName());
     attr.put("duration", duration.toMillis());
     attr.put("succeeded", Workarounds.getSucceeded(event));

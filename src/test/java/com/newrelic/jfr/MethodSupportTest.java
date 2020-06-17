@@ -1,4 +1,4 @@
-package com.newrelic.jfr.stacktrace;
+package com.newrelic.jfr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,10 +15,10 @@ import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class StackTraceBlobTest {
+public class MethodSupportTest {
 
   private RecordingFile loadFile(String fName) throws IOException, URISyntaxException {
-    URL url = StackTraceBlobTest.class.getClassLoader().getResource(fName);
+    URL url = MethodSupportTest.class.getClassLoader().getResource(fName);
     return new RecordingFile(Paths.get(url.toURI()));
   }
 
@@ -36,7 +36,7 @@ public class StackTraceBlobTest {
 
     var expected =
         "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[{\"desc\":\"Foo.meth:()V\",\"line\":\"10\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth:()V\",\"line\":\"11\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth:()V\",\"line\":\"12\",\"bytecodeIndex\":\"14\"}]}";
-    var result = StackTraceBlob.jsonWrite(frames, Optional.of(3));
+    var result = MethodSupport.jsonWrite(frames, Optional.of(3));
     assertEquals(expected, result);
   }
 
@@ -55,7 +55,7 @@ public class StackTraceBlobTest {
           if (eventType.equals("jdk.ExecutionSample")
               || eventType.equals("jdk.NativeMethodSample")) {
             var trace = event.getStackTrace();
-            var b64 = StackTraceBlob.encode(trace);
+            var b64 = MethodSupport.serialize(trace);
             // FIXME Base-64 is not currently supported, use unencoded instead
             assertTrue(b64.startsWith("eyJ0eXBlIjoic3RhY2t0cmFjZSIsImxhbmd1YWdlIjoiamF2Y"));
             count = count + 1;

@@ -1,4 +1,4 @@
-package com.newrelic.jfr.stacktrace;
+package com.newrelic.jfr;
 
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.util.*;
 import jdk.jfr.consumer.RecordedMethod;
 import jdk.jfr.consumer.RecordedStackTrace;
 
-public final class StackTraceBlob {
+public final class MethodSupport {
   private static final int JSON_SCHEMA_VERSION = 1;
   private static final int HEADROOM_75PC = 3 * 1024;
 
@@ -19,7 +19,7 @@ public final class StackTraceBlob {
     return method.getType().getName() + "." + method.getName() + method.getDescriptor();
   }
 
-  public static String encode(RecordedStackTrace trace) {
+  public static String serialize(final RecordedStackTrace trace) {
     var payload = new ArrayList<Map<String, String>>();
     var frames = trace.getFrames();
     for (int i = 0; i < frames.size(); i++) {
@@ -38,7 +38,7 @@ public final class StackTraceBlob {
     }
   }
 
-  static String jsonWrite(List<Map<String, String>> frames, Optional<Integer> limit)
+  static String jsonWrite(final List<Map<String, String>> frames, final Optional<Integer> limit)
       throws IOException {
     var strOut = new StringWriter();
     var jsonWriter = new JsonWriter(strOut);
