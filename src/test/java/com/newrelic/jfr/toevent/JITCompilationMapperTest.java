@@ -1,6 +1,7 @@
 package com.newrelic.jfr.toevent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +55,7 @@ class JITCompilationMapperTest {
     final Path dumpFile = Path.of("src", "test", "resources", "startup3.jfr");
 
     var mapper = new JITCompilationMapper();
+    var seenEvent = false;
     try (final var recordingFile = new RecordingFile(dumpFile)) {
       while (recordingFile.hasMoreEvents()) {
         var event = recordingFile.readEvent();
@@ -66,10 +68,12 @@ class JITCompilationMapperTest {
             assertEquals(
                 "java.lang.invoke.LambdaForm$Name.replaceNames([Ljava/lang/invoke/LambdaForm$Name;[Ljava/lang/invoke/LambdaForm$Name;II)Ljava/lang/invoke/LambdaForm$Name;",
                 le.get(0).getAttributes().asMap().get("desc"));
+            seenEvent = true;
             break;
           }
         }
       }
     }
+    assertTrue(seenEvent);
   }
 }

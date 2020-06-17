@@ -4,11 +4,20 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
+import jdk.jfr.consumer.RecordedMethod;
 import jdk.jfr.consumer.RecordedStackTrace;
 
-public class StackTraceBlob {
+public final class StackTraceBlob {
   private static final int JSON_SCHEMA_VERSION = 1;
   private static final int HEADROOM_75PC = 3 * 1024;
+
+  public static String describeMethod(final RecordedMethod method) {
+    if (method == null) {
+      return "[missing]";
+    }
+
+    return method.getType().getName() + "." + method.getName() + method.getDescriptor();
+  }
 
   public static String encode(RecordedStackTrace trace) {
     var payload = new ArrayList<Map<String, String>>();
@@ -16,14 +25,7 @@ public class StackTraceBlob {
     for (int i = 0; i < frames.size(); i++) {
       var frameData = new HashMap<String, String>();
       var frame = frames.get(i);
-      var method = frame.getMethod();
-      if (method != null) {
-        var methodDesc =
-            method.getType().getName() + "." + method.getName() + method.getDescriptor();
-        frameData.put("desc", methodDesc);
-      } else {
-        frameData.put("desc", "[missing]");
-      }
+      frameData.put("desc", describeMethod(frame.getMethod()));
       frameData.put("line", "" + frame.getLineNumber());
       frameData.put("bytecodeIndex", "" + frame.getBytecodeIndex());
       payload.add(frameData);

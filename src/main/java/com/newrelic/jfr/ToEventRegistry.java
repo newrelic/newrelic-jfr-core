@@ -16,8 +16,8 @@ public class ToEventRegistry {
           new JVMInformationMapper(),
           new JVMSystemPropertyMapper(),
           new ThreadLockEventMapper(),
-          new MethodSampleMapper(MethodSampleMapper.EVENT_NAME),
-          new MethodSampleMapper(MethodSampleMapper.NATIVE_EVENT_NAME));
+          MethodSampleMapper.forExecutionSample(),
+          MethodSampleMapper.forNativeMethodSample());
 
   private final List<EventToEvent> mappers;
 

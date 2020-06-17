@@ -27,7 +27,7 @@ public interface EventToEvent
    * Test to see if this event is interesting to this mapper
    *
    * @param event
-   * @return
+   * @return true if event is interesting, false otherwise
    */
   default boolean test(RecordedEvent event) {
     return event.getEventType().getName().startsWith(getEventName());
@@ -46,7 +46,7 @@ public interface EventToEvent
   /**
    * Returns the Java version where particular JFR events were added.
    *
-   * @return
+   * @return int indicating Java version that introduced the event type
    */
   default int since() {
     return Constants.JAVA_11;

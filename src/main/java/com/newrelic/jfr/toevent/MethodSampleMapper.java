@@ -27,8 +27,16 @@ public class MethodSampleMapper implements EventToEvent {
 
   private final String eventName;
 
-  public MethodSampleMapper(final String eventName) {
+  private MethodSampleMapper(final String eventName) {
     this.eventName = eventName;
+  }
+
+  public static MethodSampleMapper forExecutionSample() {
+    return new MethodSampleMapper(EVENT_NAME);
+  }
+
+  public static MethodSampleMapper forNativeMethodSample() {
+    return new MethodSampleMapper(NATIVE_EVENT_NAME);
   }
 
   @Override
