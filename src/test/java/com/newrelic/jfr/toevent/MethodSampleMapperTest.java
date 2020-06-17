@@ -41,7 +41,7 @@ class MethodSampleMapperTest {
     when(event.getString("state")).thenReturn(threadState);
     when(sampledThread.getJavaName()).thenReturn(threadName);
 
-    var mapper = new MethodSampleMapper();
+    var mapper = MethodSampleMapper.forExecutionSample();
 
     var result = mapper.apply(event);
     assertEquals(expected, result);
@@ -51,7 +51,7 @@ class MethodSampleMapperTest {
   void testApplyButNoTrace() {
     var event = mock(RecordedEvent.class);
     when(event.getStackTrace()).thenReturn(null);
-    var mapper = new MethodSampleMapper();
+    var mapper = MethodSampleMapper.forExecutionSample();
 
     var result = mapper.apply(event);
     assertEquals(List.of(), result);

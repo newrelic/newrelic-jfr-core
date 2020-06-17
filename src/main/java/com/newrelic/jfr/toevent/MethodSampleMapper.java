@@ -1,6 +1,6 @@
 package com.newrelic.jfr.toevent;
 
-import com.newrelic.jfr.stacktrace.StackTraceBlob;
+import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.List;
@@ -25,6 +25,20 @@ public class MethodSampleMapper implements EventToEvent {
   public static final String EVENT_NAME = "jdk.ExecutionSample";
   public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
 
+  private final String eventName;
+
+  private MethodSampleMapper(final String eventName) {
+    this.eventName = eventName;
+  }
+
+  public static MethodSampleMapper forExecutionSample() {
+    return new MethodSampleMapper(EVENT_NAME);
+  }
+
+  public static MethodSampleMapper forNativeMethodSample() {
+    return new MethodSampleMapper(NATIVE_EVENT_NAME);
+  }
+
   @Override
   public List<Event> apply(RecordedEvent ev) {
     var trace = ev.getStackTrace();
@@ -36,13 +50,13 @@ public class MethodSampleMapper implements EventToEvent {
     var attr = new Attributes();
     attr.put("thread.name", ev.getThread("sampledThread").getJavaName());
     attr.put("thread.state", ev.getString("state"));
-    attr.put("stackTrace", StackTraceBlob.encode(ev.getStackTrace()));
+    attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
 
     return List.of(new Event("jfr:MethodSample", attr, timestamp));
   }
 
   @Override
   public String getEventName() {
-    return EVENT_NAME;
+    return eventName;
   }
 }
