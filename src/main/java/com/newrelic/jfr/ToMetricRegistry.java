@@ -59,7 +59,7 @@ public class ToMetricRegistry {
   }
 
   /**
-   * Returns an Optional<EventToMetric> containing the mapper with the given JFR event name. If the
+   * Returns an optional EventToMetric containing the mapper with the given JFR event name. If the
    * event is not known to this registry, the returned Optional will be empty.
    *
    * @param eventName - the JFR name of the event to find

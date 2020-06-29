@@ -52,7 +52,7 @@ public class ToEventRegistry {
   }
 
   /**
-   * Returns an Optional<EventToEvent> containing the mapper with the given JFR event name. If the
+   * Returns an optional EventToEvent containing the mapper with the given JFR event name. If the
    * event is not known to this registry, the returned Optional will be empty.
    *
    * @param eventName - the JFR name of the event to find

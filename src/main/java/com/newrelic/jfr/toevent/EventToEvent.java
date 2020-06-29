@@ -26,7 +26,7 @@ public interface EventToEvent
   /**
    * Test to see if this event is interesting to this mapper
    *
-   * @param event
+   * @param event - event instance to see if we're interested
    * @return true if event is interesting, false otherwise
    */
   default boolean test(RecordedEvent event) {
