@@ -13,6 +13,7 @@ repositories {
 
 plugins {
     id("java-library")
+    id("signing")
     `maven-publish`
 }
 
@@ -71,4 +72,12 @@ publishing {
             from(components["java"])
         }
     }
+}
+
+signing {
+    val signingKey : String? by project
+    val signingKeyId: String? by project
+    val signingPassword: String? by project
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+    this.sign(publishing.publications["maven"])
 }
