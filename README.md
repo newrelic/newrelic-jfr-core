@@ -41,14 +41,14 @@ _Note: SNAPSHOT artifact is still preliminary._
 <dependency>
     <groupId>com.newrelic</groupId>
     <artifactId>jfr-mappers</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
 </dependency>
 ```
 
 ### gradle dependency
 
 ```
-compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.1.0-SNAPSHOT'
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.2.0-SNAPSHOT'
 ```
 
 ## Support
