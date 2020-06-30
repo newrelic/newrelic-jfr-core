@@ -26,7 +26,7 @@ public interface EventToSummary extends Consumer<RecordedEvent>, Predicate<Recor
   /**
    * Test to see if this event is interesting to this summarizer
    *
-   * @param event
+   * @param event - event instance to see if we're interested
    * @return true if event is interesting, false otherwise
    */
   default boolean test(RecordedEvent event) {
