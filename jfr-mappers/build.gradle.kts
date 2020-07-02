@@ -3,11 +3,6 @@ private object Versions {
     const val newRelicTelemetry = "0.6.1"
 }
 
-plugins {
-    id("signing")
-    `maven-publish`
-}
-
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -28,24 +23,12 @@ tasks {
 }
 
 publishing {
-    repositories {
-        maven {
-            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-            credentials {
-                username = System.getenv("SONATYPE_USERNAME")
-                password = System.getenv("SONATYPE_PASSWORD")
-            }
-        }
-    }
     publications {
         create<MavenPublication>("maven") {
             groupId = "com.newrelic"
             artifactId = "jfr-mappers"
             version = version
             from(components["java"])
-            artifact(tasks["javadocJar"])
             pom {
                 name.set(project.name)
                 description.set("Mappers to turn JFR RecordedEvents into New Relic telemetry")

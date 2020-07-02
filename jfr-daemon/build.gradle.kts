@@ -5,13 +5,6 @@ private object Versions {
     const val newRelicTelemetry = "0.6.1"
 }
 
-repositories {
-    mavenLocal()
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
-}
-
 plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
 }
