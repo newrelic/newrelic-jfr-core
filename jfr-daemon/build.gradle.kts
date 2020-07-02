@@ -1,8 +1,7 @@
 private object Versions {
-    const val junit = "5.3.1"
-    const val mockito = "2.23.0"
+    const val junit = "5.6.2"
+    const val mockitoJunit = "3.3.3"
     const val slf4j = "1.7.26"
-    const val jsonassert = "1.5.0"
     const val gson = "2.8.6"
     const val logback = "1.2.3"
     const val newRelicTelemetry = "0.6.1"
@@ -43,16 +42,15 @@ java {
 }
 
 dependencies {
-    api("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
+    api(project(":jfr-mappers"))
     api("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
-    api("com.newrelic:jfr-mappers:0.1.0-SNAPSHOT")
     api("org.slf4j:slf4j-api:${Versions.slf4j}")
     api("ch.qos.logback:logback-classic:${Versions.logback}")
     implementation("com.google.code.gson:gson:${Versions.gson}")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.3.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
+    testImplementation("org.mockito:mockito-junit-jupiter:${Versions.mockitoJunit}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
 }
 
 tasks.test {

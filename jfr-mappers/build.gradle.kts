@@ -7,6 +7,12 @@ buildscript {
     }
 }
 
+private object Versions {
+    const val newRelicTelemetry = "0.6.1"
+    const val junit = "5.6.2"
+    const val mockitoJunit = "3.3.3"
+}
+
 repositories {
     mavenCentral()
 }
@@ -29,11 +35,11 @@ java {
 }
 
 dependencies {
-    api("com.newrelic.telemetry:telemetry:0.6.1")
+    api("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.2")
-    testImplementation("org.mockito:mockito-junit-jupiter:3.3.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
+    testImplementation("org.mockito:mockito-junit-jupiter:${Versions.mockitoJunit}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
 }
 
 tasks.test {
