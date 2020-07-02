@@ -18,13 +18,6 @@ dependencies {
     api("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
-}
-
 tasks {
     val taskScope = this
     val jar: Jar by taskScope

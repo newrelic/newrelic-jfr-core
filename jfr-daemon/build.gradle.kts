@@ -16,8 +16,6 @@ plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
-apply(plugin = "maven")
-
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -30,13 +28,6 @@ dependencies {
     api("org.slf4j:slf4j-api:${Versions.slf4j}")
     api("ch.qos.logback:logback-classic:${Versions.logback}")
     implementation("com.google.code.gson:gson:${Versions.gson}")
-}
-
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("passed", "skipped", "failed")
-    }
 }
 
 tasks.shadowJar {

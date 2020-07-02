@@ -18,6 +18,7 @@ allprojects {
 
 subprojects {
 
+    apply(plugin = "java")
     apply(plugin = "java-library")
 
     dependencies {
@@ -31,4 +32,10 @@ subprojects {
         withJavadocJar()
     }
 
+    tasks.named<Test>("test") {
+        useJUnitPlatform()
+        testLogging {
+            events("passed", "skipped", "failed")
+        }
+    }
 }
