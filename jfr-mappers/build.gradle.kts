@@ -12,7 +12,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
     disableAutoTargetJvm()
-    withSourcesJar()
 }
 
 dependencies {
@@ -32,11 +31,6 @@ tasks {
     jar.apply {
         manifest.attributes["Implementation-Version"] = project.version
         manifest.attributes["Implementation-Vendor"] = "New Relic, Inc"
-    }
-    val javadocJar by creating(Jar::class) {
-        dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
-        archiveClassifier.set("javadoc")
-        from(taskScope.javadoc)
     }
 }
 

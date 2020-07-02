@@ -28,8 +28,9 @@ class JFRUploaderTest {
   private EventBatch expectedEventBatch;
   private RecordingFile recordingFile;
   private BufferedTelemetry bufferedTelemetry;
-  private Consumer deleter;
+  private Consumer<Path> deleter;
 
+  @SuppressWarnings("unchecked")
   @BeforeEach
   void setup() throws Exception {
     now = Instant.now();

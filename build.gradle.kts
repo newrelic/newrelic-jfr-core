@@ -26,4 +26,9 @@ subprojects {
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
     }
 
+    configure<JavaPluginExtension> {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
 }

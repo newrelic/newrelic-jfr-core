@@ -22,6 +22,7 @@ public class MethodSupportTest {
     return new RecordingFile(Paths.get(url.toURI()));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   void testJsonWriteWithTruncate() throws Exception {
     var rf = new HashMap<String, String>();

@@ -94,16 +94,21 @@ public final class JFRJMXConnector {
         objectName, "startRecording", new Object[] {recordingId}, new String[] {"long"});
   }
 
+//  /**
+//   *
+//   *
+//   * @return
+//   */
+
   /**
    * Retrieves the JFR recording over the network and stores it in a file on local disk
-   *
    * @return Path to local file on disc
-   * @throws MalformedObjectNameException
-   * @throws ReflectionException
-   * @throws MBeanException
-   * @throws InstanceNotFoundException
-   * @throws IOException
-   * @throws OpenDataException
+   * @throws MalformedObjectNameException JMX problem with the objectname
+   * @throws ReflectionException remove invocation failed due to reflection
+   * @throws MBeanException yet another MBean exception
+   * @throws InstanceNotFoundException Couldn't find the instance to invoke
+   * @throws IOException Generic input/output exception
+   * @throws OpenDataException problems creating instances of JMX objects
    */
   public Path streamRecordingToFile()
       throws MalformedObjectNameException, ReflectionException, MBeanException,
@@ -168,14 +173,12 @@ public final class JFRJMXConnector {
 
   /**
    * Requires the JMX process to share a local filesystem with the target.
-   *
    * @return Path to local file on disc
-   * @throws MalformedObjectNameException
-   * @throws MBeanException
-   * @throws InstanceNotFoundException
-   * @throws ReflectionException
-   * @throws IOException
-   * @throws OpenDataException
+   * @throws MalformedObjectNameException JMX problem with the objectname
+   * @throws ReflectionException remove invocation failed due to reflection
+   * @throws MBeanException yet another MBean exception
+   * @throws InstanceNotFoundException Couldn't find the instance to invoke
+   * @throws IOException Generic input/output exception
    */
   public Path copyRecordingToFile()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,

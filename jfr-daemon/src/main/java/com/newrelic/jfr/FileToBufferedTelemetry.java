@@ -29,6 +29,11 @@ public class FileToBufferedTelemetry {
   /**
    * Converts the given recording file int a result that contains the last seen time in the file and
    * batched metric data.
+   * @param file The input RecordingFile to convert
+   * @param onlyAfter Only consider events whose time is after this
+   * @param dumpFilename Write contents into a file at this filename
+   * @throws IOException if reading/writing encounters a problem
+   * @return a Result containing BufferedTelemetry and the Instant of the last seen event time
    */
   public Result convert(RecordingFile file, Instant onlyAfter, String dumpFilename)
       throws IOException {
