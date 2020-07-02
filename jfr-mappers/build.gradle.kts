@@ -1,31 +1,12 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("gradle.plugin.com.github.sherter.google-java-format:google-java-format-gradle-plugin:0.8")
-    }
-}
 
 private object Versions {
     const val newRelicTelemetry = "0.6.1"
-    const val junit = "5.6.2"
-    const val mockitoJunit = "3.3.3"
-}
-
-repositories {
-    mavenCentral()
 }
 
 plugins {
-    id("java-library")
     id("signing")
     `maven-publish`
 }
-
-group = "com.newrelic"
-
-apply(plugin = "com.github.sherter.google-java-format")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -36,10 +17,6 @@ java {
 
 dependencies {
     api("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
-    testImplementation("org.mockito:mockito-junit-jupiter:${Versions.mockitoJunit}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
 }
 
 tasks.test {
