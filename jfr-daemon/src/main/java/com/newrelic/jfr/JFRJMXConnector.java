@@ -19,13 +19,18 @@ public final class JFRJMXConnector {
   private static final Logger logger = LoggerFactory.getLogger(JFRJMXConnector.class);
 
   private static final int MAX_BYTES_READ = 5 * 1024 * 1024;
-  private static final String MAX_AGE = "20s";
+
   private final int port;
+  private final String host;
+  private final int harvestCycleSecs;
+
   private MBeanServerConnection connection;
   private long recordingId;
 
-  public JFRJMXConnector(int jvmPort) {
-    port = jvmPort;
+  public JFRJMXConnector(String host, int port, int harvestCycleSecs) {
+    this.host = host;
+    this.port = port;
+    this.harvestCycleSecs = harvestCycleSecs;
   }
 
   TabularDataSupport makeOpenData(final Map<String, String> options) throws OpenDataException {
@@ -49,7 +54,7 @@ public final class JFRJMXConnector {
     //        var map = new HashMap<String, Object>();
     //        var credentials = new String[]{"", ""};
     //        map.put("jmx.remote.credentials", credentials);
-    var s = "/jndi/rmi://localhost:" + port + "/jmxrmi";
+    var s = "/jndi/rmi://" + host + ":" + port + "/jmxrmi";
     var url = new JMXServiceURL("rmi", "", 0, s);
     var connector = newJMXConnector(url, null);
     connector.connect();
@@ -79,10 +84,11 @@ public final class JFRJMXConnector {
       // TODO: Something
     }
 
+    var maxAge = (harvestCycleSecs + 10) + "s";
     Map<String, String> options = new HashMap<>();
     options.put("name", "New Relic JFR Recording");
     options.put("disk", "true");
-    options.put("maxAge", MAX_AGE);
+    options.put("maxAge", maxAge);
 
     // Have to pass this as actual open data, not as a Map
     var sig = new String[] {"long", "javax.management.openmbean.TabularData"};
@@ -94,14 +100,9 @@ public final class JFRJMXConnector {
         objectName, "startRecording", new Object[] {recordingId}, new String[] {"long"});
   }
 
-//  /**
-//   *
-//   *
-//   * @return
-//   */
-
   /**
    * Retrieves the JFR recording over the network and stores it in a file on local disk
+   *
    * @return Path to local file on disc
    * @throws MalformedObjectNameException JMX problem with the objectname
    * @throws ReflectionException remove invocation failed due to reflection
@@ -173,6 +174,7 @@ public final class JFRJMXConnector {
 
   /**
    * Requires the JMX process to share a local filesystem with the target.
+   *
    * @return Path to local file on disc
    * @throws MalformedObjectNameException JMX problem with the objectname
    * @throws ReflectionException remove invocation failed due to reflection

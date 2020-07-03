@@ -25,7 +25,8 @@ public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
   private static final int DEFAULT_PORT = 1099;
-  private static final int DELAY_BETWEEN_DUMPS_MS = 10_000;
+  private static final String DEFAULT_HOST = "localhost";
+  private static final int DEFAULT_DELAY_BETWEEN_DUMPS_SECS = 10;
 
   private final JFRJMXConnector connector;
   private final JFRUploader uploader;
@@ -62,10 +63,10 @@ public final class JFRController {
     }
   }
 
-  void loop() throws IOException {
+  void loop(int harvestCycleSecs) throws IOException {
     while (!shutdown) {
       try {
-        Thread.sleep(DELAY_BETWEEN_DUMPS_MS);
+        Thread.sleep(1000 * harvestCycleSecs);
       } catch (InterruptedException e) {
         // Ignore the premature return and trigger the next JMX dump at once
       }
@@ -87,12 +88,17 @@ public final class JFRController {
   }
 
   public static void main(String[] args) {
+    // FIXME Handle config
+    var host = DEFAULT_HOST;
+    var port = DEFAULT_PORT;
+    var harvestCycleSecs = DEFAULT_DELAY_BETWEEN_DUMPS_SECS;
+
     try {
       JFRUploader uploader = buildUploader();
-      JFRJMXConnector connector = new JFRJMXConnector(DEFAULT_PORT);
+      JFRJMXConnector connector = new JFRJMXConnector(host, port, harvestCycleSecs);
       var processor = new JFRController(uploader, connector);
       processor.setup();
-      processor.loop();
+      processor.loop(harvestCycleSecs);
     } catch (Throwable e) {
       logger.error("JFR Controller is crashing!", e);
       throw new RuntimeException(e);

@@ -3,6 +3,9 @@ package com.newrelic.jfr;
 import com.newrelic.telemetry.Attributes;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
@@ -19,6 +22,8 @@ public class FileToBufferedTelemetry {
   private final ToSummaryRegistry toSummaryRegistry;
   private final ToEventRegistry toEventRegistry;
 
+  private final Map<String, AtomicInteger> eventCount = new HashMap<>();
+
   public FileToBufferedTelemetry(Builder builder) {
     this.commonAttributes = builder.commonAttributes;
     this.toMetricRegistry = builder.toMetricRegistry;
@@ -29,6 +34,7 @@ public class FileToBufferedTelemetry {
   /**
    * Converts the given recording file int a result that contains the last seen time in the file and
    * batched metric data.
+   *
    * @param file The input RecordingFile to convert
    * @param onlyAfter Only consider events whose time is after this
    * @param dumpFilename Write contents into a file at this filename
@@ -58,6 +64,9 @@ public class FileToBufferedTelemetry {
             + " in "
             + dumpFilename);
 
+    logger.debug(eventCount.toString());
+    eventCount.clear();
+
     return new Result(ctx.getLastSeen(), batches);
   }
 
@@ -73,7 +82,17 @@ public class FileToBufferedTelemetry {
     }
   }
 
+  private void updateStatistics(RecordedEvent event) {
+    var name = event.getEventType().getName();
+    if (eventCount.get(name) == null) {
+      eventCount.put(name, new AtomicInteger(0));
+    }
+    eventCount.get(name).incrementAndGet();
+  }
+
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
+    updateStatistics(event);
+
     try {
       toMetricRegistry
           .all()
