@@ -14,6 +14,7 @@ allprojects {
 object Versions {
     const val junit = "5.6.2"
     const val mockitoJunit = "3.3.3"
+    const val newRelicTelemetry = "0.6.1"
 }
 
 subprojects {
@@ -24,6 +25,8 @@ subprojects {
     apply(plugin = "signing")
 
     dependencies {
+        "api"("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
+        "api"("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
         "testImplementation"("org.mockito:mockito-junit-jupiter:${Versions.mockitoJunit}")
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")

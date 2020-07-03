@@ -1,16 +1,7 @@
-
-private object Versions {
-    const val newRelicTelemetry = "0.6.1"
-}
-
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
     disableAutoTargetJvm()
-}
-
-dependencies {
-    api("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
 }
 
 tasks {
