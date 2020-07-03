@@ -1,5 +1,8 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
+import com.newrelic.jfr.ToEventRegistry;
+import com.newrelic.jfr.ToMetricRegistry;
+import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.telemetry.Attributes;
 import java.io.IOException;
 import java.time.Instant;

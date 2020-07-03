@@ -1,11 +1,14 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.AttributeNames.APP_NAME;
-import static com.newrelic.jfr.AttributeNames.HOSTNAME;
-import static com.newrelic.jfr.AttributeNames.SERVICE_NAME;
-import static com.newrelic.jfr.EnvironmentVars.ENV_APP_NAME;
-import static com.newrelic.jfr.JFRUploader.COMMON_ATTRIBUTES;
+import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
+import static com.newrelic.jfr.daemon.AttributeNames.HOSTNAME;
+import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
+import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
+import static com.newrelic.jfr.daemon.JFRUploader.COMMON_ATTRIBUTES;
 
+import com.newrelic.jfr.ToEventRegistry;
+import com.newrelic.jfr.ToMetricRegistry;
+import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.net.InetAddress;

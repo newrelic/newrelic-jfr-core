@@ -1,4 +1,4 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
 import static javax.management.remote.JMXConnectorFactory.newJMXConnector;
 

@@ -1,6 +1,6 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.AttributeNames.*;
+import static com.newrelic.jfr.daemon.AttributeNames.*;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;

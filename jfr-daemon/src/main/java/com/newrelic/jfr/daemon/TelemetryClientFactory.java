@@ -1,8 +1,8 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.EnvironmentVars.EVENTS_INGEST_URI;
-import static com.newrelic.jfr.EnvironmentVars.INSERT_API_KEY;
-import static com.newrelic.jfr.EnvironmentVars.METRICS_INGEST_URI;
+import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
+import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
+import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
 
 import com.newrelic.telemetry.EventBatchSenderFactory;
 import com.newrelic.telemetry.Java11HttpPoster;

@@ -1,4 +1,4 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
 public class EnvironmentVars {
 

@@ -1,13 +1,13 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.JFRController.buildUploader;
+import static com.newrelic.jfr.daemon.JFRController.buildUploader;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class TestJFRController {
+public class JFRControllerTest {
 
   private static final int DUMMY_PID = 12345;
   private static final int DUMMY_PORT = 9019;

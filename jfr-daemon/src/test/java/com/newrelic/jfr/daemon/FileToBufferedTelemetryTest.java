@@ -1,4 +1,4 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,6 +9,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.ToEventRegistry;
+import com.newrelic.jfr.ToMetricRegistry;
+import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.toevent.EventToEvent;
 import com.newrelic.jfr.tometric.EventToMetric;
 import com.newrelic.jfr.tosummary.EventToSummary;

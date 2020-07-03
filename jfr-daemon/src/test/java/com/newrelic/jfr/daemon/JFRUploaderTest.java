@@ -1,4 +1,4 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.daemon;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
