@@ -37,7 +37,7 @@ public final class JFRController {
       Executors.newFixedThreadPool(
           2,
           r -> {
-            Thread result = new Thread("JFRController");
+            Thread result = new Thread(r, "JFRController");
             result.setDaemon(true);
             return result;
           });
