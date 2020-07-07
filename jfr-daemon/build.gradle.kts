@@ -24,7 +24,7 @@ dependencies {
 tasks.shadowJar {
     manifest {
         attributes(
-             "Main-Class" to "com.newrelic.jfr.JFRController"   
+             "Main-Class" to "com.newrelic.jfr.daemon.JFRController"
         )
     }
 }
