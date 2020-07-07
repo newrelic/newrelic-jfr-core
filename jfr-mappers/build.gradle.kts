@@ -22,8 +22,8 @@ publishing {
             from(components["java"])
             pom {
                 name.set(project.name)
-                description.set("Mappers to turn JFR RecordedEvents into New Relic telemetry")
-                url.set("https://github.com/newrelic/newrelic-jfr-mappers")
+                description.set("Library of mappers to turn JFR RecordedEvents into New Relic telemetry")
+                url.set("https://github.com/newrelic/newrelic-jfr-core")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -39,8 +39,8 @@ publishing {
                     }
                 }
                 scm {
-                    url.set("git@github.com:newrelic/newrelic-jfr-mappers.git")
-                    connection.set("scm:git:git@github.com:newrelic/newrelic-jfr-mappers.git")
+                    url.set("git@github.com:newrelic/newrelic-jfr-core.git")
+                    connection.set("scm:git:git@github.com:newrelic/newrelic-jfr-core.git")
                 }
             }
         }
