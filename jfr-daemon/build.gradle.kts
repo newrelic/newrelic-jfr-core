@@ -1,7 +1,7 @@
 private object Versions {
     const val slf4j = "1.7.26"
     const val gson = "2.8.6"
-    const val logback = "1.2.3"
+    const val log4j = "2.13.3"
 }
 
 plugins {
@@ -17,7 +17,8 @@ java {
 dependencies {
     api(project(":jfr-mappers"))
     api("org.slf4j:slf4j-api:${Versions.slf4j}")
-    api("ch.qos.logback:logback-classic:${Versions.logback}")
+    api("org.apache.logging.log4j:log4j-slf4j-impl:${Versions.log4j}")
+    api("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
     implementation("com.google.code.gson:gson:${Versions.gson}")
 }
 
