@@ -1,6 +1,6 @@
 # Third Party Notices
 
-newrelic-jfr-mappers uses source code from third party libraries which carry
+newrelic-jfr-core uses source code from third party libraries which carry
 their own copyright notices and license terms. These notices are provided
 below.
 
@@ -9,7 +9,7 @@ by e-mailing [open-source@newrelic.com](mailto:open-source@newrelic.com).
 
 For any licenses that require the disclosure of source
 code, the source code can be found at 
-[https://github.com/newrelic/newrelic-jfr-mappers](https://github.com/newrelic/newrelic-jfr-mappers).
+[https://github.com/newrelic/newrelic-jfr-core](https://github.com/newrelic/newrelic-jfr-core).
 
 ## Content
 
