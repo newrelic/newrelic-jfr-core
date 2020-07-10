@@ -31,7 +31,7 @@ public final class JFRController {
   private static final String DEFAULT_HOST = "localhost";
   private static final int DEFAULT_DELAY_BETWEEN_DUMPS_SECS = 10;
 
-  private final JFRJMXConnector connector;
+  private final JFRJMXRecorder connector;
   private final JFRUploader uploader;
   private final ExecutorService executorService =
       Executors.newFixedThreadPool(
@@ -45,7 +45,7 @@ public final class JFRController {
   private final boolean streamFromJmx = true;
   private volatile boolean shutdown = false;
 
-  public JFRController(JFRUploader uploader, JFRJMXConnector connector) {
+  public JFRController(JFRUploader uploader, JFRJMXRecorder connector) {
     this.connector = connector;
     this.uploader = uploader;
   }
@@ -98,7 +98,7 @@ public final class JFRController {
 
     try {
       JFRUploader uploader = buildUploader();
-      JFRJMXConnector connector = new JFRJMXConnector(host, port, harvestCycleSecs);
+      JFRJMXRecorder connector = new JFRJMXRecorder(host, port, harvestCycleSecs);
       var processor = new JFRController(uploader, connector);
       processor.setup();
       processor.loop(harvestCycleSecs);

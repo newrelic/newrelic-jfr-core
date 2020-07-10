@@ -15,8 +15,8 @@ import jdk.jfr.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class JFRJMXConnector {
-  private static final Logger logger = LoggerFactory.getLogger(JFRJMXConnector.class);
+public final class JFRJMXRecorder {
+  private static final Logger logger = LoggerFactory.getLogger(JFRJMXRecorder.class);
 
   private static final int MAX_BYTES_READ = 5 * 1024 * 1024;
 
@@ -27,7 +27,7 @@ public final class JFRJMXConnector {
   private MBeanServerConnection connection;
   private long recordingId;
 
-  public JFRJMXConnector(String host, int port, int harvestCycleSecs) {
+  public JFRJMXRecorder(String host, int port, int harvestCycleSecs) {
     this.host = host;
     this.port = port;
     this.harvestCycleSecs = harvestCycleSecs;
