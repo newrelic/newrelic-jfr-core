@@ -146,9 +146,4 @@ public final class JFRController {
     TelemetryClient telemetryClient = new TelemetryClientFactory().build(config);
     return new JFRUploader(telemetryClient, fileToBatches);
   }
-
-  private static String appName() {
-    String appName = System.getenv(ENV_APP_NAME);
-    return appName == null ? "eventing_hobgoblin" : appName;
-  }
 }

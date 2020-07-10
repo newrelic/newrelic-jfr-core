@@ -90,10 +90,21 @@ public final class JFRJMXRecorder {
         objectName, "startRecording", new Object[] {recordingId}, new String[] {"long"});
   }
 
+  /**
+   * Stores JFR recording data in a local file on disk.  The data is either
+   * streamed over JMX or copied from a shared filesystem.
+   *
+   * @return Path to local file on disc
+   * @throws MalformedObjectNameException JMX problem with the objectname
+   * @throws ReflectionException remove invocation failed due to reflection
+   * @throws MBeanException yet another MBean exception
+   * @throws InstanceNotFoundException Couldn't find the instance to invoke
+   * @throws IOException Generic input/output exception
+   * @throws OpenDataException problems creating instances of JMX objects
+   */
   public Path recordToFile() throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException, OpenDataException {
     return streamFromJmx ? streamRecordingToFile() : copyRecordingToFile();
   }
-
 
   /**
    * Retrieves the JFR recording over the network and stores it in a file on local disk
