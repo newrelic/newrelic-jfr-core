@@ -49,7 +49,6 @@ public final class JFRController {
             return result;
           });
 
-  private final boolean streamFromJmx = true;
   private volatile boolean shutdown = false;
 
   public JFRController(JFRUploader uploader, JFRJMXRecorder recorder) {
@@ -81,9 +80,7 @@ public final class JFRController {
         // Ignore the premature return and trigger the next JMX dump at once
       }
       try {
-        final var pathToFile =
-            streamFromJmx ? recorder.streamRecordingToFile() : recorder.copyRecordingToFile();
-
+        final var pathToFile = recorder.recordToFile();
         executorService.submit(() -> uploader.handleFile(pathToFile));
       } catch (MalformedObjectNameException
           | MBeanException
@@ -121,6 +118,7 @@ public final class JFRController {
             .apiKey(System.getenv(INSERT_API_KEY))
             .daemonVersion(daemonVersion);
 
+    builder.maybeEnv(ENV_APP_NAME, identity(), builder::monitoredAppName);
     builder.maybeEnv(REMOTE_JMX_HOST, identity(), builder::jmxHost);
     builder.maybeEnv(REMOTE_JMX_PORT, Integer::parseInt, builder::jmxPort);
     builder.maybeEnv(METRICS_INGEST_URI, URI::create, builder::metricsUri);

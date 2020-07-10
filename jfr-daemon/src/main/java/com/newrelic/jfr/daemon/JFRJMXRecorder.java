@@ -21,14 +21,16 @@ public final class JFRJMXRecorder {
 
   private static final int MAX_BYTES_READ = 5 * 1024 * 1024;
 
-  private final Duration harvestCycleDuration;
   private final MBeanServerConnection connection;
+  private final Duration harvestCycleDuration;
+  private final boolean streamFromJmx;
 
   private long recordingId;
 
-  public JFRJMXRecorder(MBeanServerConnection connection, Duration harvestInterval) {
+  public JFRJMXRecorder(MBeanServerConnection connection, Duration harvestInterval, boolean streamFromJmx) {
     this.connection = connection;
     this.harvestCycleDuration = harvestInterval;
+    this.streamFromJmx = streamFromJmx;
   }
 
   /**
@@ -46,10 +48,10 @@ public final class JFRJMXRecorder {
     var connector = newJMXConnector(url, null);
     connector.connect();
     var connection = connector.getMBeanServerConnection();
-    return new JFRJMXRecorder(connection, config.getHarvestInterval());
+    return new JFRJMXRecorder(connection, config.getHarvestInterval(), config.streamFromJmx());
   }
 
-  void startRecording()
+  public void startRecording()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException, OpenDataException {
     logger.debug("In startRecording()");
@@ -88,6 +90,11 @@ public final class JFRJMXRecorder {
         objectName, "startRecording", new Object[] {recordingId}, new String[] {"long"});
   }
 
+  public Path recordToFile() throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException, OpenDataException {
+    return streamFromJmx ? streamRecordingToFile() : copyRecordingToFile();
+  }
+
+
   /**
    * Retrieves the JFR recording over the network and stores it in a file on local disk
    *
@@ -99,7 +106,7 @@ public final class JFRJMXRecorder {
    * @throws IOException Generic input/output exception
    * @throws OpenDataException problems creating instances of JMX objects
    */
-  public Path streamRecordingToFile()
+  Path streamRecordingToFile()
       throws MalformedObjectNameException, ReflectionException, MBeanException,
           InstanceNotFoundException, IOException, OpenDataException {
 
@@ -187,7 +194,7 @@ public final class JFRJMXRecorder {
    * @throws InstanceNotFoundException Couldn't find the instance to invoke
    * @throws IOException Generic input/output exception
    */
-  public Path copyRecordingToFile()
+   Path copyRecordingToFile()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException {
     var objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");

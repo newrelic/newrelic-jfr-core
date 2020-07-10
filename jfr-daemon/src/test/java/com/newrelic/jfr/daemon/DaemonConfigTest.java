@@ -48,4 +48,13 @@ class DaemonConfigTest {
         assertThrows(RuntimeException.class, () -> DaemonConfig.builder().build());
     }
 
+    @Test
+    void streamOverJmx() {
+        var config = DaemonConfig.builder().apiKey("a").build();
+        assertTrue(config.streamFromJmx());
+        config = DaemonConfig.builder().apiKey("a").useSharedFilesystem(true).build();
+        assertFalse(config.streamFromJmx());
+        config = DaemonConfig.builder().apiKey("a").useSharedFilesystem(false).build();
+        assertTrue(config.streamFromJmx());
+    }
 }

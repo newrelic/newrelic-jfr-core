@@ -10,6 +10,7 @@ public class DaemonConfig {
     static final int DEFAULT_JMX_PORT = 1099;
     static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
     static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
+    static final String DEFAULT_MONITORED_APP_NAME = "eventing_hobgoblin";
 
     private final String apiKey;
     private final URI metricsUri;
@@ -53,8 +54,12 @@ public class DaemonConfig {
         return jmxPort;
     }
 
-    public boolean isUseSharedFilesystem() {
+    public boolean useSharedFilesystem() {
         return useSharedFilesystem;
+    }
+
+    public boolean streamFromJmx(){
+        return !useSharedFilesystem;
     }
 
     public Duration getHarvestInterval() {
@@ -82,7 +87,7 @@ public class DaemonConfig {
         private boolean useSharedFilesystem = DEFAULT_USE_SHARED_FILESYSTEM;
         private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
         public String daemonVersion = "UNKNOWN-VERSION";
-        public String monitoredAppName;
+        public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
 
         public Builder apiKey(String apiKey) {
             this.apiKey = apiKey;
