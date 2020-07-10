@@ -4,7 +4,14 @@ import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
 import static com.newrelic.jfr.daemon.AttributeNames.HOSTNAME;
 import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
 import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
+import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
+import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
+import static com.newrelic.jfr.daemon.EnvironmentVars.JFR_SHARED_FILESYSTEM;
+import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
+import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_HOST;
+import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_PORT;
 import static com.newrelic.jfr.daemon.JFRUploader.COMMON_ATTRIBUTES;
+import static java.util.function.Function.identity;
 
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
@@ -13,11 +20,13 @@ import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
@@ -28,9 +37,6 @@ import org.slf4j.LoggerFactory;
 
 public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
-
-  private static final int DEFAULT_PORT = 1099;
-  private static final String DEFAULT_HOST = "localhost";
 
   private final JFRJMXRecorder recorder;
   private final JFRUploader uploader;
@@ -92,17 +98,11 @@ public final class JFRController {
   }
 
   public static void main(String[] args) {
-    // FIXME Handle config
-    var host = DEFAULT_HOST;
-    var port = DEFAULT_PORT;
+
+    DaemonConfig config = buildConfig();
 
     try {
-      DaemonConfig config = DaemonConfig.builder()
-              .jmxHost(host)
-              .jmxPort(port)
-              .build();
-
-      JFRUploader uploader = buildUploader();
+      JFRUploader uploader = buildUploader(config);
       JFRJMXRecorder connector = JFRJMXRecorder.connect(config);
       var processor = new JFRController(uploader, connector);
       processor.setup();
@@ -113,7 +113,24 @@ public final class JFRController {
     }
   }
 
-  static JFRUploader buildUploader() throws UnknownHostException, MalformedURLException {
+  private static DaemonConfig buildConfig() {
+
+    var daemonVersion = new VersionFinder().get();
+
+    var builder = DaemonConfig.builder()
+            .apiKey(System.getenv(INSERT_API_KEY))
+            .daemonVersion(daemonVersion);
+
+    builder.maybeEnv(REMOTE_JMX_HOST, identity(), builder::jmxHost);
+    builder.maybeEnv(REMOTE_JMX_PORT, Integer::parseInt, builder::jmxPort);
+    builder.maybeEnv(METRICS_INGEST_URI, URI::create, builder::metricsUri);
+    builder.maybeEnv(EVENTS_INGEST_URI, URI::create, builder::eventsUri);
+    builder.maybeEnv(JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
+
+    return builder.build();
+  }
+
+  static JFRUploader buildUploader(DaemonConfig config) throws UnknownHostException, MalformedURLException {
     String localIpAddr = InetAddress.getLocalHost().toString();
     var attr =
         COMMON_ATTRIBUTES
@@ -128,7 +145,7 @@ public final class JFRController {
             .eventMapper(ToEventRegistry.createDefault())
             .summaryMappers(ToSummaryRegistry.createDefault())
             .build();
-    TelemetryClient telemetryClient = new TelemetryClientFactory().build();
+    TelemetryClient telemetryClient = new TelemetryClientFactory().build(config);
     return new JFRUploader(telemetryClient, fileToBatches);
   }
 
