@@ -103,8 +103,8 @@ public final class JFRController {
 
     try {
       JFRUploader uploader = buildUploader(config);
-      JFRJMXRecorder connector = JFRJMXRecorder.connect(config);
-      var processor = new JFRController(uploader, connector);
+      JFRJMXRecorder recorder = JFRJMXRecorder.connect(config);
+      var processor = new JFRController(uploader, recorder);
       processor.setup();
       processor.loop(config.getHarvestInterval());
     } catch (Throwable e) {
@@ -134,8 +134,8 @@ public final class JFRController {
     String localIpAddr = InetAddress.getLocalHost().toString();
     var attr =
         COMMON_ATTRIBUTES
-            .put(APP_NAME, appName())
-            .put(SERVICE_NAME, appName())
+            .put(APP_NAME, config.getMonitoredAppName())
+            .put(SERVICE_NAME, config.getMonitoredAppName())
             .put(HOSTNAME, localIpAddr);
 
     var fileToBatches =
@@ -150,7 +150,6 @@ public final class JFRController {
   }
 
   private static String appName() {
-    // FIXME Read this from an appropriate event in the file
     String appName = System.getenv(ENV_APP_NAME);
     return appName == null ? "eventing_hobgoblin" : appName;
   }

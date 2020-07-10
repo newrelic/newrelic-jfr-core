@@ -19,6 +19,7 @@ public class DaemonConfig {
     private final boolean useSharedFilesystem;
     private final Duration harvestInterval;
     private final String daemonVersion;
+    private final String monitoredAppName;
 
     public DaemonConfig(Builder builder) {
         this.apiKey = builder.apiKey;
@@ -29,6 +30,7 @@ public class DaemonConfig {
         this.useSharedFilesystem = builder.useSharedFilesystem;
         this.harvestInterval = builder.harvestInterval;
         this.daemonVersion = builder.daemonVersion;
+        this.monitoredAppName = builder.monitoredAppName;
     }
 
     public String getApiKey() {
@@ -63,6 +65,10 @@ public class DaemonConfig {
         return daemonVersion;
     }
 
+    public String getMonitoredAppName(){
+        return monitoredAppName;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -76,6 +82,7 @@ public class DaemonConfig {
         private boolean useSharedFilesystem = DEFAULT_USE_SHARED_FILESYSTEM;
         private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
         public String daemonVersion = "UNKNOWN-VERSION";
+        public String monitoredAppName;
 
         public Builder apiKey(String apiKey) {
             this.apiKey = apiKey;
@@ -114,6 +121,11 @@ public class DaemonConfig {
 
         public Builder daemonVersion(String daemonVersion) {
             this.daemonVersion = daemonVersion;
+            return this;
+        }
+
+        public Builder monitoredAppName(String monitoredAppName){
+            this.monitoredAppName = monitoredAppName;
             return this;
         }
 
