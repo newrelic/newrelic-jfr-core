@@ -26,7 +26,6 @@ import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
@@ -114,9 +113,8 @@ public final class JFRController {
 
     var daemonVersion = new VersionFinder().get();
 
-    var builder = DaemonConfig.builder()
-            .apiKey(System.getenv(INSERT_API_KEY))
-            .daemonVersion(daemonVersion);
+    var builder =
+        DaemonConfig.builder().apiKey(System.getenv(INSERT_API_KEY)).daemonVersion(daemonVersion);
 
     builder.maybeEnv(ENV_APP_NAME, identity(), builder::monitoredAppName);
     builder.maybeEnv(REMOTE_JMX_HOST, identity(), builder::jmxHost);
@@ -128,7 +126,8 @@ public final class JFRController {
     return builder.build();
   }
 
-  static JFRUploader buildUploader(DaemonConfig config) throws UnknownHostException, MalformedURLException {
+  static JFRUploader buildUploader(DaemonConfig config)
+      throws UnknownHostException, MalformedURLException {
     String localIpAddr = InetAddress.getLocalHost().toString();
     var attr =
         COMMON_ATTRIBUTES

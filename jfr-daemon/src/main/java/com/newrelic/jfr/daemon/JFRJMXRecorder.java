@@ -27,7 +27,8 @@ public final class JFRJMXRecorder {
 
   private long recordingId;
 
-  public JFRJMXRecorder(MBeanServerConnection connection, Duration harvestInterval, boolean streamFromJmx) {
+  public JFRJMXRecorder(
+      MBeanServerConnection connection, Duration harvestInterval, boolean streamFromJmx) {
     this.connection = connection;
     this.harvestCycleDuration = harvestInterval;
     this.streamFromJmx = streamFromJmx;
@@ -35,6 +36,7 @@ public final class JFRJMXRecorder {
 
   /**
    * Factory method for creating an instance of the JFRJMXRecorder.
+   *
    * @param config - The daemon configuration instance
    * @return A newly created and connected JFRJMXRecorder
    * @throws IOException if connection fails
@@ -91,8 +93,8 @@ public final class JFRJMXRecorder {
   }
 
   /**
-   * Stores JFR recording data in a local file on disk.  The data is either
-   * streamed over JMX or copied from a shared filesystem.
+   * Stores JFR recording data in a local file on disk. The data is either streamed over JMX or
+   * copied from a shared filesystem.
    *
    * @return Path to local file on disc
    * @throws MalformedObjectNameException JMX problem with the objectname
@@ -102,7 +104,9 @@ public final class JFRJMXRecorder {
    * @throws IOException Generic input/output exception
    * @throws OpenDataException problems creating instances of JMX objects
    */
-  public Path recordToFile() throws MalformedObjectNameException, ReflectionException, MBeanException, InstanceNotFoundException, IOException, OpenDataException {
+  public Path recordToFile()
+      throws MalformedObjectNameException, ReflectionException, MBeanException,
+          InstanceNotFoundException, IOException, OpenDataException {
     return streamFromJmx ? streamRecordingToFile() : copyRecordingToFile();
   }
 
@@ -178,7 +182,8 @@ public final class JFRJMXRecorder {
     return file;
   }
 
-  private TabularDataSupport makeOpenData(final Map<String, String> options) throws OpenDataException {
+  private TabularDataSupport makeOpenData(final Map<String, String> options)
+      throws OpenDataException {
     var typeName = "java.util.Map<java.lang.String, java.lang.String>";
     var itemNames = new String[] {"key", "value"};
     var openTypes = new OpenType[] {SimpleType.STRING, SimpleType.STRING};
@@ -205,7 +210,7 @@ public final class JFRJMXRecorder {
    * @throws InstanceNotFoundException Couldn't find the instance to invoke
    * @throws IOException Generic input/output exception
    */
-   Path copyRecordingToFile()
+  Path copyRecordingToFile()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException {
     var objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
