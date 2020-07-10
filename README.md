@@ -2,7 +2,7 @@
 
 # JFR Core
 
-![build badge](https://github.com/newrelic/newrelic-jfr-core/workflows/Master%20build/badge.svg)
+![build badge](https://github.com/newrelic/newrelic-jfr-core/workflows/main%20build/badge.svg)
 
 This repository contains the core New Relic JFR components. It can be used 
 to acquire JFR events, transform them into New Relic telemetry, and then 
