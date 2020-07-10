@@ -54,8 +54,8 @@ public final class JFRJMXConnector {
     //        var map = new HashMap<String, Object>();
     //        var credentials = new String[]{"", ""};
     //        map.put("jmx.remote.credentials", credentials);
-    var s = "/jndi/rmi://" + host + ":" + port + "/jmxrmi";
-    var url = new JMXServiceURL("rmi", "", 0, s);
+    var urlPath = "/jndi/rmi://" + host + ":" + port + "/jmxrmi";
+    var url = new JMXServiceURL("rmi", "", 0, urlPath);
     var connector = newJMXConnector(url, null);
     connector.connect();
     connection = connector.getMBeanServerConnection();
