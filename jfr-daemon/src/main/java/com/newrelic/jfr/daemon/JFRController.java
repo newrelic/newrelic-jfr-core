@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
@@ -29,9 +31,8 @@ public final class JFRController {
 
   private static final int DEFAULT_PORT = 1099;
   private static final String DEFAULT_HOST = "localhost";
-  private static final int DEFAULT_DELAY_BETWEEN_DUMPS_SECS = 10;
 
-  private final JFRJMXRecorder connector;
+  private final JFRJMXRecorder recorder;
   private final JFRUploader uploader;
   private final ExecutorService executorService =
       Executors.newFixedThreadPool(
@@ -45,8 +46,8 @@ public final class JFRController {
   private final boolean streamFromJmx = true;
   private volatile boolean shutdown = false;
 
-  public JFRController(JFRUploader uploader, JFRJMXRecorder connector) {
-    this.connector = connector;
+  public JFRController(JFRUploader uploader, JFRJMXRecorder recorder) {
+    this.recorder = recorder;
     this.uploader = uploader;
   }
 
@@ -57,8 +58,7 @@ public final class JFRController {
 
   void setup() {
     try {
-      connector.makeConnection();
-      connector.startRecording();
+      recorder.startRecording();
     } catch (Exception e) {
       e.printStackTrace();
       shutdown();
@@ -66,16 +66,17 @@ public final class JFRController {
     }
   }
 
-  void loop(int harvestCycleSecs) throws IOException {
+  void loop(Duration harvestInterval) throws IOException {
     while (!shutdown) {
       try {
-        Thread.sleep(1000 * harvestCycleSecs);
+        TimeUnit.MILLISECONDS.sleep(harvestInterval.toMillis());
       } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
         // Ignore the premature return and trigger the next JMX dump at once
       }
       try {
         final var pathToFile =
-            streamFromJmx ? connector.streamRecordingToFile() : connector.copyRecordingToFile();
+            streamFromJmx ? recorder.streamRecordingToFile() : recorder.copyRecordingToFile();
 
         executorService.submit(() -> uploader.handleFile(pathToFile));
       } catch (MalformedObjectNameException
@@ -94,14 +95,18 @@ public final class JFRController {
     // FIXME Handle config
     var host = DEFAULT_HOST;
     var port = DEFAULT_PORT;
-    var harvestCycleSecs = DEFAULT_DELAY_BETWEEN_DUMPS_SECS;
 
     try {
+      DaemonConfig config = DaemonConfig.builder()
+              .jmxHost(host)
+              .jmxPort(port)
+              .build();
+
       JFRUploader uploader = buildUploader();
-      JFRJMXRecorder connector = new JFRJMXRecorder(host, port, harvestCycleSecs);
+      JFRJMXRecorder connector = JFRJMXRecorder.connect(config);
       var processor = new JFRController(uploader, connector);
       processor.setup();
-      processor.loop(harvestCycleSecs);
+      processor.loop(config.getHarvestInterval());
     } catch (Throwable e) {
       logger.error("JFR Controller is crashing!", e);
       throw new RuntimeException(e);
