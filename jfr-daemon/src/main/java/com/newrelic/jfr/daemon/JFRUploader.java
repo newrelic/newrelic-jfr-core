@@ -66,8 +66,7 @@ public final class JFRUploader {
 
   void handleFile(final Path dumpFile) {
     // At startup should we read all the events present? This could be multiple hours of recordings
-Instant eventsAfter = lastSeen.orElse(Instant.EPOCH);
-    }
+    Instant eventsAfter = lastSeen.orElse(Instant.EPOCH);
 
     try (var recordingFile = recordingFileOpener.apply(dumpFile)) {
       logger.debug("Looking in " + dumpFile + " for events after: " + eventsAfter);
