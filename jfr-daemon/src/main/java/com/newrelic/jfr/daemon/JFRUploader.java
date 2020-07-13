@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,7 +39,7 @@ public final class JFRUploader {
   private final Function<Path, RecordingFile> recordingFileOpener;
   private final Consumer<Path> fileDeleter;
 
-  private Instant lastSeen = null;
+  private Optional<Instant> lastSeen = Optional.empty();
 
   public JFRUploader(
       TelemetryClient telemetryClient, FileToBufferedTelemetry fileToBufferedTelemetry) {
@@ -65,15 +66,19 @@ public final class JFRUploader {
 
   void handleFile(final Path dumpFile) {
     // At startup should we read all the events present? This could be multiple hours of recordings
-    if (lastSeen == null) {
-      lastSeen = nowProvider.get();
+    Instant eventsAfter = null;
+
+    if (lastSeen.isEmpty()) {
+      eventsAfter = Instant.EPOCH;
+    } else {
+      eventsAfter = lastSeen.get();
     }
 
     try (var recordingFile = recordingFileOpener.apply(dumpFile)) {
-      logger.debug("Looking in " + dumpFile + " for events after: " + lastSeen);
+      logger.debug("Looking in " + dumpFile + " for events after: " + eventsAfter);
 
-      var result = fileToBufferedTelemetry.convert(recordingFile, lastSeen, dumpFile.toString());
-      lastSeen = result.getLastSeen();
+      var result = fileToBufferedTelemetry.convert(recordingFile, eventsAfter, dumpFile.toString());
+      lastSeen = Optional.of(result.getLastSeen());
       var bufferedMetrics = result.getBufferedTelemetry();
 
       sendMetrics(bufferedMetrics);

@@ -137,6 +137,12 @@ public class DaemonConfig {
     /**
      * Fetch the given envKey from the environment and, if set, convert it to another type and pass
      * it to the given builder method.
+     *
+     * @param envKey
+     * @param mapper
+     * @param builderMethod
+     * @param <T>
+     * @return the builder object
      */
     public <T> DaemonConfig.Builder maybeEnv(
         String envKey,
