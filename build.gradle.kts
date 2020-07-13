@@ -1,6 +1,6 @@
 
 plugins {
-    id("com.github.sherter.google-java-format") version "0.8"
+    id("com.github.sherter.google-java-format") version "0.8" apply false
 }
 
 allprojects {
@@ -23,6 +23,7 @@ subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
+    apply(plugin = "com.github.sherter.google-java-format")
 
     dependencies {
         "api"("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")

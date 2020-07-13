@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.*;
@@ -15,53 +16,44 @@ import jdk.jfr.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class JFRJMXConnector {
-  private static final Logger logger = LoggerFactory.getLogger(JFRJMXConnector.class);
+public final class JFRJMXRecorder {
+  private static final Logger logger = LoggerFactory.getLogger(JFRJMXRecorder.class);
 
   private static final int MAX_BYTES_READ = 5 * 1024 * 1024;
 
-  private final int port;
-  private final String host;
-  private final int harvestCycleSecs;
+  private final MBeanServerConnection connection;
+  private final Duration harvestCycleDuration;
+  private final boolean streamFromJmx;
 
-  private MBeanServerConnection connection;
   private long recordingId;
 
-  public JFRJMXConnector(String host, int port, int harvestCycleSecs) {
-    this.host = host;
-    this.port = port;
-    this.harvestCycleSecs = harvestCycleSecs;
+  public JFRJMXRecorder(
+      MBeanServerConnection connection, Duration harvestInterval, boolean streamFromJmx) {
+    this.connection = connection;
+    this.harvestCycleDuration = harvestInterval;
+    this.streamFromJmx = streamFromJmx;
   }
 
-  TabularDataSupport makeOpenData(final Map<String, String> options) throws OpenDataException {
-    var typeName = "java.util.Map<java.lang.String, java.lang.String>";
-    var itemNames = new String[] {"key", "value"};
-    var openTypes = new OpenType[] {SimpleType.STRING, SimpleType.STRING};
-    var rowType = new CompositeType(typeName, typeName, itemNames, itemNames, openTypes);
-    var tabularType = new TabularType(typeName, typeName, rowType, new String[] {"key"});
-    var table = new TabularDataSupport(tabularType);
-
-    for (var entry : options.entrySet()) {
-      Object[] itemValues = {entry.getKey(), entry.getValue()};
-      CompositeData element = new CompositeDataSupport(rowType, itemNames, itemValues);
-      table.put(element);
-    }
-
-    return table;
-  }
-
-  void makeConnection() throws IOException {
+  /**
+   * Factory method for creating an instance of the JFRJMXRecorder.
+   *
+   * @param config - The daemon configuration instance
+   * @return A newly created and connected JFRJMXRecorder
+   * @throws IOException if connection fails
+   */
+  public static JFRJMXRecorder connect(DaemonConfig config) throws IOException {
     //        var map = new HashMap<String, Object>();
     //        var credentials = new String[]{"", ""};
     //        map.put("jmx.remote.credentials", credentials);
-    var s = "/jndi/rmi://" + host + ":" + port + "/jmxrmi";
-    var url = new JMXServiceURL("rmi", "", 0, s);
+    var urlPath = "/jndi/rmi://" + config.getJmxHost() + ":" + config.getJmxPort() + "/jmxrmi";
+    var url = new JMXServiceURL("rmi", "", 0, urlPath);
     var connector = newJMXConnector(url, null);
     connector.connect();
-    connection = connector.getMBeanServerConnection();
+    var connection = connector.getMBeanServerConnection();
+    return new JFRJMXRecorder(connection, config.getHarvestInterval(), config.streamFromJmx());
   }
 
-  void startRecording()
+  public void startRecording()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException, OpenDataException {
     logger.debug("In startRecording()");
@@ -84,7 +76,7 @@ public final class JFRJMXConnector {
       // TODO: Something
     }
 
-    var maxAge = (harvestCycleSecs + 10) + "s";
+    var maxAge = (harvestCycleDuration.toSeconds() + 10) + "s";
     Map<String, String> options = new HashMap<>();
     options.put("name", "New Relic JFR Recording");
     options.put("disk", "true");
@@ -101,6 +93,24 @@ public final class JFRJMXConnector {
   }
 
   /**
+   * Stores JFR recording data in a local file on disk. The data is either streamed over JMX or
+   * copied from a shared filesystem.
+   *
+   * @return Path to local file on disc
+   * @throws MalformedObjectNameException JMX problem with the objectname
+   * @throws ReflectionException remove invocation failed due to reflection
+   * @throws MBeanException yet another MBean exception
+   * @throws InstanceNotFoundException Couldn't find the instance to invoke
+   * @throws IOException Generic input/output exception
+   * @throws OpenDataException problems creating instances of JMX objects
+   */
+  public Path recordToFile()
+      throws MalformedObjectNameException, ReflectionException, MBeanException,
+          InstanceNotFoundException, IOException, OpenDataException {
+    return streamFromJmx ? streamRecordingToFile() : copyRecordingToFile();
+  }
+
+  /**
    * Retrieves the JFR recording over the network and stores it in a file on local disk
    *
    * @return Path to local file on disc
@@ -111,7 +121,7 @@ public final class JFRJMXConnector {
    * @throws IOException Generic input/output exception
    * @throws OpenDataException problems creating instances of JMX objects
    */
-  public Path streamRecordingToFile()
+  Path streamRecordingToFile()
       throws MalformedObjectNameException, ReflectionException, MBeanException,
           InstanceNotFoundException, IOException, OpenDataException {
 
@@ -172,6 +182,24 @@ public final class JFRJMXConnector {
     return file;
   }
 
+  private TabularDataSupport makeOpenData(final Map<String, String> options)
+      throws OpenDataException {
+    var typeName = "java.util.Map<java.lang.String, java.lang.String>";
+    var itemNames = new String[] {"key", "value"};
+    var openTypes = new OpenType[] {SimpleType.STRING, SimpleType.STRING};
+    var rowType = new CompositeType(typeName, typeName, itemNames, itemNames, openTypes);
+    var tabularType = new TabularType(typeName, typeName, rowType, new String[] {"key"});
+    var table = new TabularDataSupport(tabularType);
+
+    for (var entry : options.entrySet()) {
+      Object[] itemValues = {entry.getKey(), entry.getValue()};
+      CompositeData element = new CompositeDataSupport(rowType, itemNames, itemValues);
+      table.put(element);
+    }
+
+    return table;
+  }
+
   /**
    * Requires the JMX process to share a local filesystem with the target.
    *
@@ -182,7 +210,7 @@ public final class JFRJMXConnector {
    * @throws InstanceNotFoundException Couldn't find the instance to invoke
    * @throws IOException Generic input/output exception
    */
-  public Path copyRecordingToFile()
+  Path copyRecordingToFile()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException {
     var objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");

@@ -1,9 +1,5 @@
 package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
-import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
-import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
-
 import com.newrelic.telemetry.EventBatchSenderFactory;
 import com.newrelic.telemetry.Java11HttpPoster;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
@@ -12,7 +8,6 @@ import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
@@ -20,44 +15,41 @@ import java.util.function.Supplier;
 /** Builds the instance of the TelemetryClient used to send data to New Relic ingest endpoints. */
 public class TelemetryClientFactory {
 
-  private final String apiKey;
-  private final String metricsUri;
-  private final String eventsUri;
+  private final Supplier<HttpPoster> httpPosterCreator =
+      () -> new Java11HttpPoster(Duration.of(10, ChronoUnit.SECONDS));
 
-  public TelemetryClientFactory() {
-    this(
-        System.getenv(INSERT_API_KEY),
-        System.getenv(METRICS_INGEST_URI),
-        System.getenv(EVENTS_INGEST_URI));
-  }
-
-  public TelemetryClientFactory(String apiKey, String metricsUri, String eventsUri) {
-    this.apiKey = apiKey;
-    this.metricsUri = metricsUri;
-    this.eventsUri = eventsUri;
-  }
-
-  public TelemetryClient build() throws MalformedURLException {
-
-    Supplier<HttpPoster> httpPosterCreator =
-        () -> new Java11HttpPoster(Duration.of(10, ChronoUnit.SECONDS));
-
-    var metricBatchSender =
-        MetricBatchSender.create(
-            MetricBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
-                .configureWith(apiKey)
-                .endpointWithPath(URI.create(metricsUri).toURL())
-                .auditLoggingEnabled(true)
-                .build());
-
-    var eventBatchSender =
-        EventBatchSender.create(
-            EventBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
-                .configureWith(apiKey)
-                .endpointWithPath(URI.create(eventsUri).toURL())
-                .auditLoggingEnabled(true)
-                .build());
-
+  public TelemetryClient build(DaemonConfig config) throws MalformedURLException {
+    var metricBatchSender = buildMetricBatchSender(config);
+    var eventBatchSender = buildEventBatchSender(config);
     return new TelemetryClient(metricBatchSender, null, eventBatchSender, null);
+  }
+
+  private EventBatchSender buildEventBatchSender(DaemonConfig config) throws MalformedURLException {
+    var eventsConfig =
+        EventBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
+            .configureWith(config.getApiKey())
+            .auditLoggingEnabled(true)
+            .secondaryUserAgent(makeUserAgent(config));
+    if (config.getEventsUri() != null) {
+      eventsConfig = eventsConfig.endpointWithPath(config.getEventsUri().toURL());
+    }
+    return EventBatchSender.create(eventsConfig.build());
+  }
+
+  private MetricBatchSender buildMetricBatchSender(DaemonConfig config)
+      throws MalformedURLException {
+    var metricConfig =
+        MetricBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
+            .configureWith(config.getApiKey())
+            .secondaryUserAgent(makeUserAgent(config))
+            .auditLoggingEnabled(true);
+    if (config.getMetricsUri() != null) {
+      metricConfig = metricConfig.endpointWithPath(config.getMetricsUri().toURL());
+    }
+    return MetricBatchSender.create(metricConfig.build());
+  }
+
+  private String makeUserAgent(DaemonConfig config) {
+    return "JFR-Daemon/" + config.getDaemonVersion();
   }
 }

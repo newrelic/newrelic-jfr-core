@@ -4,7 +4,14 @@ import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
 import static com.newrelic.jfr.daemon.AttributeNames.HOSTNAME;
 import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
 import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
+import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
+import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
+import static com.newrelic.jfr.daemon.EnvironmentVars.JFR_SHARED_FILESYSTEM;
+import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
+import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_HOST;
+import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_PORT;
 import static com.newrelic.jfr.daemon.JFRUploader.COMMON_ATTRIBUTES;
+import static java.util.function.Function.identity;
 
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
@@ -13,9 +20,12 @@ import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
@@ -27,11 +37,7 @@ import org.slf4j.LoggerFactory;
 public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
-  private static final int DEFAULT_PORT = 1099;
-  private static final String DEFAULT_HOST = "localhost";
-  private static final int DEFAULT_DELAY_BETWEEN_DUMPS_SECS = 10;
-
-  private final JFRJMXConnector connector;
+  private final JFRJMXRecorder recorder;
   private final JFRUploader uploader;
   private final ExecutorService executorService =
       Executors.newFixedThreadPool(
@@ -42,11 +48,10 @@ public final class JFRController {
             return result;
           });
 
-  private final boolean streamFromJmx = true;
   private volatile boolean shutdown = false;
 
-  public JFRController(JFRUploader uploader, JFRJMXConnector connector) {
-    this.connector = connector;
+  public JFRController(JFRUploader uploader, JFRJMXRecorder recorder) {
+    this.recorder = recorder;
     this.uploader = uploader;
   }
 
@@ -57,8 +62,7 @@ public final class JFRController {
 
   void setup() {
     try {
-      connector.makeConnection();
-      connector.startRecording();
+      recorder.startRecording();
     } catch (Exception e) {
       e.printStackTrace();
       shutdown();
@@ -66,17 +70,16 @@ public final class JFRController {
     }
   }
 
-  void loop(int harvestCycleSecs) throws IOException {
+  void loop(Duration harvestInterval) throws IOException {
     while (!shutdown) {
       try {
-        Thread.sleep(1000 * harvestCycleSecs);
+        TimeUnit.MILLISECONDS.sleep(harvestInterval.toMillis());
       } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
         // Ignore the premature return and trigger the next JMX dump at once
       }
       try {
-        final var pathToFile =
-            streamFromJmx ? connector.streamRecordingToFile() : connector.copyRecordingToFile();
-
+        final var pathToFile = recorder.recordToFile();
         executorService.submit(() -> uploader.handleFile(pathToFile));
       } catch (MalformedObjectNameException
           | MBeanException
@@ -91,29 +94,45 @@ public final class JFRController {
   }
 
   public static void main(String[] args) {
-    // FIXME Handle config
-    var host = DEFAULT_HOST;
-    var port = DEFAULT_PORT;
-    var harvestCycleSecs = DEFAULT_DELAY_BETWEEN_DUMPS_SECS;
+
+    DaemonConfig config = buildConfig();
 
     try {
-      JFRUploader uploader = buildUploader();
-      JFRJMXConnector connector = new JFRJMXConnector(host, port, harvestCycleSecs);
-      var processor = new JFRController(uploader, connector);
+      JFRUploader uploader = buildUploader(config);
+      JFRJMXRecorder recorder = JFRJMXRecorder.connect(config);
+      var processor = new JFRController(uploader, recorder);
       processor.setup();
-      processor.loop(harvestCycleSecs);
+      processor.loop(config.getHarvestInterval());
     } catch (Throwable e) {
       logger.error("JFR Controller is crashing!", e);
       throw new RuntimeException(e);
     }
   }
 
-  static JFRUploader buildUploader() throws UnknownHostException, MalformedURLException {
+  private static DaemonConfig buildConfig() {
+
+    var daemonVersion = new VersionFinder().get();
+
+    var builder =
+        DaemonConfig.builder().apiKey(System.getenv(INSERT_API_KEY)).daemonVersion(daemonVersion);
+
+    builder.maybeEnv(ENV_APP_NAME, identity(), builder::monitoredAppName);
+    builder.maybeEnv(REMOTE_JMX_HOST, identity(), builder::jmxHost);
+    builder.maybeEnv(REMOTE_JMX_PORT, Integer::parseInt, builder::jmxPort);
+    builder.maybeEnv(METRICS_INGEST_URI, URI::create, builder::metricsUri);
+    builder.maybeEnv(EVENTS_INGEST_URI, URI::create, builder::eventsUri);
+    builder.maybeEnv(JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
+
+    return builder.build();
+  }
+
+  static JFRUploader buildUploader(DaemonConfig config)
+      throws UnknownHostException, MalformedURLException {
     String localIpAddr = InetAddress.getLocalHost().toString();
     var attr =
         COMMON_ATTRIBUTES
-            .put(APP_NAME, appName())
-            .put(SERVICE_NAME, appName())
+            .put(APP_NAME, config.getMonitoredAppName())
+            .put(SERVICE_NAME, config.getMonitoredAppName())
             .put(HOSTNAME, localIpAddr);
 
     var fileToBatches =
@@ -123,13 +142,7 @@ public final class JFRController {
             .eventMapper(ToEventRegistry.createDefault())
             .summaryMappers(ToSummaryRegistry.createDefault())
             .build();
-    TelemetryClient telemetryClient = new TelemetryClientFactory().build();
+    TelemetryClient telemetryClient = new TelemetryClientFactory().build(config);
     return new JFRUploader(telemetryClient, fileToBatches);
-  }
-
-  private static String appName() {
-    // FIXME Read this from an appropriate event in the file
-    String appName = System.getenv(ENV_APP_NAME);
-    return appName == null ? "eventing_hobgoblin" : appName;
   }
 }

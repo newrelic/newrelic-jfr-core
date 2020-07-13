@@ -15,7 +15,8 @@ public class JFRControllerTest {
   @Test
   @Disabled
   public void test_simple_stream() throws Exception {
-    var processor = buildUploader();
+    DaemonConfig config = DaemonConfig.builder().build();
+    var processor = buildUploader(config);
     var p = Path.of("src/test/resources/stream-2020-06-10-2.jfr");
     //    processor.handleFile(p);
     assertTrue(true);
