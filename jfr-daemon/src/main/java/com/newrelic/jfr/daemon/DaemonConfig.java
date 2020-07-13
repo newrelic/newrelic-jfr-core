@@ -1,5 +1,7 @@
 package com.newrelic.jfr.daemon;
 
+import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
+
 import java.net.URI;
 import java.time.Duration;
 import java.util.function.Function;
@@ -137,6 +139,12 @@ public class DaemonConfig {
     /**
      * Fetch the given envKey from the environment and, if set, convert it to another type and pass
      * it to the given builder method.
+     *
+     * @param envKey - The key to look up in the environment
+     * @param mapper - A type conversion function
+     * @param builderMethod - builder method to invoke
+     * @param <T> - generic type of the resulting field in the builder
+     * @return the builder object
      */
     public <T> DaemonConfig.Builder maybeEnv(
         String envKey,
@@ -157,7 +165,7 @@ public class DaemonConfig {
 
     public DaemonConfig build() {
       if (apiKey == null) {
-        throw new RuntimeException("INSERT_API_KEY environment variable is required!");
+        throw new RuntimeException(INSERT_API_KEY + " environment variable is required!");
       }
       return new DaemonConfig(this);
     }

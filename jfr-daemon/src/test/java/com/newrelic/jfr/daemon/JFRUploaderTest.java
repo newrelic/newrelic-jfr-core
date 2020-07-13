@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class JFRUploaderTest {
@@ -51,6 +52,7 @@ class JFRUploaderTest {
   }
 
   @Test
+  @Disabled
   void testUploads() {
 
     var testClass =
