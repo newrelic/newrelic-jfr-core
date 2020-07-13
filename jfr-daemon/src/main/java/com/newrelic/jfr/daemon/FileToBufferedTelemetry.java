@@ -70,7 +70,7 @@ public class FileToBufferedTelemetry {
     logger.debug(eventCount.toString());
     eventCount.clear();
 
-    return new Result(ctx.getLastSeen(), batches);
+    return new Result(ctx.getLastEventTime(), batches);
   }
 
   private void processEvent(BufferedTelemetry batches, ProcessingContext ctx, RecordedEvent event) {
@@ -80,7 +80,7 @@ public class FileToBufferedTelemetry {
     ctx.updateFirstEventTime(event);
     ctx.updateLastEventTime(event);
 
-    if (ctx.updateLastSeenIfMoreRecent(event)) {
+    if (event.getStartTime().isAfter(ctx.getLastSeen())) {
       convertAndBuffer(batches, event);
     }
   }
@@ -182,7 +182,7 @@ public class FileToBufferedTelemetry {
   private static class ProcessingContext {
     private Instant firstEventTime = null;
     private Instant lastEventTime = null;
-    private Instant lastSeen;
+    private final Instant lastSeen;
 
     public ProcessingContext(Instant lastSeen) {
       this.lastSeen = lastSeen;
@@ -196,14 +196,6 @@ public class FileToBufferedTelemetry {
 
     public void updateLastEventTime(RecordedEvent event) {
       lastEventTime = event.getStartTime();
-    }
-
-    public boolean updateLastSeenIfMoreRecent(RecordedEvent event) {
-      boolean after = event.getStartTime().isAfter(lastSeen);
-      if (after) {
-        lastSeen = event.getStartTime();
-      }
-      return after;
     }
 
     public Instant getFirstEventTime() {

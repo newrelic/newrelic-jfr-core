@@ -1,5 +1,7 @@
 package com.newrelic.jfr.daemon;
 
+import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
+
 import java.net.URI;
 import java.time.Duration;
 import java.util.function.Function;
@@ -163,7 +165,7 @@ public class DaemonConfig {
 
     public DaemonConfig build() {
       if (apiKey == null) {
-        throw new RuntimeException("INSERT_API_KEY environment variable is required!");
+        throw new RuntimeException(INSERT_API_KEY + " environment variable is required!");
       }
       return new DaemonConfig(this);
     }
