@@ -61,14 +61,14 @@ _Note: SNAPSHOT artifact is still preliminary._
 <dependency>
     <groupId>com.newrelic</groupId>
     <artifactId>jfr-mappers</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
 #### gradle dependency
 
 ```
-compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.2.0-SNAPSHOT'
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '0.2.0'
 ```
 
 ## JFR Daemon
@@ -80,7 +80,33 @@ JFR files.  It uses these files to build a "pseudo stream" of telemetry events.
 
 ### How To Use
 
-TBD.  This is a work in progress.
+After building or downloading the jfr-daemon jar, should first export the INSIGHTS_INSERT_KEY variable
+with [your insights key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key):
+
+```
+$ export INSIGHTS_INSERT_KEY=abc123youractualkeyhere
+```
+
+After that, you can run the daemon like this:
+
+```
+$ java -jar jfr-daemon-<version>.jar 
+```
+(where &lt;version&gt; is the actual version number).
+
+By default, the daemon will connect JMX to `localhost` on port 1099 and send data to 
+New Relic US production metric and event ingest endpoints.  If you need to change this
+default behavior, the following environment variables are recognized:
+
+| env var name          | required? | default             | description  |
+|-----------------------|-----------|---------------------|--------------|
+| INSIGHTS_INSERT_KEY   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) for your account |
+| NEW_RELIC_APP_NAME    |     N(!)  |  eventing_hobgoblin | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform. 
+| REMOTE_JMX_HOST       |     N     |  localhost          | The host to pull JFR data from via JMX        |
+| REMOTE_JMX_PORT       |     N     |  1099               | The port to pull JFR data from via JMX        |
+| METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1)         | Where to send metric data
+| EVENTS_INGEST_URI     |     N     |  [US production](https://trace-api.newrelic.com/v1/accounts/events) | Where to send event data
+| JFR_SHARED_FILESYSTEM |     N     |  false              | Use a shared filesystem instead of streaming data from JMX
 
 ---
 ## Support
