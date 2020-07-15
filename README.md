@@ -80,7 +80,7 @@ JFR files.  It uses these files to build a "pseudo stream" of telemetry events.
 
 ### How To Use
 
-After building or downloading the jfr-daemon jar, should first export the INSIGHTS_INSERT_KEY variable
+After building or downloading the jfr-daemon jar, you should first export the INSIGHTS_INSERT_KEY variable
 with [your insights key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key):
 
 ```
