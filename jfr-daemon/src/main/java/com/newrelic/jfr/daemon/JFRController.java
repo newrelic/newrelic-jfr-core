@@ -100,6 +100,7 @@ public final class JFRController {
             | OpenDataException
             | ReflectionException jmxException) {
           // Log before fatal exit?
+          shutdown();
         }
       }
     }
