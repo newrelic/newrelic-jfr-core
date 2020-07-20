@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.management.*;
 import javax.management.openmbean.*;
@@ -20,6 +21,7 @@ public final class JFRJMXRecorder {
   private static final Logger logger = LoggerFactory.getLogger(JFRJMXRecorder.class);
 
   private static final int MAX_BYTES_READ = 5 * 1024 * 1024;
+  private static List<Integer> backoffSeconds = List.of(1, 2, 4, 8, 15);
 
   private final MBeanServerConnection connection;
   private final Duration harvestCycleDuration;
@@ -34,6 +36,47 @@ public final class JFRJMXRecorder {
     this.streamFromJmx = streamFromJmx;
   }
 
+  public static JFRJMXRecorder connectWithBackOff(DaemonConfig config) throws IOException {
+    JFRJMXRecorder out = null;
+    try {
+      out = connect(config);
+    } catch (IOException e) {
+      for (int i = 0; i < backoffSeconds.size(); i = i + 1) {
+        try {
+          out = connect(config);
+          break;
+        } catch (IOException iox) {
+          // Log retry?
+          if (i == backoffSeconds.size() - 1) {
+            throw iox;
+          }
+        }
+      }
+    }
+
+    return out;
+  }
+
+  public void startRecordingWithBackOff()
+      throws MalformedObjectNameException, ReflectionException, IOException,
+          InstanceNotFoundException, MBeanException, OpenDataException {
+    try {
+      startRecording();
+    } catch (Exception e) {
+      for (int i = 0; i < backoffSeconds.size(); i = i + 1) {
+        try {
+          startRecording();
+          break;
+        } catch (IOException iox) {
+          // Log retry?
+          if (i == backoffSeconds.size() - 1) {
+            throw iox;
+          }
+        }
+      }
+    }
+  }
+
   /**
    * Factory method for creating an instance of the JFRJMXRecorder.
    *
@@ -41,7 +84,7 @@ public final class JFRJMXRecorder {
    * @return A newly created and connected JFRJMXRecorder
    * @throws IOException if connection fails
    */
-  public static JFRJMXRecorder connect(DaemonConfig config) throws IOException {
+  static JFRJMXRecorder connect(DaemonConfig config) throws IOException {
     //        var map = new HashMap<String, Object>();
     //        var credentials = new String[]{"", ""};
     //        map.put("jmx.remote.credentials", credentials);
@@ -53,7 +96,7 @@ public final class JFRJMXRecorder {
     return new JFRJMXRecorder(connection, config.getHarvestInterval(), config.streamFromJmx());
   }
 
-  public void startRecording()
+  void startRecording()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException, OpenDataException {
     logger.debug("In startRecording()");
