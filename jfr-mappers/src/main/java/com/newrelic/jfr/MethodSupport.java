@@ -68,8 +68,13 @@ public final class MethodSupport {
     var length = out.length();
     if (length > HEADROOM_75PC) {
       // Truncate the stack frame and try again
-      int numFrames = frames.size() * HEADROOM_75PC / length;
-      return jsonWrite(frames, Optional.of(numFrames));
+      double percentageOfFramesToTry = ((double) HEADROOM_75PC) / length;
+      int numFrames = (int) (frames.size() * percentageOfFramesToTry);
+      if (numFrames < frameCount) {
+        return jsonWrite(frames, Optional.of(numFrames));
+      }
+      throw new IOException(
+          "Corner case of a stack frame that can't be cleanly truncated, should not happen in practice");
     } else {
       return out;
     }
