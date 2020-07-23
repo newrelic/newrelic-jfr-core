@@ -21,7 +21,7 @@ public final class JFRJMXRecorder {
   private static final Logger logger = LoggerFactory.getLogger(JFRJMXRecorder.class);
 
   private static final int MAX_BYTES_READ = 5 * 1024 * 1024;
-  private static List<Integer> backoffSeconds = List.of(1, 2, 4, 8, 15);
+  private static final List<Integer> BACKOFF_SECONDS = List.of(1, 2, 4, 8, 15);
 
   private final MBeanServerConnection connection;
   private final Duration harvestCycleDuration;
@@ -41,13 +41,13 @@ public final class JFRJMXRecorder {
     try {
       out = connect(config);
     } catch (IOException e) {
-      for (int i = 0; i < backoffSeconds.size(); i = i + 1) {
+      for (int i = 0; i < BACKOFF_SECONDS.size(); i = i + 1) {
         try {
           out = connect(config);
           break;
         } catch (IOException iox) {
           // Log retry?
-          if (i == backoffSeconds.size() - 1) {
+          if (i == BACKOFF_SECONDS.size() - 1) {
             throw iox;
           }
         }
@@ -63,13 +63,13 @@ public final class JFRJMXRecorder {
     try {
       startRecording();
     } catch (Exception e) {
-      for (int i = 0; i < backoffSeconds.size(); i = i + 1) {
+      for (int i = 0; i < BACKOFF_SECONDS.size(); i = i + 1) {
         try {
           startRecording();
           break;
         } catch (IOException iox) {
           // Log retry?
-          if (i == backoffSeconds.size() - 1) {
+          if (i == BACKOFF_SECONDS.size() - 1) {
             throw iox;
           }
         }
