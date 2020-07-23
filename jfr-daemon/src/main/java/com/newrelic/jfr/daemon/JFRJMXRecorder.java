@@ -37,24 +37,30 @@ public final class JFRJMXRecorder {
   }
 
   public static JFRJMXRecorder connectWithBackOff(DaemonConfig config) throws IOException {
-    JFRJMXRecorder out = null;
-    try {
-      out = connect(config);
-    } catch (IOException e) {
-      for (int i = 0; i < backoffSeconds.size(); i = i + 1) {
-        try {
-          out = connect(config);
-          break;
-        } catch (IOException iox) {
-          // Log retry?
-          if (i == backoffSeconds.size() - 1) {
-            throw iox;
-          }
-        }
-      }
-    }
+    return connectWithBackOff(config, 0);
+  }
 
-    return out;
+  private static JFRJMXRecorder connectWithBackOff(DaemonConfig config, int backoffIndex) throws IOException {
+    try {
+      return connect(config);
+    } catch (IOException e) {
+      if(backoffIndex == backoffSeconds.size() - 1) {
+        logger.error("Failed to connect to JMX and retries exhausted.  JFR will be disabled.", e);
+        throw e;
+      }
+      logger.warn("Error connecting to JMX, backing off before retry", e);
+      sleepSafely(backoffIndex);
+      return connectWithBackOff(config, backoffIndex + 1);
+    }
+  }
+
+  private static void sleepSafely(int backoffIndex) {
+    try {
+      TimeUnit.SECONDS.sleep(backoffSeconds.get(backoffIndex));
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Error during backoff sleep", e);
+    }
   }
 
   public void startRecordingWithBackOff()
