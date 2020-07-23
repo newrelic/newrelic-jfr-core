@@ -50,7 +50,7 @@ public final class JFRJMXRecorder {
         logger.error("Failed to connect to JMX and retries exhausted.  JFR will be disabled.", e);
         throw e;
       }
-      logger.warn("Error connecting to JMX, backing off before retry", e);
+      logger.warn("Error connecting to JMX, backing off before retry");
       sleepSafely(backoffIndex);
       return connectWithBackOff(config, backoffIndex + 1);
     }
