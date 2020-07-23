@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.management.*;
 import javax.management.openmbean.*;
 import javax.management.remote.JMXServiceURL;
@@ -37,43 +38,52 @@ public final class JFRJMXRecorder {
   }
 
   public static JFRJMXRecorder connectWithBackOff(DaemonConfig config) throws IOException {
-    JFRJMXRecorder out = null;
-    try {
-      out = connect(config);
-    } catch (IOException e) {
-      for (int i = 0; i < BACKOFF_SECONDS.size(); i = i + 1) {
-        try {
-          out = connect(config);
-          break;
-        } catch (IOException iox) {
-          // Log retry?
-          if (i == BACKOFF_SECONDS.size() - 1) {
-            throw iox;
-          }
-        }
-      }
-    }
+    return connectWithBackOff(config, 0);
+  }
 
-    return out;
+  private static JFRJMXRecorder connectWithBackOff(DaemonConfig config, int backoffIndex)
+      throws IOException {
+    try {
+      return connect(config);
+    } catch (IOException e) {
+      if (backoffIndex >= BACKOFF_SECONDS.size() - 1) {
+        logger.error("Failed to connect to JMX and retries exhausted.  JFR will be disabled.", e);
+        throw e;
+      }
+      logger.warn("Error connecting to JMX, backing off before retry", e);
+      sleepSafely(backoffIndex);
+      return connectWithBackOff(config, backoffIndex + 1);
+    }
   }
 
   public void startRecordingWithBackOff()
       throws MalformedObjectNameException, ReflectionException, IOException,
           InstanceNotFoundException, MBeanException, OpenDataException {
+    startRecordingWithBackOff(0);
+  }
+
+  public void startRecordingWithBackOff(int backoffIndex)
+      throws MalformedObjectNameException, ReflectionException, IOException,
+          InstanceNotFoundException, MBeanException, OpenDataException {
     try {
       startRecording();
     } catch (Exception e) {
-      for (int i = 0; i < BACKOFF_SECONDS.size(); i = i + 1) {
-        try {
-          startRecording();
-          break;
-        } catch (IOException iox) {
-          // Log retry?
-          if (i == BACKOFF_SECONDS.size() - 1) {
-            throw iox;
-          }
-        }
+      if (backoffIndex >= BACKOFF_SECONDS.size() - 1) {
+        logger.error("Failed to start recording and retries exhausted.  JFR will be disabled.", e);
+        throw e;
       }
+      logger.warn("Error starting recording, backing off before retry", e);
+      sleepSafely(backoffIndex);
+      startRecordingWithBackOff(backoffIndex + 1);
+    }
+  }
+
+  private static void sleepSafely(int backoffIndex) {
+    try {
+      TimeUnit.SECONDS.sleep(BACKOFF_SECONDS.get(backoffIndex));
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException("Error during backoff sleep", e);
     }
   }
 
