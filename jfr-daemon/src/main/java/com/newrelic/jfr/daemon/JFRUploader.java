@@ -87,7 +87,7 @@ public final class JFRUploader {
   private void sendMetrics(BufferedTelemetry bufferedMetrics) {
     var metricBatch = bufferedMetrics.createMetricBatch();
     if (!metricBatch.isEmpty()) {
-      logger.debug(String.format("Sending metric batch of size %s", metricBatch.size()));
+      logger.info(String.format("Sending metric batch of size %s", metricBatch.size()));
       telemetryClient.sendBatch(metricBatch);
     }
   }
@@ -95,7 +95,7 @@ public final class JFRUploader {
   private void sendEvents(BufferedTelemetry bufferedMetrics) {
     var eventBatch = bufferedMetrics.createEventBatch();
     if (!eventBatch.isEmpty()) {
-      logger.debug(String.format("Sending events batch of size %s", eventBatch.size()));
+      logger.info(String.format("Sending events batch of size %s", eventBatch.size()));
       telemetryClient.sendBatch(eventBatch);
     }
   }

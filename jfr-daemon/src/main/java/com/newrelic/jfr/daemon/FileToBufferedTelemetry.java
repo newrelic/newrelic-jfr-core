@@ -67,7 +67,7 @@ public class FileToBufferedTelemetry {
             + " in "
             + dumpFilename);
 
-    logger.debug(eventCount.toString());
+    logger.info(eventCount.toString());
     eventCount.clear();
 
     return new Result(ctx.getLastEventTime(), batches);
