@@ -67,11 +67,7 @@ public final class MethodSupport {
       // Truncate the stack frame and try again
       double percentageOfFramesToTry = ((double) HEADROOM_75PC) / length;
       int numFrames = (int) (frameCount * percentageOfFramesToTry);
-      if (numFrames < frameCount) {
-        return jsonWrite(frames, Optional.of(numFrames));
-      }
-      throw new IOException(
-          "Corner case of a stack frame that can't be cleanly truncated, should not happen in practice");
+      return jsonWrite(frames, Optional.of(numFrames));
     } else {
       return out;
     }
