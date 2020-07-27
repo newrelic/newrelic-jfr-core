@@ -43,10 +43,8 @@ public final class MethodSupport {
     var strOut = new StringWriter();
     var jsonWriter = new JsonWriter(strOut);
     var isTruncated = limit.isPresent();
-    var frameCount = frames.size();
-    if (isTruncated && limit.get() < frameCount) {
-      frameCount = limit.get();
-    }
+    var frameCount = Math.min(limit.orElse(frames.size()), frames.size());
+
     jsonWriter.beginObject();
     jsonWriter.name("type").value("stacktrace");
     jsonWriter.name("language").value("java");
