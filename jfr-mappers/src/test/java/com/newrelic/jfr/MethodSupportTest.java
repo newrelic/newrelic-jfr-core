@@ -1,6 +1,7 @@
 package com.newrelic.jfr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -139,7 +140,7 @@ public class MethodSupportTest {
   }
 
   @Test
-  void writeLargeStack_edgeCase() {
+  void writeLargeStack_edgeCase() throws Exception {
     List<Map<String, String>> stack = new ArrayList<>();
     // Specially crafted artisanal length in order to exercise the edge case
     // It happens on the second recursion.
@@ -147,9 +148,10 @@ public class MethodSupportTest {
       var frame = Map.of("desc", "", "line", "", "bytecodeIndex", "");
       stack.add(frame);
     }
-    assertThrows(IOException.class, () -> {
-      MethodSupport.jsonWrite(stack, Optional.of(74));
-    });
+
+    String result = MethodSupport.jsonWrite(stack, Optional.of(74));
+    assertNotNull(result);
+    assertTrue(result.length() < 3 * 1024);
   }
 
   private Map<String, String> buildFrame(int i){

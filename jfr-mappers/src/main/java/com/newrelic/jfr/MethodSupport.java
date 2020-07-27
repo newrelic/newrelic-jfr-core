@@ -66,7 +66,7 @@ public final class MethodSupport {
     if (length > HEADROOM_75PC) {
       // Truncate the stack frame and try again
       double percentageOfFramesToTry = ((double) HEADROOM_75PC) / length;
-      int numFrames = (int) (frames.size() * percentageOfFramesToTry);
+      int numFrames = (int) (frameCount * percentageOfFramesToTry);
       if (numFrames < frameCount) {
         return jsonWrite(frames, Optional.of(numFrames));
       }
