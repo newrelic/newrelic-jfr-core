@@ -42,14 +42,13 @@ public final class MethodSupport {
       throws IOException {
     var strOut = new StringWriter();
     var jsonWriter = new JsonWriter(strOut);
-    var isTruncated = limit.isPresent();
     var frameCount = Math.min(limit.orElse(frames.size()), frames.size());
 
     jsonWriter.beginObject();
     jsonWriter.name("type").value("stacktrace");
     jsonWriter.name("language").value("java");
     jsonWriter.name("version").value(JSON_SCHEMA_VERSION);
-    jsonWriter.name("truncated").value(isTruncated);
+    jsonWriter.name("truncated").value(frameCount < frames.size());
     jsonWriter.name("payload").beginArray();
     for (int i = 0; i < frameCount; i++) {
       var frame = frames.get(i);
