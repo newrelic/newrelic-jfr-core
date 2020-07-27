@@ -99,6 +99,16 @@ public class MethodSupportTest {
   }
 
   @Test
+  void writeJsonSimple_limitMatchesFrameSize() throws Exception {
+    List<Map<String, String>> stack = new ArrayList<>();
+    stack.add(buildFrame("action", "21", "77"));
+    String payload = "{\"desc\":\"action\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
+    var expected = "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[" + payload + "]}";
+    var result = MethodSupport.jsonWrite(stack, Optional.of(1));
+    assertEquals(expected, result);
+  }
+
+  @Test
   void writeJsonSimple_withLimit() throws Exception {
     List<Map<String, String>> stack = new ArrayList<>();
     stack.add(buildFrame("action1", "21", "77"));
