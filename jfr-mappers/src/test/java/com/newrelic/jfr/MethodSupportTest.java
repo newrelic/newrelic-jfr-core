@@ -2,7 +2,6 @@ package com.newrelic.jfr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -94,7 +92,10 @@ public class MethodSupportTest {
     List<Map<String, String>> stack = new ArrayList<>();
     stack.add(buildFrame("action", "21", "77"));
     String payload = "{\"desc\":\"action\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
-    var expected = "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":[" + payload + "]}";
+    var expected =
+        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":["
+            + payload
+            + "]}";
     var result = MethodSupport.jsonWrite(stack, Optional.empty());
     assertEquals(expected, result);
   }
@@ -104,7 +105,10 @@ public class MethodSupportTest {
     List<Map<String, String>> stack = new ArrayList<>();
     stack.add(buildFrame("action", "21", "77"));
     String payload = "{\"desc\":\"action\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
-    var expected = "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":[" + payload + "]}";
+    var expected =
+        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":["
+            + payload
+            + "]}";
     var result = MethodSupport.jsonWrite(stack, Optional.of(1));
     assertEquals(expected, result);
   }
@@ -117,8 +121,12 @@ public class MethodSupportTest {
     stack.add(buildFrame("action3", "23", "79"));
     String payload1 = "{\"desc\":\"action1\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
     String payload2 = "{\"desc\":\"action2\",\"line\":\"22\",\"bytecodeIndex\":\"78\"}";
-    var expected = "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[" +
-            payload1 + "," + payload2 + "]}";
+    var expected =
+        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":["
+            + payload1
+            + ","
+            + payload2
+            + "]}";
     var result = MethodSupport.jsonWrite(stack, Optional.of(2));
     assertEquals(expected, result);
   }
@@ -126,15 +134,26 @@ public class MethodSupportTest {
   @Test
   void writeLargeStack() throws Exception {
     List<Map<String, String>> stack = new ArrayList<>();
-    for(int i=0; i < 500; i++){
+    for (int i = 0; i < 500; i++) {
       stack.add(buildFrame(i));
     }
 
-    String payloads = IntStream.range(0, 55).mapToObj(i ->
-            "{\"desc\":\"action" + i + "\",\"line\":\"" + (21 + i) +
-            "\",\"bytecodeIndex\":\"" + (77 + i) + "\"}").collect(Collectors.joining(","));
-    var expected = "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[" +
-            payloads + "]}";
+    String payloads =
+        IntStream.range(0, 55)
+            .mapToObj(
+                i ->
+                    "{\"desc\":\"action"
+                        + i
+                        + "\",\"line\":\""
+                        + (21 + i)
+                        + "\",\"bytecodeIndex\":\""
+                        + (77 + i)
+                        + "\"}")
+            .collect(Collectors.joining(","));
+    var expected =
+        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":["
+            + payloads
+            + "]}";
     var result = MethodSupport.jsonWrite(stack, Optional.empty());
     assertEquals(expected, result);
   }
@@ -144,7 +163,7 @@ public class MethodSupportTest {
     List<Map<String, String>> stack = new ArrayList<>();
     // Specially crafted artisanal length in order to exercise the edge case
     // It happens on the second recursion.
-    for(int i=0; i < 75; i++){
+    for (int i = 0; i < 75; i++) {
       var frame = Map.of("desc", "", "line", "", "bytecodeIndex", "");
       stack.add(frame);
     }
@@ -154,7 +173,7 @@ public class MethodSupportTest {
     assertTrue(result.length() < 3 * 1024);
   }
 
-  private Map<String, String> buildFrame(int i){
+  private Map<String, String> buildFrame(int i) {
     return buildFrame("action" + i, "" + (21 + i), "" + (77 + i));
   }
 
