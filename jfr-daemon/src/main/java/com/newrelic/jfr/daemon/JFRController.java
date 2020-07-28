@@ -142,7 +142,13 @@ public final class JFRController {
 
   static JFRUploader buildUploader(DaemonConfig config)
       throws UnknownHostException, MalformedURLException {
-    String localIpAddr = InetAddress.getLocalHost().toString();
+    String localIpAddr;
+    try {
+      localIpAddr = InetAddress.getLocalHost().toString();
+    } catch (Throwable e) {
+      logger.error("Unable to get localhost IP, defaulting to 127.0.0.1.", e);
+      localIpAddr = "127.0.0.1";
+    }
     var attr =
         COMMON_ATTRIBUTES
             .put(APP_NAME, config.getMonitoredAppName())
