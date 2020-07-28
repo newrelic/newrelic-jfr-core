@@ -37,8 +37,11 @@ import org.slf4j.LoggerFactory;
 public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
-  private final JFRJMXRecorder recorder;
+  // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
+  private JFRJMXRecorder recorder;
   private final JFRUploader uploader;
+  private final DaemonConfig config;
+
   private final ExecutorService executorService =
       Executors.newFixedThreadPool(
           2,
@@ -50,9 +53,10 @@ public final class JFRController {
 
   private volatile boolean shutdown = false;
 
-  public JFRController(JFRUploader uploader, JFRJMXRecorder recorder) {
+  public JFRController(JFRUploader uploader, JFRJMXRecorder recorder, DaemonConfig config) {
     this.recorder = recorder;
     this.uploader = uploader;
+    this.config = config;
   }
 
   // This needs to be exposed to JMX / k8s
@@ -62,7 +66,7 @@ public final class JFRController {
 
   void setup() {
     try {
-      recorder.startRecording();
+      recorder.startRecordingWithBackOff();
     } catch (Exception e) {
       e.printStackTrace();
       shutdown();
@@ -84,10 +88,20 @@ public final class JFRController {
       } catch (MalformedObjectNameException
           | MBeanException
           | InstanceNotFoundException
+          | OpenDataException
           | ReflectionException e) {
         logger.error("JMX streaming failed: ", e);
-      } catch (OpenDataException e) {
-        logger.error("Open data exception: ", e);
+        try {
+          recorder = JFRJMXRecorder.connectWithBackOff(config);
+          recorder.startRecordingWithBackOff();
+        } catch (MalformedObjectNameException
+            | MBeanException
+            | InstanceNotFoundException
+            | OpenDataException
+            | ReflectionException jmxException) {
+          // Log before fatal exit?
+          shutdown();
+        }
       }
     }
     executorService.shutdown();
@@ -98,9 +112,9 @@ public final class JFRController {
     DaemonConfig config = buildConfig();
 
     try {
-      JFRUploader uploader = buildUploader(config);
-      JFRJMXRecorder recorder = JFRJMXRecorder.connect(config);
-      var processor = new JFRController(uploader, recorder);
+      var uploader = buildUploader(config);
+      var recorder = JFRJMXRecorder.connectWithBackOff(config);
+      var processor = new JFRController(uploader, recorder, config);
       processor.setup();
       processor.loop(config.getHarvestInterval());
     } catch (Throwable e) {
