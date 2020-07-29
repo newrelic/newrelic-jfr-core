@@ -21,6 +21,7 @@ public final class JFRController {
   private final DaemonConfig config;
   // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
   private JFRJMXRecorder recorder;
+  private volatile boolean shutdown = false;
 
   private final ExecutorService executorService =
       Executors.newFixedThreadPool(
@@ -31,7 +32,6 @@ public final class JFRController {
             return result;
           });
 
-  private volatile boolean shutdown = false;
 
   public JFRController(JFRUploader uploader, DaemonConfig config) {
     this.uploader = uploader;

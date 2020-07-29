@@ -28,10 +28,8 @@ public class JFRDaemon {
     private static final Logger logger = LoggerFactory.getLogger(JFRDaemon.class);
 
     public static void main(String[] args) {
-
-        DaemonConfig config = buildConfig();
-
         try {
+            DaemonConfig config = buildConfig();
             var uploader = buildUploader(config);
             var jfrController = new JFRController(uploader, config);
             jfrController.setup();
