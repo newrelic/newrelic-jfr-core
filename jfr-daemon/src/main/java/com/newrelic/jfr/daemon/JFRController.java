@@ -45,8 +45,7 @@ public final class JFRController {
 
   void setup() {
     try {
-      recorder = JFRJMXRecorder.connectWithBackOff(config);
-      recorder.startRecordingWithBackOff();
+      restartRecording();
     } catch (Exception e) {
       e.printStackTrace();
       shutdown();
@@ -72,8 +71,7 @@ public final class JFRController {
           | ReflectionException e) {
         logger.error("JMX streaming failed: ", e);
         try {
-          recorder = JFRJMXRecorder.connectWithBackOff(config);
-          recorder.startRecordingWithBackOff();
+          restartRecording();
         } catch (MalformedObjectNameException
             | MBeanException
             | InstanceNotFoundException
@@ -85,5 +83,10 @@ public final class JFRController {
       }
     }
     executorService.shutdown();
+  }
+
+  private void restartRecording() throws IOException, MalformedObjectNameException, ReflectionException, InstanceNotFoundException, MBeanException, OpenDataException {
+    recorder = JFRJMXRecorder.connectWithBackOff(config);
+    recorder.startRecordingWithBackOff();
   }
 }
