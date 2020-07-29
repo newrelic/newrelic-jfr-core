@@ -18,9 +18,9 @@ public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
   // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
-  private JFRJMXRecorder recorder;
   private final JFRUploader uploader;
   private final DaemonConfig config;
+  private JFRJMXRecorder recorder;
 
   private final ExecutorService executorService =
       Executors.newFixedThreadPool(
@@ -33,10 +33,10 @@ public final class JFRController {
 
   private volatile boolean shutdown = false;
 
-  public JFRController(JFRUploader uploader, JFRJMXRecorder recorder, DaemonConfig config) {
-    this.recorder = recorder;
+  public JFRController(JFRUploader uploader, DaemonConfig config, JFRJMXRecorder recorder) {
     this.uploader = uploader;
     this.config = config;
+    this.recorder = recorder;
   }
 
   // This needs to be exposed to JMX / k8s

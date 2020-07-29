@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.UnknownHostException;
 
 import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
 import static com.newrelic.jfr.daemon.AttributeNames.HOSTNAME;
@@ -35,7 +34,7 @@ public class JFRDaemon {
         try {
             var uploader = buildUploader(config);
             var recorder = JFRJMXRecorder.connectWithBackOff(config);
-            var jfrController = new JFRController(uploader, recorder, config);
+            var jfrController = new JFRController(uploader, config, recorder);
             jfrController.setup();
             jfrController.loop(config.getHarvestInterval());
         } catch (Throwable e) {
