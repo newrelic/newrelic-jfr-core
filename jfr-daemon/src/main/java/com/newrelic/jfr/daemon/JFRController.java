@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
-  // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
   private final JFRUploader uploader;
   private final DaemonConfig config;
+  // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
   private JFRJMXRecorder recorder;
 
   private final ExecutorService executorService =
@@ -33,10 +33,9 @@ public final class JFRController {
 
   private volatile boolean shutdown = false;
 
-  public JFRController(JFRUploader uploader, DaemonConfig config, JFRJMXRecorder recorder) {
+  public JFRController(JFRUploader uploader, DaemonConfig config) {
     this.uploader = uploader;
     this.config = config;
-    this.recorder = recorder;
   }
 
   // This needs to be exposed to JMX / k8s
@@ -46,6 +45,7 @@ public final class JFRController {
 
   void setup() {
     try {
+      recorder = JFRJMXRecorder.connectWithBackOff(config);
       recorder.startRecordingWithBackOff();
     } catch (Exception e) {
       e.printStackTrace();

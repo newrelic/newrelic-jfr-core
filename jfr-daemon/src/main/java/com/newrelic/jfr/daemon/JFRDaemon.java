@@ -33,8 +33,7 @@ public class JFRDaemon {
 
         try {
             var uploader = buildUploader(config);
-            var recorder = JFRJMXRecorder.connectWithBackOff(config);
-            var jfrController = new JFRController(uploader, config, recorder);
+            var jfrController = new JFRController(uploader, config);
             jfrController.setup();
             jfrController.loop(config.getHarvestInterval());
         } catch (Throwable e) {
