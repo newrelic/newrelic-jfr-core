@@ -147,7 +147,7 @@ public final class JFRController {
       localIpAddr = InetAddress.getLocalHost().toString();
     } catch (Throwable e) {
       logger.error("Unable to get localhost IP, defaulting to 127.0.0.1.", e);
-      localIpAddr = "127.0.0.1";
+      localIpAddr = InetAddress.getLoopbackAddress();
     }
     var attr =
         COMMON_ATTRIBUTES
