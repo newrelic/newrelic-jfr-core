@@ -1,18 +1,17 @@
 package com.newrelic.jfr.daemon;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MalformedObjectNameException;
-import javax.management.ReflectionException;
-import javax.management.openmbean.OpenDataException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MalformedObjectNameException;
+import javax.management.ReflectionException;
+import javax.management.openmbean.OpenDataException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
@@ -31,7 +30,6 @@ public final class JFRController {
             result.setDaemon(true);
             return result;
           });
-
 
   public JFRController(JFRUploader uploader, DaemonConfig config) {
     this.uploader = uploader;
@@ -85,7 +83,9 @@ public final class JFRController {
     executorService.shutdown();
   }
 
-  private void restartRecording() throws IOException, MalformedObjectNameException, ReflectionException, InstanceNotFoundException, MBeanException, OpenDataException {
+  private void restartRecording()
+      throws IOException, MalformedObjectNameException, ReflectionException,
+          InstanceNotFoundException, MBeanException, OpenDataException {
     recorder = JFRJMXRecorder.connectWithBackOff(config);
     recorder.startRecordingWithBackOff();
   }
