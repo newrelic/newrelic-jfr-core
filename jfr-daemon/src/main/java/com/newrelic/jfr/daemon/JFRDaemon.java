@@ -62,7 +62,7 @@ public class JFRDaemon {
     }
 
     static JFRUploader buildUploader(DaemonConfig config)
-            throws UnknownHostException, MalformedURLException {
+            throws MalformedURLException {
         String hostname = findHostname();
         var attr =
                 COMMON_ATTRIBUTES
