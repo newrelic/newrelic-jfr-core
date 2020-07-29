@@ -42,16 +42,13 @@ public final class MethodSupport {
       throws IOException {
     var strOut = new StringWriter();
     var jsonWriter = new JsonWriter(strOut);
-    var isTruncated = limit.isPresent();
-    var frameCount = frames.size();
-    if (isTruncated && limit.get() < frameCount) {
-      frameCount = limit.get();
-    }
+    var frameCount = Math.min(limit.orElse(frames.size()), frames.size());
+
     jsonWriter.beginObject();
     jsonWriter.name("type").value("stacktrace");
     jsonWriter.name("language").value("java");
     jsonWriter.name("version").value(JSON_SCHEMA_VERSION);
-    jsonWriter.name("truncated").value(isTruncated);
+    jsonWriter.name("truncated").value(frameCount < frames.size());
     jsonWriter.name("payload").beginArray();
     for (int i = 0; i < frameCount; i++) {
       var frame = frames.get(i);
@@ -68,8 +65,22 @@ public final class MethodSupport {
     var length = out.length();
     if (length > HEADROOM_75PC) {
       // Truncate the stack frame and try again
-      int numFrames = frames.size() * HEADROOM_75PC / length;
-      return jsonWrite(frames, Optional.of(numFrames));
+      double percentageOfFramesToTry = ((double) HEADROOM_75PC) / length;
+      int numFrames = (int) (frameCount * percentageOfFramesToTry);
+      if (numFrames < frameCount) {
+        return jsonWrite(frames, Optional.of(numFrames));
+      }
+      throw new IOException(
+          "Corner case of a stack frame that can't be cleanly truncated! "
+              + "numFrames = "
+              + numFrames
+              + ", frameCount = "
+              + frameCount
+              + ", "
+              + ", percentageOfFramesToTry = "
+              + percentageOfFramesToTry
+              + ", length = "
+              + length);
     } else {
       return out;
     }
