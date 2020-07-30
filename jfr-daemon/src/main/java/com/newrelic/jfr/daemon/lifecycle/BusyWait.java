@@ -29,7 +29,12 @@ public class BusyWait<T> {
   }
 
   public BusyWait(String name, Callable<T> callable, Predicate<T> completionCheck) {
-    this(name, callable, completionCheck, Duration.ofSeconds(1), Duration.ofSeconds(10));
+    this(name, callable, completionCheck, Duration.ofSeconds(1));
+  }
+
+  public BusyWait(
+      String name, Callable<T> callable, Predicate<T> completionCheck, Duration sleepInterval) {
+    this(name, callable, completionCheck, sleepInterval, Duration.ofSeconds(10));
   }
 
   public BusyWait(
