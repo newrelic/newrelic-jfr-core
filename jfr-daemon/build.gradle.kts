@@ -26,7 +26,7 @@ tasks.shadowJar {
     archiveClassifier.set("")
     manifest {
         attributes(
-                "Main-Class" to "com.newrelic.jfr.daemon.JFRController",
+                "Main-Class" to "com.newrelic.jfr.daemon.JFRDaemon",
                 "Implementation-Version" to project.version
         )
     }
