@@ -12,8 +12,8 @@ public class SafeSleep {
     try {
       TimeUnit.NANOSECONDS.sleep(nanos);
     } catch (InterruptedException e) {
-      logger.warn("Interrupted while sleeping", e);
       Thread.currentThread().interrupt();
+      logger.warn("Interrupted while sleeping", e);
     }
   }
 }
