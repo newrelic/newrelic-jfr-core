@@ -15,8 +15,10 @@ public class ThreadAllocationStatisticsMapper implements EventToMetric {
     var time = ev.getStartTime().toEpochMilli();
     var allocated = ev.getDouble("allocated");
     RecordedThread t = ev.getValue("thread");
-    var attr =
-        new Attributes().put("thread.name", t.getJavaName()).put("thread.osName", t.getOSName());
+    var attr = new Attributes();
+    if (t != null) {
+      attr.put("thread.name", t.getJavaName()).put("thread.osName", t.getOSName());
+    }
 
     return List.of(new Gauge("jfr:ThreadAllocationStatistics.allocated", allocated, time, attr));
   }
