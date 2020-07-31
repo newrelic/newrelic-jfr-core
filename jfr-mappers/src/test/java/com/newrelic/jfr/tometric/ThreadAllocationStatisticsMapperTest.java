@@ -41,4 +41,25 @@ class ThreadAllocationStatisticsMapperTest {
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);
   }
+
+  @Test
+  void nullThread() {
+    var recordedEvent = mock(RecordedEvent.class);
+    var now = System.currentTimeMillis();
+    var startTime = Instant.ofEpochMilli(now);
+    var allocated = 1250229920d;
+
+    var attr = new Attributes();
+    var gauge = new Gauge("jfr:ThreadAllocationStatistics.allocated", allocated, now, attr);
+    var expected = List.of(gauge);
+
+    var testClass = new ThreadAllocationStatisticsMapper();
+
+    when(recordedEvent.getStartTime()).thenReturn(startTime);
+    when(recordedEvent.getDouble("allocated")).thenReturn(allocated);
+    when(recordedEvent.getValue("thread")).thenReturn(null);
+
+    var result = testClass.apply(recordedEvent);
+    assertEquals(expected, result);
+  }
 }
