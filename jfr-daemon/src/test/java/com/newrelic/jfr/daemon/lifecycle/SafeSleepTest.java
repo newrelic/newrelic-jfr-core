@@ -23,11 +23,11 @@ class SafeSleepTest {
         new Thread(
             () -> {
               SafeSleep.nanos(TimeUnit.SECONDS.toNanos(15));
+              assertTrue(Thread.currentThread().isInterrupted());
               latch.countDown();
             });
     thread.start();
     thread.interrupt();
-    latch.await(2, TimeUnit.SECONDS);
-    assertTrue(thread.isInterrupted());
+    assertTrue(latch.await(2, TimeUnit.SECONDS));
   }
 }
