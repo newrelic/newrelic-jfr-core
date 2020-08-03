@@ -48,9 +48,8 @@ public class RemoteEntityGuid {
     var busyWait = new BusyWait<>("Getting entity guid", callable, completionCheck, sleepInterval);
     var result = busyWait.apply();
     result.entityGuid.ifPresentOrElse(
-            guid -> logger.info("Entity guid obtained from remote: " + guid),
-            () -> logger.info("No remote agent, no entity guid.")
-    );
+        guid -> logger.info("Entity guid obtained from remote: " + guid),
+        () -> logger.info("No remote agent, no entity guid."));
     return result.entityGuid;
   }
 
