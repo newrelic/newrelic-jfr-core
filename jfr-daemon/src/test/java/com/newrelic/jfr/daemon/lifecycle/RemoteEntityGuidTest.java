@@ -2,12 +2,14 @@ package com.newrelic.jfr.daemon.lifecycle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.junit.jupiter.api.Test;
@@ -32,8 +34,8 @@ class RemoteEntityGuidTest {
           }
         };
 
-    String result = remoteEntityGuid.queryFromJmx();
-    assertEquals(guid, result);
+    Optional<String> result = remoteEntityGuid.queryFromJmx();
+    assertEquals(guid, result.get());
   }
 
   @Test
@@ -53,8 +55,8 @@ class RemoteEntityGuidTest {
           }
         };
 
-    String result = remoteEntityGuid.queryFromJmx();
-    assertNull(result);
+    Optional<String> result = remoteEntityGuid.queryFromJmx();
+    assertTrue(result.isEmpty());
   }
 
   @Test
@@ -78,7 +80,7 @@ class RemoteEntityGuidTest {
           }
         };
 
-    String result = remoteEntityGuid.queryFromJmx(Duration.ofNanos(1));
-    assertEquals(guid, result);
+    Optional<String> result = remoteEntityGuid.queryFromJmx(Duration.ofNanos(1));
+    assertEquals(guid, result.get());
   }
 }

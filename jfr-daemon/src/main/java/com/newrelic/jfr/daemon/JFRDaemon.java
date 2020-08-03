@@ -22,6 +22,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Optional;
 import javax.management.MBeanServerConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class JFRDaemon {
       DaemonConfig config = buildConfig();
       MBeanServerConnection mBeanServerConnection =
           new MBeanServerConnector(config).getConnection();
-      String entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
+      Optional<String> entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
       var uploader = buildUploader(config, entityGuid);
       var jfrController = new JFRController(uploader, config);
       jfrController.setup();
@@ -62,7 +63,7 @@ public class JFRDaemon {
     return builder.build();
   }
 
-  static JFRUploader buildUploader(DaemonConfig config, String entityGuid)
+  static JFRUploader buildUploader(DaemonConfig config, Optional<String> entityGuid)
       throws MalformedURLException {
     String hostname = findHostname();
     var attr =
@@ -70,9 +71,7 @@ public class JFRDaemon {
             .put(APP_NAME, config.getMonitoredAppName())
             .put(SERVICE_NAME, config.getMonitoredAppName())
             .put(HOSTNAME, hostname);
-    if (entityGuid != null) {
-      attr.put("entity.guid", entityGuid);
-    }
+    entityGuid.ifPresent(guid -> attr.put("entity.guid", guid));
 
     var fileToBatches =
         FileToBufferedTelemetry.builder()
