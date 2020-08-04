@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -20,25 +21,17 @@ public final class JFRController {
   private final DaemonConfig config;
   // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
   private JFRJMXRecorder recorder;
-  private volatile boolean shutdown = false;
+  private final ScheduledExecutorService executorService;
 
-  private final ExecutorService executorService =
-      Executors.newFixedThreadPool(
-          2,
-          r -> {
-            Thread result = new Thread(r, "JFRController");
-            result.setDaemon(true);
-            return result;
-          });
-
-  public JFRController(JFRUploader uploader, DaemonConfig config) {
+  public JFRController(JFRUploader uploader, DaemonConfig config, ScheduledExecutorService executorService) {
     this.uploader = uploader;
     this.config = config;
+    this.executorService = executorService;
   }
 
   // This needs to be exposed to JMX / k8s
   public void shutdown() {
-    shutdown = true;
+    executorService.shutdown();
   }
 
   void setup() {
@@ -51,36 +44,39 @@ public final class JFRController {
     }
   }
 
-  void loop(Duration harvestInterval) throws IOException {
-    while (!shutdown) {
-      try {
-        TimeUnit.MILLISECONDS.sleep(harvestInterval.toMillis());
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        // Ignore the premature return and trigger the next JMX dump at once
-      }
-      try {
-        final var pathToFile = recorder.recordToFile();
-        executorService.submit(() -> uploader.handleFile(pathToFile));
-      } catch (MalformedObjectNameException
-          | MBeanException
-          | InstanceNotFoundException
-          | OpenDataException
-          | ReflectionException e) {
-        logger.error("JMX streaming failed: ", e);
-        try {
-          restartRecording();
-        } catch (MalformedObjectNameException
-            | MBeanException
-            | InstanceNotFoundException
-            | OpenDataException
-            | ReflectionException jmxException) {
-          // Log before fatal exit?
-          shutdown();
-        }
-      }
+  void loop(Duration harvestInterval) throws InterruptedException {
+    executorService.scheduleAtFixedRate(this::doSingleRecording, 0, harvestInterval.toMillis(), TimeUnit.MILLISECONDS);
+    executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+    logger.info("JFR Controller is shut down (gracefully)");
+  }
+
+  private void doSingleRecording() {
+    try {
+      final var pathToFile = recorder.recordToFile();
+      executorService.submit(() -> uploader.handleFile(pathToFile));
+    } catch (MalformedObjectNameException
+        | MBeanException
+        | IOException
+        | InstanceNotFoundException
+        | OpenDataException
+        | ReflectionException e) {
+      logger.error("JMX streaming failed: ", e);
+      tryToRestart();
     }
-    executorService.shutdown();
+  }
+
+  private void tryToRestart() {
+    try {
+      restartRecording();
+    } catch (MalformedObjectNameException
+        | MBeanException
+        | IOException
+        | InstanceNotFoundException
+        | OpenDataException
+        | ReflectionException e) {
+      logger.error("Could not restart recording. JFR Daemon shutting down", e);
+      shutdown();
+    }
   }
 
   private void restartRecording()

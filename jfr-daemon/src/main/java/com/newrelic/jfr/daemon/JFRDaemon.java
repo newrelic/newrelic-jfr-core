@@ -23,7 +23,8 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Optional;
-import javax.management.MBeanServerConnection;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,18 +33,29 @@ public class JFRDaemon {
 
   public static void main(String[] args) {
     try {
-      DaemonConfig config = buildConfig();
-      MBeanServerConnection mBeanServerConnection =
+      var config = buildConfig();
+      var mBeanServerConnection =
           new MBeanServerConnector(config).getConnection();
-      Optional<String> entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
+      var entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
       var uploader = buildUploader(config, entityGuid);
-      var jfrController = new JFRController(uploader, config);
+      ScheduledExecutorService executorService = buildScheduledExecutorService();
+      var jfrController = new JFRController(uploader, config, executorService);
       jfrController.setup();
       jfrController.loop(config.getHarvestInterval());
     } catch (Throwable e) {
       logger.error("JFR Daemon is crashing!", e);
       throw new RuntimeException(e);
     }
+  }
+
+  private static ScheduledExecutorService buildScheduledExecutorService() {
+    return Executors.newSingleThreadScheduledExecutor(
+                      r -> {
+          Thread result = new Thread(r, "JFRController");
+          result.setDaemon(true);
+          return result;
+        }
+    );
   }
 
   private static DaemonConfig buildConfig() {
