@@ -2,6 +2,7 @@ package com.newrelic.jfr.daemon.lifecycle;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 import javax.management.JMX;
@@ -35,22 +36,20 @@ public class RemoteEntityGuid {
    * @return The entity guid of the remote service or null if the remote service does not expose the
    *     expected MBean.
    */
-  public String queryFromJmx() {
+  public Optional<String> queryFromJmx() {
     return queryFromJmx(Duration.ofSeconds(1));
   }
 
   // Exists for testing
-  String queryFromJmx(Duration sleepInterval) {
+  Optional<String> queryFromJmx(Duration sleepInterval) {
     Callable<Result> callable = this::tryToFetchGuid;
     Predicate<Result> completionCheck =
         result -> result.type == Result.Type.NO_AGENT || result.type == Result.Type.OK;
     var busyWait = new BusyWait<>("Getting entity guid", callable, completionCheck, sleepInterval);
     var result = busyWait.apply();
-    if (result.entityGuid != null) {
-      logger.info("Entity guid obtained from remote: " + result.entityGuid);
-    } else {
-      logger.info("No remote agent, no entity guid.");
-    }
+    result.entityGuid.ifPresentOrElse(
+        guid -> logger.info("Entity guid obtained from remote: " + guid),
+        () -> logger.info("No remote agent, no entity guid."));
     return result.entityGuid;
   }
 
@@ -94,17 +93,21 @@ public class RemoteEntityGuid {
       OK
     }
 
-    private static final Result NO_AGENT = new Result(Type.NO_AGENT, null);
-    private static final Result NO_GUID = new Result(Type.NO_GUID, null);
+    private static final Result NO_AGENT = new Result(Type.NO_AGENT);
+    private static final Result NO_GUID = new Result(Type.NO_GUID);
 
-    private final String entityGuid;
+    private final Optional<String> entityGuid;
     private final Type type;
 
     static Result ok(String entityGuid) {
-      return new Result(Type.OK, entityGuid);
+      return new Result(Type.OK, Optional.of(entityGuid));
     }
 
-    private Result(Type type, String entityGuid) {
+    private Result(Type type) {
+      this(type, Optional.empty());
+    }
+
+    private Result(Type type, Optional<String> entityGuid) {
       this.entityGuid = entityGuid;
       this.type = type;
     }
