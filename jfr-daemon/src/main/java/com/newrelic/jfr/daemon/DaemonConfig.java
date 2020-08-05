@@ -13,6 +13,8 @@ public class DaemonConfig {
   static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
   static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
   static final String DEFAULT_MONITORED_APP_NAME = "eventing_hobgoblin";
+  public static final Duration DEFAULT_BATCH_SEND_INTERVAL = Duration.ofSeconds(5);
+  public static final int DEFAULT_MAX_BATCH_SIZE = 2_500;
 
   private final String apiKey;
   private final URI metricsUri;
@@ -23,6 +25,8 @@ public class DaemonConfig {
   private final Duration harvestInterval;
   private final String daemonVersion;
   private final String monitoredAppName;
+  private final Duration batchSendInterval;
+  private final int maxBatchSizeBeforeSend;
 
   public DaemonConfig(Builder builder) {
     this.apiKey = builder.apiKey;
@@ -34,6 +38,8 @@ public class DaemonConfig {
     this.harvestInterval = builder.harvestInterval;
     this.daemonVersion = builder.daemonVersion;
     this.monitoredAppName = builder.monitoredAppName;
+    this.batchSendInterval = builder.batchSendInterval;
+    this.maxBatchSizeBeforeSend = builder.maxBatchSizeBeforeSend;
   }
 
   public String getApiKey() {
@@ -76,6 +82,14 @@ public class DaemonConfig {
     return monitoredAppName;
   }
 
+  public Duration getBatchSendInterval() {
+    return batchSendInterval;
+  }
+
+  public int getMaxBatchSizeBeforeSend() {
+    return maxBatchSizeBeforeSend;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -90,6 +104,8 @@ public class DaemonConfig {
     private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
     public String daemonVersion = "UNKNOWN-VERSION";
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
+    private Duration batchSendInterval = DEFAULT_BATCH_SEND_INTERVAL;
+    private int maxBatchSizeBeforeSend = DEFAULT_MAX_BATCH_SIZE;
 
     public Builder apiKey(String apiKey) {
       this.apiKey = apiKey;

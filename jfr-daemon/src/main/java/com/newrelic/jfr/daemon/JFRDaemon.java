@@ -3,6 +3,7 @@ package com.newrelic.jfr.daemon;
 import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
 import static com.newrelic.jfr.daemon.AttributeNames.HOSTNAME;
 import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
+import static com.newrelic.jfr.daemon.DumpFileProcessor.COMMON_ATTRIBUTES;
 import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
 import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
 import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
@@ -10,21 +11,24 @@ import static com.newrelic.jfr.daemon.EnvironmentVars.JFR_SHARED_FILESYSTEM;
 import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
 import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_HOST;
 import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_PORT;
-import static com.newrelic.jfr.daemon.JFRUploader.COMMON_ATTRIBUTES;
 import static java.util.function.Function.identity;
 
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
+import com.newrelic.jfr.daemon.buffer.BufferedTelemetry;
 import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
 import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
+import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,28 +38,91 @@ public class JFRDaemon {
   public static void main(String[] args) {
     try {
       var config = buildConfig();
-      var mBeanServerConnection =
-          new MBeanServerConnector(config).getConnection();
-      var entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
-      var uploader = buildUploader(config, entityGuid);
-      ScheduledExecutorService executorService = buildScheduledExecutorService();
-      var jfrController = new JFRController(uploader, config, executorService);
+      var mBeanServerConnection = new MBeanServerConnector(config).getConnection();
+
+      // TODO: Reevaluate capacity
+      var rawEventQueue = new LinkedBlockingQueue<RecordedEvent>(10_000);
+      var transformBufferAndSendExecutor = Executors.newSingleThreadExecutor();
+
+      transformBufferAndSendExecutor.submit(
+          () -> {
+            RawEventConsumerTask rawEventSink =
+                buildRawEventConsumerTask(config, mBeanServerConnection, rawEventQueue);
+            rawEventSink.run();
+          });
+
+      JFRController jfrController = buildJfrController(config, rawEventQueue);
       jfrController.setup();
-      jfrController.loop(config.getHarvestInterval());
+      jfrController.runUntilShutdown();
     } catch (Throwable e) {
       logger.error("JFR Daemon is crashing!", e);
       throw new RuntimeException(e);
     }
   }
 
-  private static ScheduledExecutorService buildScheduledExecutorService() {
+  private static RawEventConsumerTask buildRawEventConsumerTask(
+      DaemonConfig config,
+      javax.management.MBeanServerConnection mBeanServerConnection,
+      LinkedBlockingQueue<RecordedEvent> rawEventQueue) {
+    var toSummaryRegistry = ToSummaryRegistry.createDefault();
+    var entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
+    var eventToTelemetry = buildRecordedEventToTelemetry(toSummaryRegistry);
+    var commonAttributes = buildCommonAttributes(config, entityGuid);
+    var bufferedTelemetry = BufferedTelemetry.create(commonAttributes);
+    var lastSendStateTracker = buildLastSendStateTracker(config);
+    var uploader = buildJfrUploader(config);
+    return RawEventConsumerTask.builder()
+        .rawEventQueue(rawEventQueue)
+        .bufferedTelemetry(bufferedTelemetry)
+        .recordedEventToTelemetry(eventToTelemetry)
+        .lastSendStateTracker(lastSendStateTracker)
+        .toSummaryRegistry(toSummaryRegistry)
+        .uploader(uploader)
+        .build();
+  }
+
+  private static JFRUploader buildJfrUploader(DaemonConfig config) {
+    try {
+      TelemetryClient telemetryClient = new TelemetryClientFactory().build(config);
+      return new JFRUploader(telemetryClient);
+    } catch (MalformedURLException e) {
+      throw new RuntimeException("Cannot create TelemetryClient, daemon crashing", e);
+    }
+  }
+
+  private static LastSendStateTracker buildLastSendStateTracker(DaemonConfig config) {
+    return new LastSendStateTracker(
+        config.getBatchSendInterval(), config.getMaxBatchSizeBeforeSend());
+  }
+
+  private static JFRController buildJfrController(
+      DaemonConfig config, LinkedBlockingQueue<RecordedEvent> rawEventQueue) {
+    var fileToRawEventSource = buildFileToRawEventSource(rawEventQueue);
+    var dumpFileProcessor = buildDumpFileProcessor(fileToRawEventSource);
+    var periodicRecordingService = buildPeriodicRecordingExecutorService();
+    return new JFRController(dumpFileProcessor, config, periodicRecordingService);
+  }
+
+  private static FileToRawEventSource buildFileToRawEventSource(
+      LinkedBlockingQueue<RecordedEvent> rawEventQueue) {
+    return new FileToRawEventSource(
+        event -> {
+          try {
+            rawEventQueue.put(event);
+          } catch (InterruptedException e) {
+            logger.warn("Interrupted while sending raw event", e);
+            Thread.currentThread().interrupt();
+          }
+        });
+  }
+
+  private static ScheduledExecutorService buildPeriodicRecordingExecutorService() {
     return Executors.newSingleThreadScheduledExecutor(
-                      r -> {
+        r -> {
           Thread result = new Thread(r, "JFRController");
           result.setDaemon(true);
           return result;
-        }
-    );
+        });
   }
 
   private static DaemonConfig buildConfig() {
@@ -75,25 +142,27 @@ public class JFRDaemon {
     return builder.build();
   }
 
-  static JFRUploader buildUploader(DaemonConfig config, Optional<String> entityGuid)
-      throws MalformedURLException {
+  static DumpFileProcessor buildDumpFileProcessor(FileToRawEventSource fileToRawEventSource) {
+    return new DumpFileProcessor(fileToRawEventSource);
+  }
+
+  static RecordedEventToTelemetry buildRecordedEventToTelemetry(
+      ToSummaryRegistry toSummaryRegistry) {
+    return RecordedEventToTelemetry.builder()
+        .metricMappers(ToMetricRegistry.createDefault())
+        .eventMappers(ToEventRegistry.createDefault())
+        .summaryMappers(toSummaryRegistry)
+        .build();
+  }
+
+  static Attributes buildCommonAttributes(DaemonConfig config, Optional<String> entityGuid) {
     String hostname = findHostname();
     var attr =
-        COMMON_ATTRIBUTES
-            .put(APP_NAME, config.getMonitoredAppName())
-            .put(SERVICE_NAME, config.getMonitoredAppName())
-            .put(HOSTNAME, hostname);
-    entityGuid.ifPresent(guid -> attr.put("entity.guid", guid));
-
-    var fileToBatches =
-        FileToBufferedTelemetry.builder()
-            .commonAttributes(attr)
-            .metricMappers(ToMetricRegistry.createDefault())
-            .eventMapper(ToEventRegistry.createDefault())
-            .summaryMappers(ToSummaryRegistry.createDefault())
-            .build();
-    TelemetryClient telemetryClient = new TelemetryClientFactory().build(config);
-    return new JFRUploader(telemetryClient, fileToBatches);
+        COMMON_ATTRIBUTES.put(SERVICE_NAME, config.getMonitoredAppName()).put(HOSTNAME, hostname);
+    entityGuid.ifPresentOrElse(
+        guid -> attr.put("entity.guid", guid),
+        () -> attr.put(APP_NAME, config.getMonitoredAppName()));
+    return attr;
   }
 
   private static String findHostname() {

@@ -1,87 +1,23 @@
 package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.daemon.AttributeNames.*;
-
-import com.newrelic.telemetry.Attributes;
+import com.newrelic.jfr.daemon.buffer.BufferedTelemetry;
 import com.newrelic.telemetry.TelemetryClient;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class JFRUploader {
+public class JFRUploader {
+
   private static final Logger logger = LoggerFactory.getLogger(JFRUploader.class);
 
-  public static final Function<Path, RecordingFile> OPEN_RECORDING_FILE =
-      file -> {
-        try {
-          return new RecordingFile(file);
-        } catch (IOException e) {
-          throw new RuntimeException("Error opening recording file", e);
-        }
-      };
-  static final Attributes COMMON_ATTRIBUTES =
-      new Attributes()
-          .put(INSTRUMENTATION_NAME, "JFR")
-          .put(INSTRUMENTATION_PROVIDER, "JFR-Uploader")
-          .put(COLLECTOR_NAME, "JFR-Uploader");
-
   private final TelemetryClient telemetryClient;
-  private final FileToBufferedTelemetry fileToBufferedTelemetry;
-  private final Supplier<Instant> nowProvider;
-  private final Function<Path, RecordingFile> recordingFileOpener;
-  private final Consumer<Path> fileDeleter;
 
-  private Optional<Instant> lastSeen = Optional.empty();
-
-  public JFRUploader(
-      TelemetryClient telemetryClient, FileToBufferedTelemetry fileToBufferedTelemetry) {
-    this(
-        telemetryClient,
-        fileToBufferedTelemetry,
-        Instant::now,
-        OPEN_RECORDING_FILE,
-        JFRUploader::deleteFile);
-  }
-
-  public JFRUploader(
-      TelemetryClient telemetryClient,
-      FileToBufferedTelemetry fileToBufferedTelemetry,
-      Supplier<Instant> nowProvider,
-      Function<Path, RecordingFile> recordingFileOpener,
-      Consumer<Path> fileDeleter) {
+  public JFRUploader(TelemetryClient telemetryClient) {
     this.telemetryClient = telemetryClient;
-    this.fileToBufferedTelemetry = fileToBufferedTelemetry;
-    this.nowProvider = nowProvider;
-    this.recordingFileOpener = recordingFileOpener;
-    this.fileDeleter = fileDeleter;
   }
 
-  void handleFile(final Path dumpFile) {
-    // At startup should we read all the events present? This could be multiple hours of recordings
-    Instant eventsAfter = lastSeen.orElse(Instant.EPOCH);
-
-    try (var recordingFile = recordingFileOpener.apply(dumpFile)) {
-      logger.debug("Looking in " + dumpFile + " for events after: " + eventsAfter);
-
-      var result = fileToBufferedTelemetry.convert(recordingFile, eventsAfter, dumpFile.toString());
-      lastSeen = Optional.of(result.getLastSeen());
-      var bufferedMetrics = result.getBufferedTelemetry();
-
-      sendMetrics(bufferedMetrics);
-      sendEvents(bufferedMetrics);
-    } catch (Throwable t) {
-      logger.error("Error processing file " + dumpFile, t);
-    } finally {
-      fileDeleter.accept(dumpFile);
-    }
+  public void send(BufferedTelemetry telemetry) {
+    sendMetrics(telemetry);
+    sendEvents(telemetry);
   }
 
   private void sendMetrics(BufferedTelemetry bufferedMetrics) {
@@ -97,16 +33,6 @@ public final class JFRUploader {
     if (!eventBatch.isEmpty()) {
       logger.info(String.format("Sending events batch of size %s", eventBatch.size()));
       telemetryClient.sendBatch(eventBatch);
-    }
-  }
-
-  private static void deleteFile(Path dumpFile) {
-    try {
-      Files.delete(dumpFile);
-    } catch (Exception e) {
-      // TODO: I think we actually want to log an error here and exit cleanly, rather than
-      // throw an exception on the executor thread
-      throw new RuntimeException(e);
     }
   }
 }

@@ -1,4 +1,4 @@
-package com.newrelic.jfr.daemon;
+package com.newrelic.jfr.daemon.buffer;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
@@ -9,17 +9,21 @@ import com.newrelic.telemetry.metrics.MetricBatch;
 import com.newrelic.telemetry.metrics.MetricBuffer;
 
 public class BufferedTelemetry {
-  private final MetricBuffer metrics;
-  private final EventBuffer events;
+  private final CountingMetricBuffer metrics;
+  private final CountingEventBuffer events;
 
   public BufferedTelemetry(MetricBuffer metrics, EventBuffer events) {
+    this(new CountingMetricBuffer(metrics), new CountingEventBuffer(events));
+  }
+
+  public BufferedTelemetry(CountingMetricBuffer metrics, CountingEventBuffer events) {
     this.metrics = metrics;
     this.events = events;
   }
 
   public static BufferedTelemetry create(Attributes attributes) {
-    var metrics = new MetricBuffer(attributes);
-    var events = new EventBuffer(attributes);
+    var metrics = new CountingMetricBuffer(attributes);
+    var events = new CountingEventBuffer(attributes);
     return new BufferedTelemetry(metrics, events);
   }
 
@@ -33,6 +37,10 @@ public class BufferedTelemetry {
 
   public MetricBatch createMetricBatch() {
     return metrics.createBatch();
+  }
+
+  public int getTotalSize() {
+    return metrics.size() + events.size();
   }
 
   public EventBatch createEventBatch() {

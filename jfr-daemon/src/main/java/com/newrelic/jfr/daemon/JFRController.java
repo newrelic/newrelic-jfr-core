@@ -1,9 +1,6 @@
 package com.newrelic.jfr.daemon;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.management.InstanceNotFoundException;
@@ -17,13 +14,14 @@ import org.slf4j.LoggerFactory;
 public final class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
-  private final JFRUploader uploader;
+  private final DumpFileProcessor uploader;
   private final DaemonConfig config;
   // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
   private JFRJMXRecorder recorder;
   private final ScheduledExecutorService executorService;
 
-  public JFRController(JFRUploader uploader, DaemonConfig config, ScheduledExecutorService executorService) {
+  public JFRController(
+      DumpFileProcessor uploader, DaemonConfig config, ScheduledExecutorService executorService) {
     this.uploader = uploader;
     this.config = config;
     this.executorService = executorService;
@@ -44,8 +42,10 @@ public final class JFRController {
     }
   }
 
-  void loop(Duration harvestInterval) throws InterruptedException {
-    executorService.scheduleAtFixedRate(this::doSingleRecording, 0, harvestInterval.toMillis(), TimeUnit.MILLISECONDS);
+  void runUntilShutdown() throws InterruptedException {
+    var harvestInterval = config.getHarvestInterval();
+    executorService.scheduleAtFixedRate(
+        this::doSingleRecording, 0, harvestInterval.toMillis(), TimeUnit.MILLISECONDS);
     executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
     logger.info("JFR Controller is shut down (gracefully)");
   }
@@ -53,7 +53,7 @@ public final class JFRController {
   private void doSingleRecording() {
     try {
       final var pathToFile = recorder.recordToFile();
-      executorService.submit(() -> uploader.handleFile(pathToFile));
+      uploader.handleFile(pathToFile);
     } catch (MalformedObjectNameException
         | MBeanException
         | IOException
