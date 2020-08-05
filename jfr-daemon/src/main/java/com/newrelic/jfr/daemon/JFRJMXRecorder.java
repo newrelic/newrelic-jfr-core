@@ -130,7 +130,7 @@ public final class JFRJMXRecorder {
           new Object[] {recordingId, content},
           new String[] {"long", "java.lang.String"});
     } catch (ParseException e) {
-      // TODO: Something
+      logger.warn("Error getting JFR configuration profile", e);
     }
 
     var maxAge = (harvestCycleDuration.toSeconds() + 10) + "s";
