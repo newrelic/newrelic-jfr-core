@@ -11,7 +11,7 @@ import javax.management.openmbean.OpenDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class JFRController {
+public class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
   private final DumpFileProcessor uploader;
@@ -82,7 +82,12 @@ public final class JFRController {
   private void restartRecording()
       throws IOException, MalformedObjectNameException, ReflectionException,
           InstanceNotFoundException, MBeanException, OpenDataException {
-    recorder = JFRJMXRecorder.connectWithBackOff(config);
+    recorder = connect();
     recorder.startRecordingWithBackOff();
+  }
+
+  // Exists for testing
+  JFRJMXRecorder connect() throws IOException {
+    return JFRJMXRecorder.connectWithBackOff(config);
   }
 }

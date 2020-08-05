@@ -41,7 +41,7 @@ public class JFRDaemon {
       var mBeanServerConnection = new MBeanServerConnector(config).getConnection();
 
       // TODO: Reevaluate capacity
-      var rawEventQueue = new LinkedBlockingQueue<RecordedEvent>(10_000);
+      var rawEventQueue = new LinkedBlockingQueue<RecordedEvent>(100_000);
       var transformBufferAndSendExecutor = Executors.newSingleThreadExecutor();
 
       transformBufferAndSendExecutor.submit(

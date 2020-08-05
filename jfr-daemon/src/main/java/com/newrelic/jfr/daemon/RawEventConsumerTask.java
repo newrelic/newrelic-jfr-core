@@ -6,6 +6,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import jdk.jfr.consumer.RecordedEvent;
 
+/**
+ * The purpose of the RawEventConsumerTask is to run forever (until shut down)
+ * in order to read raw RecordedEvent instances from a queue, convert
+ * them to telemetry and buffer (via RecordedEventToTelemetry), and then
+ * upload the data to New Relic when a duration has passed or the buffer
+ * exceeds a predetermined size, whichever comes first.
+ */
 public class RawEventConsumerTask implements Runnable {
   private final BlockingQueue<RecordedEvent> rawEventQueue;
   private final BufferedTelemetry bufferedTelemetry;
