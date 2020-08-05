@@ -44,7 +44,7 @@ class RawEventConsumerTaskTest {
     var latch = new CountDownLatch(1);
 
     when(bufferedTelemetry.getTotalSize()).thenReturn(99);
-    when(lastSendStateTracker.isReady(99)).thenReturn(true);
+    when(lastSendStateTracker.updateIfReady(99)).thenReturn(true);
     when(toSummary.all()).thenReturn(Stream.of(summarizer));
     when(summarizer.summarizeAndReset()).thenReturn(Stream.of(summary1, summary2));
 
@@ -75,7 +75,6 @@ class RawEventConsumerTaskTest {
 
     testClass.shutdown();
     verify(recordedEventToTelemetry).processEvent(event, bufferedTelemetry);
-    verify(lastSendStateTracker).updateSendTime();
   }
 
   @Test

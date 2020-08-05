@@ -14,7 +14,7 @@ class LastSendStateTrackerTest {
   @Test
   void testNotReady() {
     var testClass = new LastSendStateTracker(Duration.ofDays(500_000), Integer.MAX_VALUE);
-    assertFalse(testClass.isReady(531800));
+    assertFalse(testClass.updateIfReady(531800));
   }
 
   @Test
@@ -22,7 +22,8 @@ class LastSendStateTrackerTest {
     var now = Instant.now();
     Supplier<Instant> clock = () -> now;
     var testClass = new LastSendStateTracker(Duration.ofDays(900), 12, clock);
-    assertTrue(testClass.isReady(13));
+    assertTrue(testClass.updateIfReady(13));
+    assertTrue(testClass.updateIfReady(13));
   }
 
   @Test
@@ -31,7 +32,7 @@ class LastSendStateTrackerTest {
     var now = Instant.ofEpochMilli(maxSendDuration.toMillis() + 1);
     Supplier<Instant> clock = () -> now;
     var testClass = new LastSendStateTracker(maxSendDuration, 999, clock);
-    assertTrue(testClass.isReady(4));
+    assertTrue(testClass.updateIfReady(4));
   }
 
   @Test
@@ -42,8 +43,7 @@ class LastSendStateTrackerTest {
     Supplier<Instant> clock = mock(Supplier.class);
     when(clock.get()).thenReturn(firstTime, secondTime);
     var testClass = new LastSendStateTracker(maxSendDuration, 999, clock);
-    assertTrue(testClass.isReady(4));
-    testClass.updateSendTime();
-    assertFalse(testClass.isReady(4));
+    assertTrue(testClass.updateIfReady(4));
+    assertFalse(testClass.updateIfReady(4));
   }
 }

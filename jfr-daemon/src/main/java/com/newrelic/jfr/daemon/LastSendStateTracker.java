@@ -27,12 +27,19 @@ class LastSendStateTracker {
     this.clock = clock;
   }
 
-  public void updateSendTime() {
-    this.lastTime = clock.get();
-  }
-
-  public boolean isReady(int totalSize) {
-    return bufferIsBigEnough(totalSize) || enoughTimeHasPassed();
+  /**
+   * Updates this state tracker's internal "last sent" time in the event that enough time has passed
+   * or if the current total batch size is greater than our desired threshold.
+   *
+   * @param totalBatchSizeInTelemetryPoints - the number of buffered telemetry points
+   * @return - true if its time to send and the time was updated, false if not.
+   */
+  public boolean updateIfReady(int totalBatchSizeInTelemetryPoints) {
+    boolean result = bufferIsBigEnough(totalBatchSizeInTelemetryPoints) || enoughTimeHasPassed();
+    if (result) {
+      this.lastTime = clock.get();
+    }
+    return result;
   }
 
   private boolean bufferIsBigEnough(int totalSize) {

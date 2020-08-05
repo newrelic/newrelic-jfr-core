@@ -32,7 +32,6 @@ public class RawEventConsumerTask implements Runnable {
         recordedEventToTelemetry.processEvent(event, bufferedTelemetry);
       }
       if (shouldSendNow()) {
-        lastSendStateTracker.updateSendTime();
         finishSummarizers();
         uploader.send(bufferedTelemetry);
       }
@@ -50,7 +49,7 @@ public class RawEventConsumerTask implements Runnable {
   }
 
   private boolean shouldSendNow() {
-    return lastSendStateTracker.isReady(bufferedTelemetry.getTotalSize());
+    return lastSendStateTracker.updateIfReady(bufferedTelemetry.getTotalSize());
   }
 
   private RecordedEvent pollSafely() {
