@@ -11,18 +11,28 @@ import javax.management.openmbean.OpenDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The JFRController is a long running instance that uses a ScheduledExecutorService to periodically
+ * do work. This work is in the method doSingleRecording, which initiates a recording via the
+ * JFRJMXRecorder, and then passes the path to the recorded file to the DumpFileProcessor.
+ *
+ * <p>In addition to the periodic job setup, this class also handles exceptions that can occur when
+ * recording or processing (on the read side) and is capable of initiating a reconnect.
+ */
 public class JFRController {
   private static final Logger logger = LoggerFactory.getLogger(JFRController.class);
 
-  private final DumpFileProcessor uploader;
+  private final DumpFileProcessor dumpFileProcessor;
   private final DaemonConfig config;
   // Non-final to allow for reconnect - there's too much crufty JMX state too close to the surface
   private JFRJMXRecorder recorder;
   private final ScheduledExecutorService executorService;
 
   public JFRController(
-      DumpFileProcessor uploader, DaemonConfig config, ScheduledExecutorService executorService) {
-    this.uploader = uploader;
+      DumpFileProcessor dumpFileProcessor,
+      DaemonConfig config,
+      ScheduledExecutorService executorService) {
+    this.dumpFileProcessor = dumpFileProcessor;
     this.config = config;
     this.executorService = executorService;
   }
@@ -53,7 +63,7 @@ public class JFRController {
   private void doSingleRecording() {
     try {
       final var pathToFile = recorder.recordToFile();
-      uploader.handleFile(pathToFile);
+      dumpFileProcessor.handleFile(pathToFile);
     } catch (MalformedObjectNameException
         | MBeanException
         | IOException

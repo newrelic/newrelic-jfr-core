@@ -18,6 +18,10 @@ import jdk.jfr.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is responsible for connecting via JMX (over RMI) to a remote application and
+ * initiating continuous recording in the JFR subsystem of the other JVM.
+ */
 public final class JFRJMXRecorder {
   private static final Logger logger = LoggerFactory.getLogger(JFRJMXRecorder.class);
 

@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.jar.Manifest;
 
+/** Attempts to locate the Implementation-Version from the manifest. */
 public class VersionFinder {
 
   public static final String UNKNOWN_VERSION = "UNKNOWN-VERSION";

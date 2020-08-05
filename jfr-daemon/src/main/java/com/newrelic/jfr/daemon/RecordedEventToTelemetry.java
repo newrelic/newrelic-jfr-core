@@ -11,6 +11,10 @@ import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Turns a RecordedEvent into NewRelic telemetry and buffers the results in a BufferedTelemetry
+ * instance.
+ */
 public class RecordedEventToTelemetry {
 
   private static final Logger logger =

@@ -8,6 +8,11 @@ import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.MetricBatch;
 import com.newrelic.telemetry.metrics.MetricBuffer;
 
+/**
+ * This class buffers metrics and event telemetry in memory until batches are created for upload.
+ * Calling createMetricBatch or createEventBatch will return a batch that can be sent with the
+ * TelemetryClient and will drain the underlying buffer delegate.
+ */
 public class BufferedTelemetry {
   private final CountingMetricBuffer metrics;
   private final CountingEventBuffer events;

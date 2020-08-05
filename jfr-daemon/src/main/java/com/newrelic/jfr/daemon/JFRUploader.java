@@ -5,6 +5,11 @@ import com.newrelic.telemetry.TelemetryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The JFRUploader sends batches of telemetry data (metrics and events) to New Relic by delegating
+ * to a TelemetryClient. The metrics batch and event batch are sent sequentially, but the
+ * TelemetryClient sends them on another thread.
+ */
 public class JFRUploader {
 
   private static final Logger logger = LoggerFactory.getLogger(JFRUploader.class);

@@ -14,7 +14,13 @@ import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO: Add javadoc for this class
+/**
+ * The DumpFileProcessor is responsible for opening a RecordingFile from a path and pumping that
+ * opened file to a FileToRawEventSource.
+ *
+ * <p>It is responsible for keeping track of what the last seen time in each file is (so that events
+ * in the overlapping interval are not repeated) and for deleting files that have been processed.
+ */
 public final class DumpFileProcessor {
   private static final Logger logger = LoggerFactory.getLogger(DumpFileProcessor.class);
 
