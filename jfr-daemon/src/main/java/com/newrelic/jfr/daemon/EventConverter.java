@@ -4,19 +4,17 @@ import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.telemetry.Attributes;
-import jdk.jfr.consumer.RecordedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import jdk.jfr.consumer.RecordedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EventConverter {
 
-  private static final Logger logger =
-      LoggerFactory.getLogger(EventConverter.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(EventConverter.class.getName());
 
   private final Attributes commonAttributes;
   private final ToMetricRegistry toMetricRegistry;
@@ -35,9 +33,10 @@ public class EventConverter {
   public BufferedTelemetry convert(RecordedEventBuffer buffer) {
     var batches = BufferedTelemetry.create(commonAttributes);
 
-    buffer.drainToStream()
-            .filter(Objects::nonNull)
-            .forEach(recordedEvent -> convertAndBuffer(batches, recordedEvent));
+    buffer
+        .drainToStream()
+        .filter(Objects::nonNull)
+        .forEach(recordedEvent -> convertAndBuffer(batches, recordedEvent));
 
     toSummaryRegistry.all().forEach(s -> s.summarizeAndReset().forEach(batches::addMetric));
 

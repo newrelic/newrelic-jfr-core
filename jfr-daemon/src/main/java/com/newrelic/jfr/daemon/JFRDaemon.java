@@ -25,16 +25,12 @@ import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
 import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
-import com.newrelic.telemetry.TelemetryClient;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.management.MBeanServerConnection;
-
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

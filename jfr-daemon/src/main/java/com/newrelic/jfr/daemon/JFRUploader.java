@@ -14,11 +14,8 @@ import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +44,8 @@ public final class JFRUploader {
   private final Consumer<Path> fileDeleter;
 
   public JFRUploader(
-      TelemetryClient telemetryClient, RecordedEventBuffer recordedEventBuffer,
+      TelemetryClient telemetryClient,
+      RecordedEventBuffer recordedEventBuffer,
       EventConverter eventConverter) {
     this(
         telemetryClient,
@@ -74,11 +72,9 @@ public final class JFRUploader {
     try {
       bufferFileData(dumpFile);
       maybeDrainAndSend();
-    }
-    catch(Exception e){
+    } catch (Exception e) {
       logger.error("Error handling raw dump file", e);
-    }
-    finally {
+    } finally {
       fileDeleter.accept(dumpFile);
     }
   }

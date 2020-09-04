@@ -2,11 +2,9 @@ package com.newrelic.jfr.daemon;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +58,8 @@ class JFRUploaderTest {
   void testUploads() {
 
     var testClass =
-        new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     testClass.handleFile(filePath);
 
@@ -78,7 +77,8 @@ class JFRUploaderTest {
           throw new RuntimeException("KABOOM!");
         };
     var testClass =
-        new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     assertThrows(RuntimeException.class, () -> testClass.handleFile(filePath));
     assertTrue(deleterCalled.get());
@@ -87,10 +87,12 @@ class JFRUploaderTest {
   @Test
   void testBufferingThrowsExceptionIsHandled() throws Exception {
     doThrow(new RuntimeException("Whoopsie doodle"))
-            .when(recordedEventBuffer).bufferEvents(filePath, recordingFile);
+        .when(recordedEventBuffer)
+        .bufferEvents(filePath, recordingFile);
 
     var testClass =
-        new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     testClass.handleFile(filePath);
     // no exception, but we still try and send
@@ -100,11 +102,11 @@ class JFRUploaderTest {
 
   @Test
   public void testConvertThrowsExceptionIsHandled() throws Exception {
-    doThrow(new RuntimeException("kaboom!"))
-            .when(eventConverter).convert(recordedEventBuffer);
+    doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
 
     var testClass =
-            new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     testClass.handleFile(filePath);
     // no exception, and since we can't convert don't try sending
