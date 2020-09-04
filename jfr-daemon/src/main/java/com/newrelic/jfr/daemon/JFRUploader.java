@@ -73,10 +73,14 @@ public final class JFRUploader {
   void handleFile(final Path dumpFile) {
     try {
       bufferFileData(dumpFile);
-    } finally {
+      maybeDrainAndSend();
+    }
+    catch(Exception e){
+      logger.error("Error handling raw dump file", e);
+    }
+    finally {
       fileDeleter.accept(dumpFile);
     }
-    maybeDrainAndSend();
   }
 
   private void bufferFileData(Path dumpFile) {

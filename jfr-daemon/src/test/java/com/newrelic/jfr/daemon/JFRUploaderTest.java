@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.TelemetryClient;
@@ -85,18 +86,28 @@ class JFRUploaderTest {
 
   @Test
   void testBufferingThrowsExceptionIsHandled() throws Exception {
-    doThrow(new OutOfMemoryError("Whoopsie doodle"))
+    doThrow(new RuntimeException("Whoopsie doodle"))
             .when(recordedEventBuffer).bufferEvents(filePath, recordingFile);
 
     var testClass =
         new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     testClass.handleFile(filePath);
-    verifyNoInteractions(telemetryClient);
+    // no exception, but we still try and send
+    verify(telemetryClient).sendBatch(expectedMetricBatch);
+    verify(telemetryClient).sendBatch(expectedEventBatch);
   }
 
   @Test
   public void testConvertThrowsExceptionIsHandled() throws Exception {
-    fail("build me");
+    doThrow(new RuntimeException("kaboom!"))
+            .when(eventConverter).convert(recordedEventBuffer);
+
+    var testClass =
+            new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+
+    testClass.handleFile(filePath);
+    // no exception, and since we can't convert don't try sending
+    verifyNoMoreInteractions(telemetryClient);
   }
 }
