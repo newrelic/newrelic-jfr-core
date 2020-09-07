@@ -1,5 +1,9 @@
 [![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
 
+# Required JDK
+
+THis can be built with JDK11, but if packaging is required then JDK14 must be used. The class files will still be JDK11-compatible.
+
 # JFR Core
 
 ![build badge](https://github.com/newrelic/newrelic-jfr-core/workflows/main%20build/badge.svg)

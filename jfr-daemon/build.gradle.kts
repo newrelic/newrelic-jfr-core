@@ -1,12 +1,11 @@
-private object Versions {
-    const val slf4j = "1.7.26"
-    const val gson = "2.8.6"
-    const val log4j = "2.13.3"
-    const val newRelicTelemetry = "0.8.0"
-}
+val gsonVersion: String by project
+val log4jVersion: String by project
+val mockitoVersion: String by project
+val objenesisVersion: String by project
+val slf4jVersion: String by project
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("org.beryx.jlink")
 }
 
 java {
@@ -15,26 +14,20 @@ java {
     disableAutoTargetJvm()
 }
 
-dependencies {
-    api(project(":jfr-mappers"))
-    api("org.slf4j:slf4j-api:${Versions.slf4j}")
-    api("org.apache.logging.log4j:log4j-slf4j-impl:${Versions.log4j}")
-    api("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
-    api("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
-    implementation("com.google.code.gson:gson:${Versions.gson}")
-}
-
-tasks.shadowJar {
-    archiveClassifier.set("")
-    manifest {
-        attributes(
-                "Main-Class" to "com.newrelic.jfr.daemon.JFRDaemon",
-                "Implementation-Version" to project.version
-        )
+jpmsExtraModules {
+    module("mockito-junit-jupiter-${mockitoVersion}.jar", "mockito.junit.jupiter", mockitoVersion) {
+        exports("org.mockito.junit.jupiter")
+    }
+    module("objenesis-${objenesisVersion}.jar", "org.objenesis", objenesisVersion) {
+        exports("org.objenesis")
     }
 }
 
-tasks.named("build") { dependsOn("shadowJar") }
+dependencies {
+    implementation(project(":jfr-mappers"))
+    implementation(jpms.asModule("org.apache.logging.log4j:log4j-core:${log4jVersion}", "org.apache.logging.log4j.core"))
+    implementation(jpms.asModule("org.apache.logging.log4j:log4j-api:${log4jVersion}", "log4j.api"))
+}
 
 publishing {
     publications {
@@ -76,4 +69,18 @@ signing {
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
+}
+
+application {
+    mainClass.set("com.newrelic.jfr.daemon.JFRDaemon")
+    mainModule.set("com.newrelic.jfr.daemon")
+}
+
+jlink {
+    imageDir.set(file("${buildDir}/jlink/${project.name}-${project.version}"))
+    imageZip.set(file("${buildDir}/distributions/${project.name}-${project.version}-jlink.zip"))
+}
+
+tasks.named("build") {
+    dependsOn("jlink")
 }

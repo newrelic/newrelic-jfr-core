@@ -1,3 +1,8 @@
+val newRelicTelemetryVersion: String by project
+val gsonVersion: String by project
+val mockitoVersion: String by project
+val objenesisVersion: String by project
+
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -10,6 +15,23 @@ tasks {
     jar.apply {
         manifest.attributes["Implementation-Version"] = project.version
         manifest.attributes["Implementation-Vendor"] = "New Relic, Inc"
+    }
+}
+
+dependencies {
+    "api"("com.newrelic.telemetry:telemetry-all:${newRelicTelemetryVersion}")
+    implementation("com.google.code.gson:gson:${gsonVersion}")
+}
+
+jpmsExtraModules {
+    module("gson-${gsonVersion}.jar", "com.google.code.gson", gsonVersion) {
+        exports("com.google.gson")
+    }
+    module("mockito-junit-jupiter-${mockitoVersion}.jar", "mockito.junit.jupiter", mockitoVersion) {
+        exports("com.google.gson")
+    }
+    module("objenesis-${objenesisVersion}.jar", "org.objenesis", objenesisVersion) {
+        exports("com.google.gson")
     }
 }
 
@@ -45,11 +67,10 @@ publishing {
             }
         }
     }
-
 }
 
 signing {
-    val signingKey : String? by project
+    val signingKey: String? by project
     val signingKeyId: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)

@@ -7,7 +7,7 @@
 
 package com.newrelic.jfr;
 
-import com.newrelic.relocated.stream.JsonWriter;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
