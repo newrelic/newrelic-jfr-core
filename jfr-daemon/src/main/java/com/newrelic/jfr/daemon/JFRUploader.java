@@ -9,7 +9,6 @@ package com.newrelic.jfr.daemon;
 
 import static com.newrelic.jfr.daemon.AttributeNames.*;
 
-import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.nio.file.Files;

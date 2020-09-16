@@ -7,21 +7,6 @@
 
 package com.newrelic.jfr.daemon;
 
-import com.newrelic.jfr.ToEventRegistry;
-import com.newrelic.jfr.ToMetricRegistry;
-import com.newrelic.jfr.ToSummaryRegistry;
-import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
-import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
-import jdk.jfr.consumer.RecordedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.management.MBeanServerConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.Optional;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
 import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
 import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
@@ -30,6 +15,20 @@ import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
 import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_HOST;
 import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_PORT;
 import static java.util.function.Function.identity;
+
+import com.newrelic.jfr.ToEventRegistry;
+import com.newrelic.jfr.ToMetricRegistry;
+import com.newrelic.jfr.ToSummaryRegistry;
+import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
+import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+import javax.management.MBeanServerConnection;
+import jdk.jfr.consumer.RecordedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JFRDaemon {
   private static final Logger logger = LoggerFactory.getLogger(JFRDaemon.class);
@@ -83,5 +82,4 @@ public class JFRDaemon {
     var recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter);
   }
-
 }
