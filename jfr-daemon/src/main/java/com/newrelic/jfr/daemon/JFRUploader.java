@@ -31,11 +31,6 @@ public final class JFRUploader {
           throw new RuntimeException("Error opening recording file", e);
         }
       };
-  static final Attributes COMMON_ATTRIBUTES =
-      new Attributes()
-          .put(INSTRUMENTATION_NAME, "JFR")
-          .put(INSTRUMENTATION_PROVIDER, "JFR-Uploader")
-          .put(COLLECTOR_NAME, "JFR-Uploader");
 
   private final TelemetryClient telemetryClient;
   private final RecordedEventBuffer recordedEventBuffer;

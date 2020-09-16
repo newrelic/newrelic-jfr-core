@@ -7,9 +7,21 @@
 
 package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
-import static com.newrelic.jfr.daemon.AttributeNames.HOSTNAME;
-import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
+import com.newrelic.jfr.ToEventRegistry;
+import com.newrelic.jfr.ToMetricRegistry;
+import com.newrelic.jfr.ToSummaryRegistry;
+import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
+import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
+import jdk.jfr.consumer.RecordedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.management.MBeanServerConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
 import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
 import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
@@ -17,23 +29,7 @@ import static com.newrelic.jfr.daemon.EnvironmentVars.JFR_SHARED_FILESYSTEM;
 import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
 import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_HOST;
 import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_PORT;
-import static com.newrelic.jfr.daemon.JFRUploader.COMMON_ATTRIBUTES;
 import static java.util.function.Function.identity;
-
-import com.newrelic.jfr.ToEventRegistry;
-import com.newrelic.jfr.ToMetricRegistry;
-import com.newrelic.jfr.ToSummaryRegistry;
-import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
-import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.Optional;
-import java.util.concurrent.LinkedBlockingQueue;
-import javax.management.MBeanServerConnection;
-import jdk.jfr.consumer.RecordedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JFRDaemon {
   private static final Logger logger = LoggerFactory.getLogger(JFRDaemon.class);
@@ -73,14 +69,8 @@ public class JFRDaemon {
 
   static JFRUploader buildUploader(DaemonConfig config, Optional<String> entityGuid)
       throws MalformedURLException {
-    String hostname = findHostname();
-    var attr =
-        COMMON_ATTRIBUTES
-            .put(APP_NAME, config.getMonitoredAppName())
-            .put(SERVICE_NAME, config.getMonitoredAppName())
-            .put(HOSTNAME, hostname);
-    entityGuid.ifPresent(guid -> attr.put("entity.guid", guid));
 
+    var attr = new JFRCommonAttributes(config).build(entityGuid);
     var eventConverter =
         EventConverter.builder()
             .commonAttributes(attr)
@@ -94,14 +84,4 @@ public class JFRDaemon {
     return new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter);
   }
 
-  private static String findHostname() {
-    try {
-      return InetAddress.getLocalHost().toString();
-    } catch (Throwable e) {
-      var loopback = InetAddress.getLoopbackAddress().toString();
-      logger.error(
-          "Unable to get localhost IP, defaulting to loopback address," + loopback + ".", e);
-      return loopback;
-    }
-  }
 }
