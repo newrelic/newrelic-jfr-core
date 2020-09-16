@@ -25,12 +25,13 @@ import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
 import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
-import com.newrelic.telemetry.TelemetryClient;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.management.MBeanServerConnection;
+import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,15 +81,17 @@ public class JFRDaemon {
             .put(HOSTNAME, hostname);
     entityGuid.ifPresent(guid -> attr.put("entity.guid", guid));
 
-    var fileToBatches =
-        FileToBufferedTelemetry.builder()
+    var eventConverter =
+        EventConverter.builder()
             .commonAttributes(attr)
             .metricMappers(ToMetricRegistry.createDefault())
             .eventMapper(ToEventRegistry.createDefault())
             .summaryMappers(ToSummaryRegistry.createDefault())
             .build();
-    TelemetryClient telemetryClient = new TelemetryClientFactory().build(config);
-    return new JFRUploader(telemetryClient, fileToBatches);
+    var telemetryClient = new TelemetryClientFactory().build(config);
+    var queue = new LinkedBlockingQueue<RecordedEvent>(50000);
+    var recordedEventBuffer = new RecordedEventBuffer(queue);
+    return new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter);
   }
 
   private static String findHostname() {

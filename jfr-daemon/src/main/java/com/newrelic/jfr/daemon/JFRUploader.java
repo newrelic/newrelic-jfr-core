@@ -14,11 +14,8 @@ import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,54 +38,59 @@ public final class JFRUploader {
           .put(COLLECTOR_NAME, "JFR-Uploader");
 
   private final TelemetryClient telemetryClient;
-  private final FileToBufferedTelemetry fileToBufferedTelemetry;
-  private final Supplier<Instant> nowProvider;
+  private final RecordedEventBuffer recordedEventBuffer;
+  private final EventConverter eventConverter;
   private final Function<Path, RecordingFile> recordingFileOpener;
   private final Consumer<Path> fileDeleter;
 
-  private Optional<Instant> lastSeen = Optional.empty();
-
   public JFRUploader(
-      TelemetryClient telemetryClient, FileToBufferedTelemetry fileToBufferedTelemetry) {
+      TelemetryClient telemetryClient,
+      RecordedEventBuffer recordedEventBuffer,
+      EventConverter eventConverter) {
     this(
         telemetryClient,
-        fileToBufferedTelemetry,
-        Instant::now,
+        recordedEventBuffer,
+        eventConverter,
         OPEN_RECORDING_FILE,
         JFRUploader::deleteFile);
   }
 
   public JFRUploader(
       TelemetryClient telemetryClient,
-      FileToBufferedTelemetry fileToBufferedTelemetry,
-      Supplier<Instant> nowProvider,
+      RecordedEventBuffer recordedEventBuffer,
+      EventConverter eventConverter,
       Function<Path, RecordingFile> recordingFileOpener,
       Consumer<Path> fileDeleter) {
     this.telemetryClient = telemetryClient;
-    this.fileToBufferedTelemetry = fileToBufferedTelemetry;
-    this.nowProvider = nowProvider;
+    this.recordedEventBuffer = recordedEventBuffer;
+    this.eventConverter = eventConverter;
     this.recordingFileOpener = recordingFileOpener;
     this.fileDeleter = fileDeleter;
   }
 
   void handleFile(final Path dumpFile) {
-    // At startup should we read all the events present? This could be multiple hours of recordings
-    Instant eventsAfter = lastSeen.orElse(Instant.EPOCH);
-
-    try (var recordingFile = recordingFileOpener.apply(dumpFile)) {
-      logger.debug("Looking in " + dumpFile + " for events after: " + eventsAfter);
-
-      var result = fileToBufferedTelemetry.convert(recordingFile, eventsAfter, dumpFile.toString());
-      lastSeen = Optional.of(result.getLastSeen());
-      var bufferedMetrics = result.getBufferedTelemetry();
-
-      sendMetrics(bufferedMetrics);
-      sendEvents(bufferedMetrics);
-    } catch (Throwable t) {
-      logger.error("Error processing file " + dumpFile, t);
+    try {
+      bufferFileData(dumpFile);
+      maybeDrainAndSend();
+    } catch (Exception e) {
+      logger.error("Error handling raw dump file", e);
     } finally {
       fileDeleter.accept(dumpFile);
     }
+  }
+
+  private void bufferFileData(Path dumpFile) {
+    try (var recordingFile = recordingFileOpener.apply(dumpFile)) {
+      recordedEventBuffer.bufferEvents(dumpFile, recordingFile);
+    } catch (Throwable t) {
+      logger.error("Error processing file " + dumpFile, t);
+    }
+  }
+
+  private void maybeDrainAndSend() {
+    BufferedTelemetry telemetry = eventConverter.convert(recordedEventBuffer);
+    sendMetrics(telemetry);
+    sendEvents(telemetry);
   }
 
   private void sendMetrics(BufferedTelemetry bufferedMetrics) {

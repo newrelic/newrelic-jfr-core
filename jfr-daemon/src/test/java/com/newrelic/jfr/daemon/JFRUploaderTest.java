@@ -2,9 +2,10 @@ package com.newrelic.jfr.daemon;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.telemetry.TelemetryClient;
@@ -24,12 +25,13 @@ class JFRUploaderTest {
   private Instant now;;
   private Path filePath;
   private TelemetryClient telemetryClient;
-  private FileToBufferedTelemetry fileBufferer;
   private MetricBatch expectedMetricBatch;
   private EventBatch expectedEventBatch;
   private RecordingFile recordingFile;
   private BufferedTelemetry bufferedTelemetry;
   private Consumer<Path> deleter;
+  private EventConverter eventConverter;
+  private RecordedEventBuffer recordedEventBuffer;
 
   @SuppressWarnings("unchecked")
   @BeforeEach
@@ -37,16 +39,16 @@ class JFRUploaderTest {
     now = Instant.now();
     filePath = Path.of("/foo", "bar", "baz");
     telemetryClient = mock(TelemetryClient.class);
-    fileBufferer = mock(FileToBufferedTelemetry.class);
+    recordedEventBuffer = mock(RecordedEventBuffer.class);
     expectedMetricBatch = mock(MetricBatch.class);
     expectedEventBatch = mock(EventBatch.class);
     recordingFile = mock(RecordingFile.class);
     bufferedTelemetry = mock(BufferedTelemetry.class);
+    eventConverter = mock(EventConverter.class);
     deleter = mock(Consumer.class);
 
-    FileToBufferedTelemetry.Result bufferResult = mock(FileToBufferedTelemetry.Result.class);
-    when(fileBufferer.convert(recordingFile, now, filePath.toString())).thenReturn(bufferResult);
-    when(bufferResult.getBufferedTelemetry()).thenReturn(bufferedTelemetry);
+    when(eventConverter.convert(recordedEventBuffer)).thenReturn(bufferedTelemetry);
+
     when(bufferedTelemetry.createEventBatch()).thenReturn(expectedEventBatch);
     when(bufferedTelemetry.createMetricBatch()).thenReturn(expectedMetricBatch);
   }
@@ -56,7 +58,8 @@ class JFRUploaderTest {
   void testUploads() {
 
     var testClass =
-        new JFRUploader(telemetryClient, fileBufferer, () -> now, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     testClass.handleFile(filePath);
 
@@ -74,7 +77,8 @@ class JFRUploaderTest {
           throw new RuntimeException("KABOOM!");
         };
     var testClass =
-        new JFRUploader(telemetryClient, fileBufferer, () -> now, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     assertThrows(RuntimeException.class, () -> testClass.handleFile(filePath));
     assertTrue(deleterCalled.get());
@@ -82,13 +86,30 @@ class JFRUploaderTest {
 
   @Test
   void testBufferingThrowsExceptionIsHandled() throws Exception {
-    when(fileBufferer.convert(recordingFile, now, filePath.toString()))
-        .thenThrow(new OutOfMemoryError("Whoopsie doodle"));
+    doThrow(new RuntimeException("Whoopsie doodle"))
+        .when(recordedEventBuffer)
+        .bufferEvents(filePath, recordingFile);
 
     var testClass =
-        new JFRUploader(telemetryClient, fileBufferer, () -> now, x -> recordingFile, deleter);
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
 
     testClass.handleFile(filePath);
-    verifyNoInteractions(telemetryClient);
+    // no exception, but we still try and send
+    verify(telemetryClient).sendBatch(expectedMetricBatch);
+    verify(telemetryClient).sendBatch(expectedEventBatch);
+  }
+
+  @Test
+  public void testConvertThrowsExceptionIsHandled() throws Exception {
+    doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
+
+    var testClass =
+        new JFRUploader(
+            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+
+    testClass.handleFile(filePath);
+    // no exception, and since we can't convert don't try sending
+    verifyNoMoreInteractions(telemetryClient);
   }
 }
