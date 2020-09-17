@@ -13,6 +13,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import jdk.jfr.consumer.RecordingFile;
@@ -36,30 +37,15 @@ public final class JFRUploader {
   private final EventConverter eventConverter;
   private final Function<Path, RecordingFile> recordingFileOpener;
   private final Consumer<Path> fileDeleter;
+  private final AtomicBoolean readinessCheck;
 
-  public JFRUploader(
-      TelemetryClient telemetryClient,
-      RecordedEventBuffer recordedEventBuffer,
-      EventConverter eventConverter) {
-    this(
-        telemetryClient,
-        recordedEventBuffer,
-        eventConverter,
-        OPEN_RECORDING_FILE,
-        JFRUploader::deleteFile);
-  }
-
-  public JFRUploader(
-      TelemetryClient telemetryClient,
-      RecordedEventBuffer recordedEventBuffer,
-      EventConverter eventConverter,
-      Function<Path, RecordingFile> recordingFileOpener,
-      Consumer<Path> fileDeleter) {
-    this.telemetryClient = telemetryClient;
-    this.recordedEventBuffer = recordedEventBuffer;
-    this.eventConverter = eventConverter;
-    this.recordingFileOpener = recordingFileOpener;
-    this.fileDeleter = fileDeleter;
+  private JFRUploader(Builder builder) {
+    this.telemetryClient = builder.telemetryClient;
+    this.recordedEventBuffer = builder.recordedEventBuffer;
+    this.eventConverter = builder.eventConverter;
+    this.recordingFileOpener = builder.recordingFileOpener;
+    this.fileDeleter = builder.fileDeleter;
+    this.readinessCheck = builder.readinessCheck;
   }
 
   void handleFile(final Path dumpFile) {
@@ -82,6 +68,10 @@ public final class JFRUploader {
   }
 
   private void maybeDrainAndSend() {
+    if (!readinessCheck.get()) {
+      logger.warn("Drain attempt skipped -- readiness check not yet ready.");
+      return;
+    }
     BufferedTelemetry telemetry = eventConverter.convert(recordedEventBuffer);
     sendMetrics(telemetry);
     sendEvents(telemetry);
@@ -110,6 +100,53 @@ public final class JFRUploader {
       // TODO: I think we actually want to log an error here and exit cleanly, rather than
       // throw an exception on the executor thread
       throw new RuntimeException(e);
+    }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static class Builder {
+    private TelemetryClient telemetryClient;
+    private RecordedEventBuffer recordedEventBuffer;
+    private EventConverter eventConverter;
+    private Function<Path, RecordingFile> recordingFileOpener = OPEN_RECORDING_FILE;
+    private Consumer<Path> fileDeleter = JFRUploader::deleteFile;
+    private AtomicBoolean readinessCheck;
+
+    public Builder telemetryClient(TelemetryClient telemetryClient) {
+      this.telemetryClient = telemetryClient;
+      return this;
+    }
+
+    public Builder recordedEventBuffer(RecordedEventBuffer recordedEventBuffer) {
+      this.recordedEventBuffer = recordedEventBuffer;
+      return this;
+    }
+
+    public Builder eventConverter(EventConverter converter) {
+      this.eventConverter = converter;
+      return this;
+    }
+
+    public Builder recordingFileOpener(Function<Path, RecordingFile> opener) {
+      this.recordingFileOpener = opener;
+      return this;
+    }
+
+    public Builder fileDeleter(Consumer<Path> fileDeleter) {
+      this.fileDeleter = fileDeleter;
+      return this;
+    }
+
+    public Builder readinessCheck(AtomicBoolean readinessCheck) {
+      this.readinessCheck = readinessCheck;
+      return this;
+    }
+
+    public JFRUploader build() {
+      return new JFRUploader(this);
     }
   }
 }

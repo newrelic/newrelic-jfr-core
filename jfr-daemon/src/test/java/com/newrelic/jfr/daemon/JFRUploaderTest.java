@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -57,9 +58,7 @@ class JFRUploaderTest {
   @Disabled
   void testUploads() {
 
-    var testClass =
-        new JFRUploader(
-            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+    JFRUploader testClass = buildTestClass();
 
     testClass.handleFile(filePath);
 
@@ -76,9 +75,7 @@ class JFRUploaderTest {
           deleterCalled.set(true);
           throw new RuntimeException("KABOOM!");
         };
-    var testClass =
-        new JFRUploader(
-            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+    JFRUploader testClass = buildTestClass();
 
     assertThrows(RuntimeException.class, () -> testClass.handleFile(filePath));
     assertTrue(deleterCalled.get());
@@ -90,9 +87,7 @@ class JFRUploaderTest {
         .when(recordedEventBuffer)
         .bufferEvents(filePath, recordingFile);
 
-    var testClass =
-        new JFRUploader(
-            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+    JFRUploader testClass = buildTestClass();
 
     testClass.handleFile(filePath);
     // no exception, but we still try and send
@@ -101,15 +96,36 @@ class JFRUploaderTest {
   }
 
   @Test
+  void testSkipsIfNotReady() {
+    JFRUploader testClass = buildTestClass(false);
+    testClass.handleFile(filePath);
+    verifyNoInteractions(eventConverter);
+    verifyNoInteractions(telemetryClient);
+  }
+
+  @Test
   public void testConvertThrowsExceptionIsHandled() throws Exception {
     doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
 
-    var testClass =
-        new JFRUploader(
-            telemetryClient, recordedEventBuffer, eventConverter, x -> recordingFile, deleter);
+    var testClass = buildTestClass();
 
     testClass.handleFile(filePath);
     // no exception, and since we can't convert don't try sending
     verifyNoMoreInteractions(telemetryClient);
+  }
+
+  private JFRUploader buildTestClass() {
+    return buildTestClass(true);
+  }
+
+  private JFRUploader buildTestClass(boolean ready) {
+    return JFRUploader.builder()
+        .telemetryClient(telemetryClient)
+        .recordedEventBuffer(recordedEventBuffer)
+        .eventConverter(eventConverter)
+        .recordingFileOpener(x -> recordingFile)
+        .fileDeleter(deleter)
+        .readinessCheck(new AtomicBoolean(ready))
+        .build();
   }
 }

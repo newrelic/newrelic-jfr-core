@@ -25,7 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
-import javax.management.MBeanServerConnection;
+import java.util.concurrent.atomic.AtomicBoolean;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +35,14 @@ public class JFRDaemon {
 
   public static void main(String[] args) {
     try {
-      DaemonConfig config = buildConfig();
-      MBeanServerConnection mBeanServerConnection =
-          new MBeanServerConnector(config).getConnection();
-      Optional<String> entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
-      var uploader = buildUploader(config, entityGuid);
+      var config = buildConfig();
+      var mBeanServerConnection = new MBeanServerConnector(config).getConnection();
+      var readinessCheck = new AtomicBoolean(false);
+
+      var entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
+      readinessCheck.set(true);
+
+      var uploader = buildUploader(config, entityGuid, readinessCheck);
       var jfrController = new JFRController(uploader, config);
       jfrController.setup();
       jfrController.loop(config.getHarvestInterval());
@@ -66,20 +69,29 @@ public class JFRDaemon {
     return builder.build();
   }
 
-  static JFRUploader buildUploader(DaemonConfig config, Optional<String> entityGuid)
+  static JFRUploader buildUploader(
+      DaemonConfig config, Optional<String> entityGuid, AtomicBoolean readinessCheck)
       throws MalformedURLException {
 
     var attr = new JFRCommonAttributes(config).build(entityGuid);
-    var eventConverter =
-        EventConverter.builder()
-            .commonAttributes(attr)
-            .metricMappers(ToMetricRegistry.createDefault())
-            .eventMapper(ToEventRegistry.createDefault())
-            .summaryMappers(ToSummaryRegistry.createDefault())
-            .build();
+    var eventConverter = buildEventConverter(attr);
     var telemetryClient = new TelemetryClientFactory().build(config);
     var queue = new LinkedBlockingQueue<RecordedEvent>(50000);
     var recordedEventBuffer = new RecordedEventBuffer(queue);
-    return new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter);
+    return JFRUploader.builder()
+        .telemetryClient(telemetryClient)
+        .recordedEventBuffer(recordedEventBuffer)
+        .eventConverter(eventConverter)
+        .readinessCheck(readinessCheck)
+        .build();
+  }
+
+  private static EventConverter buildEventConverter(com.newrelic.telemetry.Attributes attr) {
+    return EventConverter.builder()
+        .commonAttributes(attr)
+        .metricMappers(ToMetricRegistry.createDefault())
+        .eventMapper(ToEventRegistry.createDefault())
+        .summaryMappers(ToSummaryRegistry.createDefault())
+        .build();
   }
 }
