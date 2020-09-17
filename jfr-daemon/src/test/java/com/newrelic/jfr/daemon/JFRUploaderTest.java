@@ -120,12 +120,12 @@ class JFRUploaderTest {
 
   private JFRUploader buildTestClass(boolean ready) {
     return JFRUploader.builder()
-            .telemetryClient(telemetryClient)
-            .recordedEventBuffer(recordedEventBuffer)
-            .eventConverter(eventConverter)
-            .recordingFileOpener(x -> recordingFile)
-            .fileDeleter(deleter)
-            .readinessCheck(new AtomicBoolean(ready))
-            .build();
+        .telemetryClient(telemetryClient)
+        .recordedEventBuffer(recordedEventBuffer)
+        .eventConverter(eventConverter)
+        .recordingFileOpener(x -> recordingFile)
+        .fileDeleter(deleter)
+        .readinessCheck(new AtomicBoolean(ready))
+        .build();
   }
 }
