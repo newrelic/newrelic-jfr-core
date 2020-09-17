@@ -26,7 +26,6 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.management.MBeanServerConnection;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,7 @@ public class JFRDaemon {
   public static void main(String[] args) {
     try {
       var config = buildConfig();
-      var mBeanServerConnection =
-          new MBeanServerConnector(config).getConnection();
+      var mBeanServerConnection = new MBeanServerConnector(config).getConnection();
       var readinessCheck = new AtomicBoolean(false);
 
       var entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
@@ -71,7 +69,8 @@ public class JFRDaemon {
     return builder.build();
   }
 
-  static JFRUploader buildUploader(DaemonConfig config, Optional<String> entityGuid, AtomicBoolean readinessCheck)
+  static JFRUploader buildUploader(
+      DaemonConfig config, Optional<String> entityGuid, AtomicBoolean readinessCheck)
       throws MalformedURLException {
 
     var attr = new JFRCommonAttributes(config).build(entityGuid);
@@ -80,11 +79,11 @@ public class JFRDaemon {
     var queue = new LinkedBlockingQueue<RecordedEvent>(50000);
     var recordedEventBuffer = new RecordedEventBuffer(queue);
     return JFRUploader.builder()
-            .telemetryClient(telemetryClient)
-            .recordedEventBuffer(recordedEventBuffer)
-            .eventConverter(eventConverter)
-            .readinessCheck(readinessCheck)
-            .build();
+        .telemetryClient(telemetryClient)
+        .recordedEventBuffer(recordedEventBuffer)
+        .eventConverter(eventConverter)
+        .readinessCheck(readinessCheck)
+        .build();
   }
 
   private static EventConverter buildEventConverter(com.newrelic.telemetry.Attributes attr) {

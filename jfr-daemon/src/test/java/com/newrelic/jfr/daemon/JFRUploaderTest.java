@@ -109,13 +109,14 @@ class JFRUploaderTest {
 
   private JFRUploader buildTestClass(boolean ready) {
     var testClass =
-            JFRUploader.builder().telemetryClient(telemetryClient)
-                    .recordedEventBuffer(recordedEventBuffer)
-                    .eventConverter(eventConverter)
-                    .recordingFileOpener(x -> recordingFile)
-                    .fileDeleter(deleter)
-                    .readinessCheck(new AtomicBoolean(ready))
-                    .build();
+        JFRUploader.builder()
+            .telemetryClient(telemetryClient)
+            .recordedEventBuffer(recordedEventBuffer)
+            .eventConverter(eventConverter)
+            .recordingFileOpener(x -> recordingFile)
+            .fileDeleter(deleter)
+            .readinessCheck(new AtomicBoolean(ready))
+            .build();
     return testClass;
   }
 
@@ -124,12 +125,13 @@ class JFRUploaderTest {
     doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
 
     var testClass =
-            JFRUploader.builder().telemetryClient(telemetryClient)
-                    .recordedEventBuffer(recordedEventBuffer)
-                    .eventConverter(eventConverter)
-                    .recordingFileOpener(x -> recordingFile)
-                    .fileDeleter(deleter)
-                    .build();
+        JFRUploader.builder()
+            .telemetryClient(telemetryClient)
+            .recordedEventBuffer(recordedEventBuffer)
+            .eventConverter(eventConverter)
+            .recordingFileOpener(x -> recordingFile)
+            .fileDeleter(deleter)
+            .build();
 
     testClass.handleFile(filePath);
     // no exception, and since we can't convert don't try sending

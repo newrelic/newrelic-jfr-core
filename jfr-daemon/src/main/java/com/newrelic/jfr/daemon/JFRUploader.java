@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import jdk.jfr.consumer.RecordingFile;
@@ -40,7 +39,7 @@ public final class JFRUploader {
   private final Consumer<Path> fileDeleter;
   private final AtomicBoolean readinessCheck;
 
-  private JFRUploader(Builder builder){
+  private JFRUploader(Builder builder) {
     this.telemetryClient = builder.telemetryClient;
     this.recordedEventBuffer = builder.recordedEventBuffer;
     this.eventConverter = builder.eventConverter;
@@ -69,7 +68,7 @@ public final class JFRUploader {
   }
 
   private void maybeDrainAndSend() {
-    if(!readinessCheck.get()){
+    if (!readinessCheck.get()) {
       logger.warn("Drain attempt skipped -- readiness check not yet ready.");
       return;
     }
@@ -104,10 +103,9 @@ public final class JFRUploader {
     }
   }
 
-  public static Builder builder(){
+  public static Builder builder() {
     return new Builder();
   }
-
 
   public static class Builder {
     private TelemetryClient telemetryClient;
@@ -117,37 +115,37 @@ public final class JFRUploader {
     private Consumer<Path> fileDeleter = JFRUploader::deleteFile;
     private AtomicBoolean readinessCheck;
 
-    public Builder telemetryClient(TelemetryClient telemetryClient){
+    public Builder telemetryClient(TelemetryClient telemetryClient) {
       this.telemetryClient = telemetryClient;
       return this;
     }
 
-    public Builder recordedEventBuffer(RecordedEventBuffer recordedEventBuffer){
+    public Builder recordedEventBuffer(RecordedEventBuffer recordedEventBuffer) {
       this.recordedEventBuffer = recordedEventBuffer;
       return this;
     }
 
-    public Builder eventConverter(EventConverter converter){
+    public Builder eventConverter(EventConverter converter) {
       this.eventConverter = converter;
       return this;
     }
 
-    public Builder recordingFileOpener(Function<Path,RecordingFile> opener){
+    public Builder recordingFileOpener(Function<Path, RecordingFile> opener) {
       this.recordingFileOpener = opener;
       return this;
     }
 
-    public Builder fileDeleter(Consumer<Path> fileDeleter){
+    public Builder fileDeleter(Consumer<Path> fileDeleter) {
       this.fileDeleter = fileDeleter;
       return this;
     }
 
-    public Builder readinessCheck(AtomicBoolean readinessCheck){
+    public Builder readinessCheck(AtomicBoolean readinessCheck) {
       this.readinessCheck = readinessCheck;
       return this;
     }
 
-    public JFRUploader build(){
+    public JFRUploader build() {
       return new JFRUploader(this);
     }
   }
