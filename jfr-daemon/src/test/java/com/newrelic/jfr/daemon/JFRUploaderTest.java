@@ -103,13 +103,23 @@ class JFRUploaderTest {
     verifyNoInteractions(telemetryClient);
   }
 
+  @Test
+  public void testConvertThrowsExceptionIsHandled() throws Exception {
+    doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
+
+    var testClass = buildTestClass();
+
+    testClass.handleFile(filePath);
+    // no exception, and since we can't convert don't try sending
+    verifyNoMoreInteractions(telemetryClient);
+  }
+
   private JFRUploader buildTestClass() {
     return buildTestClass(true);
   }
 
   private JFRUploader buildTestClass(boolean ready) {
-    var testClass =
-        JFRUploader.builder()
+    return JFRUploader.builder()
             .telemetryClient(telemetryClient)
             .recordedEventBuffer(recordedEventBuffer)
             .eventConverter(eventConverter)
@@ -117,24 +127,5 @@ class JFRUploaderTest {
             .fileDeleter(deleter)
             .readinessCheck(new AtomicBoolean(ready))
             .build();
-    return testClass;
-  }
-
-  @Test
-  public void testConvertThrowsExceptionIsHandled() throws Exception {
-    doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
-
-    var testClass =
-        JFRUploader.builder()
-            .telemetryClient(telemetryClient)
-            .recordedEventBuffer(recordedEventBuffer)
-            .eventConverter(eventConverter)
-            .recordingFileOpener(x -> recordingFile)
-            .fileDeleter(deleter)
-            .build();
-
-    testClass.handleFile(filePath);
-    // no exception, and since we can't convert don't try sending
-    verifyNoMoreInteractions(telemetryClient);
   }
 }
