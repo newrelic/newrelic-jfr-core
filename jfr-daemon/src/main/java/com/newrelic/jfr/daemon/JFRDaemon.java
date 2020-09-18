@@ -21,13 +21,12 @@ import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
 import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuidCheck;
+import com.newrelic.telemetry.Attributes;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.newrelic.telemetry.Attributes;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +42,16 @@ public class JFRDaemon {
       var eventConverterReference = new AtomicReference<EventConverter>();
 
       RemoteEntityGuidCheck.builder()
-              .mbeanServerConnection(mBeanServerConnection)
-              .onComplete(guid -> {
+          .mbeanServerConnection(mBeanServerConnection)
+          .onComplete(
+              guid -> {
                 var attr = new JFRCommonAttributes(config).build(guid);
                 var eventConverter = buildEventConverter(attr);
                 eventConverterReference.set(eventConverter);
                 readinessCheck.set(true);
               })
-              .build()
-              .start();
+          .build()
+          .start();
       readinessCheck.set(true);
 
       var uploader = buildUploader(config, readinessCheck, eventConverterReference);
@@ -82,7 +82,9 @@ public class JFRDaemon {
   }
 
   static JFRUploader buildUploader(
-          DaemonConfig config, AtomicBoolean readinessCheck, AtomicReference<EventConverter> eventConverterReference)
+      DaemonConfig config,
+      AtomicBoolean readinessCheck,
+      AtomicReference<EventConverter> eventConverterReference)
       throws MalformedURLException {
     var telemetryClient = new TelemetryClientFactory().build(config);
     var queue = new LinkedBlockingQueue<RecordedEvent>(50000);

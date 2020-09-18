@@ -7,6 +7,8 @@
 
 package com.newrelic.jfr.daemon.lifecycle;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -21,8 +23,6 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 /**
  * Attempts to locate an entity guid string from a remote MBean. This guid can be used to link jfr
  * daemon data to an external entity.
@@ -34,41 +34,45 @@ public class RemoteEntityGuidCheck {
 
   private final Consumer<Optional<String>> onComplete;
   private final ScheduledExecutorService executorService;
-  private final Function<ObjectName,LinkingMetadataMBean> mBeanProxyCreator;
+  private final Function<ObjectName, LinkingMetadataMBean> mBeanProxyCreator;
 
   public RemoteEntityGuidCheck(Builder builder) {
     this.onComplete = builder.onComplete;
     this.executorService = builder.executorService;
-    this.mBeanProxyCreator = builder.mBeanProxyCreator;;
+    this.mBeanProxyCreator = builder.mBeanProxyCreator;
+    ;
   }
 
   /**
-   * Attempts to poll a remote LinkingMetadata MBean every second for the linking metadata so that it can obtain
-   * the entity guid. If the remote MBean is not found, this method invokes the onComplete callback
-   * with an empty Optional.  When the MBean is found, it is polled until the entity guid is obtained.
-   * will be
-   * executed with an empty Optional.  will return null. When the
+   * Attempts to poll a remote LinkingMetadata MBean every second for the linking metadata so that
+   * it can obtain the entity guid. If the remote MBean is not found, this method invokes the
+   * onComplete callback with an empty Optional. When the MBean is found, it is polled until the
+   * entity guid is obtained. will be executed with an empty Optional. will return null. When the
    * linking metadata does not yet contain an entity guid, then this code will enter a busy-wait
    * loop, checking every second forever until the entity guid is contained in the linking metadata.
    *
    * @return The entity guid of the remote service or null if the remote service does not expose the
    *     expected MBean.
    */
-  public void start(){
+  public void start() {
     start(Duration.ofSeconds(1));
   }
 
-  void start(Duration duration){
-      executorService.scheduleAtFixedRate(() -> {
+  void start(Duration duration) {
+    executorService.scheduleAtFixedRate(
+        () -> {
           Result result = tryToFetchGuid();
-          if(result.type == Result.Type.NO_AGENT || result.type == Result.Type.OK){
-              result.entityGuid.ifPresentOrElse(
-                      guid -> logger.info("Entity guid obtained from remote: " + guid),
-                      () -> logger.info("No remote agent, no entity guid."));
-              onComplete.accept(result.entityGuid);
-              executorService.shutdown();
+          if (result.type == Result.Type.NO_AGENT || result.type == Result.Type.OK) {
+            result.entityGuid.ifPresentOrElse(
+                guid -> logger.info("Entity guid obtained from remote: " + guid),
+                () -> logger.info("No remote agent, no entity guid."));
+            onComplete.accept(result.entityGuid);
+            executorService.shutdown();
           }
-      }, 0, duration.toMillis(), MILLISECONDS);
+        },
+        0,
+        duration.toMillis(),
+        MILLISECONDS);
   }
 
   private Result tryToFetchGuid() {
@@ -96,15 +100,15 @@ public class RemoteEntityGuidCheck {
   }
 
   // exists for testing
-//  LinkingMetadataMBean newMBeanProxy(ObjectName name) {
-//    return JMX.newMBeanProxy(mBeanServerConnection, name, LinkingMetadataMBean.class);
-//  }
+  //  LinkingMetadataMBean newMBeanProxy(ObjectName name) {
+  //    return JMX.newMBeanProxy(mBeanServerConnection, name, LinkingMetadataMBean.class);
+  //  }
 
   public interface LinkingMetadataMBean {
     Map<String, String> readLinkingMetadata();
   }
 
-  public static Builder builder(){
+  public static Builder builder() {
     return new Builder();
   }
 
@@ -137,34 +141,33 @@ public class RemoteEntityGuidCheck {
 
   public static class Builder {
 
-    private Function<ObjectName,LinkingMetadataMBean> mBeanProxyCreator;
+    private Function<ObjectName, LinkingMetadataMBean> mBeanProxyCreator;
     private Consumer<Optional<String>> onComplete;
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-    public Builder mbeanServerConnection(MBeanServerConnection conn){
+    public Builder mbeanServerConnection(MBeanServerConnection conn) {
       this.mBeanProxyCreator = name -> JMX.newMBeanProxy(conn, name, LinkingMetadataMBean.class);
       return this;
     }
 
-    public Builder mBeanProxyCreator(Function<ObjectName,LinkingMetadataMBean> mBeanProxyCreator){
+    public Builder mBeanProxyCreator(Function<ObjectName, LinkingMetadataMBean> mBeanProxyCreator) {
       this.mBeanProxyCreator = mBeanProxyCreator;
       return this;
     }
 
-    public Builder onComplete(Consumer<Optional<String>> onComplete){
+    public Builder onComplete(Consumer<Optional<String>> onComplete) {
       this.onComplete = onComplete;
       return this;
     }
 
     // Exists for testing
-    Builder executorService(ScheduledExecutorService service){
+    Builder executorService(ScheduledExecutorService service) {
       this.executorService = service;
       return this;
     }
 
-    public RemoteEntityGuidCheck build(){
+    public RemoteEntityGuidCheck build() {
       return new RemoteEntityGuidCheck(this);
     }
-
   }
 }
