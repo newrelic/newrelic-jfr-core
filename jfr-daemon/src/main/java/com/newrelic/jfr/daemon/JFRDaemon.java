@@ -52,7 +52,6 @@ public class JFRDaemon {
               })
           .build()
           .start();
-      readinessCheck.set(true);
 
       var uploader = buildUploader(config, readinessCheck, eventConverterReference);
       var jfrController = new JFRController(uploader, config);
