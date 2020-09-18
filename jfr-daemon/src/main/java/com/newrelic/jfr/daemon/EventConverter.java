@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,8 +124,7 @@ public class EventConverter {
 
     public EventConverter build() {
       if (commonAttributes == null) {
-        logger.warn("Warning: defaulting common attributes.");
-        commonAttributes = new Attributes();
+        throw new IllegalStateException("Common attributes are required");
       }
       return new EventConverter(this);
     }
