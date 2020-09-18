@@ -1,4 +1,4 @@
-name: main build
+name: main build publishes a snapshot
 
 on:
   push:
