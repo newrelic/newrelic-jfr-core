@@ -94,11 +94,6 @@ public class RemoteEntityGuidCheck {
     }
   }
 
-  // exists for testing
-  //  LinkingMetadataMBean newMBeanProxy(ObjectName name) {
-  //    return JMX.newMBeanProxy(mBeanServerConnection, name, LinkingMetadataMBean.class);
-  //  }
-
   public interface LinkingMetadataMBean {
     Map<String, String> readLinkingMetadata();
   }
