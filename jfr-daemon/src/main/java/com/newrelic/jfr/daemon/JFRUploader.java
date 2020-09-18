@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import jdk.jfr.consumer.RecordingFile;
@@ -34,7 +35,7 @@ public final class JFRUploader {
 
   private final TelemetryClient telemetryClient;
   private final RecordedEventBuffer recordedEventBuffer;
-  private final EventConverter eventConverter;
+  private final AtomicReference<EventConverter> eventConverter;
   private final Function<Path, RecordingFile> recordingFileOpener;
   private final Consumer<Path> fileDeleter;
   private final AtomicBoolean readinessCheck;
@@ -72,7 +73,7 @@ public final class JFRUploader {
       logger.warn("Drain attempt skipped -- readiness check not yet ready.");
       return;
     }
-    BufferedTelemetry telemetry = eventConverter.convert(recordedEventBuffer);
+    BufferedTelemetry telemetry = eventConverter.get().convert(recordedEventBuffer);
     sendMetrics(telemetry);
     sendEvents(telemetry);
   }
@@ -110,7 +111,7 @@ public final class JFRUploader {
   public static class Builder {
     private TelemetryClient telemetryClient;
     private RecordedEventBuffer recordedEventBuffer;
-    private EventConverter eventConverter;
+    private AtomicReference<EventConverter> eventConverter;
     private Function<Path, RecordingFile> recordingFileOpener = OPEN_RECORDING_FILE;
     private Consumer<Path> fileDeleter = JFRUploader::deleteFile;
     private AtomicBoolean readinessCheck;
@@ -125,7 +126,7 @@ public final class JFRUploader {
       return this;
     }
 
-    public Builder eventConverter(EventConverter converter) {
+    public Builder eventConverter(AtomicReference<EventConverter> converter) {
       this.eventConverter = converter;
       return this;
     }

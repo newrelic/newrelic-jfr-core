@@ -15,6 +15,7 @@ import com.newrelic.telemetry.metrics.MetricBatch;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,7 +123,7 @@ class JFRUploaderTest {
     return JFRUploader.builder()
         .telemetryClient(telemetryClient)
         .recordedEventBuffer(recordedEventBuffer)
-        .eventConverter(eventConverter)
+        .eventConverter(new AtomicReference<>(eventConverter))
         .recordingFileOpener(x -> recordingFile)
         .fileDeleter(deleter)
         .readinessCheck(new AtomicBoolean(ready))

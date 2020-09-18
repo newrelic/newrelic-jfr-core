@@ -20,12 +20,13 @@ import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.daemon.lifecycle.MBeanServerConnector;
-import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuid;
+import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuidCheck;
+import com.newrelic.telemetry.Attributes;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +39,21 @@ public class JFRDaemon {
       var config = buildConfig();
       var mBeanServerConnection = new MBeanServerConnector(config).getConnection();
       var readinessCheck = new AtomicBoolean(false);
+      var eventConverterReference = new AtomicReference<EventConverter>();
 
-      var entityGuid = new RemoteEntityGuid(mBeanServerConnection).queryFromJmx();
-      readinessCheck.set(true);
+      RemoteEntityGuidCheck.builder()
+          .mbeanServerConnection(mBeanServerConnection)
+          .onComplete(
+              guid -> {
+                var attr = new JFRCommonAttributes(config).build(guid);
+                var eventConverter = buildEventConverter(attr);
+                eventConverterReference.set(eventConverter);
+                readinessCheck.set(true);
+              })
+          .build()
+          .start();
 
-      var uploader = buildUploader(config, entityGuid, readinessCheck);
+      var uploader = buildUploader(config, readinessCheck, eventConverterReference);
       var jfrController = new JFRController(uploader, config);
       jfrController.setup();
       jfrController.loop(config.getHarvestInterval());
@@ -70,23 +81,22 @@ public class JFRDaemon {
   }
 
   static JFRUploader buildUploader(
-      DaemonConfig config, Optional<String> entityGuid, AtomicBoolean readinessCheck)
+      DaemonConfig config,
+      AtomicBoolean readinessCheck,
+      AtomicReference<EventConverter> eventConverterReference)
       throws MalformedURLException {
-
-    var attr = new JFRCommonAttributes(config).build(entityGuid);
-    var eventConverter = buildEventConverter(attr);
     var telemetryClient = new TelemetryClientFactory().build(config);
     var queue = new LinkedBlockingQueue<RecordedEvent>(50000);
     var recordedEventBuffer = new RecordedEventBuffer(queue);
     return JFRUploader.builder()
         .telemetryClient(telemetryClient)
         .recordedEventBuffer(recordedEventBuffer)
-        .eventConverter(eventConverter)
+        .eventConverter(eventConverterReference)
         .readinessCheck(readinessCheck)
         .build();
   }
 
-  private static EventConverter buildEventConverter(com.newrelic.telemetry.Attributes attr) {
+  private static EventConverter buildEventConverter(Attributes attr) {
     return EventConverter.builder()
         .commonAttributes(attr)
         .metricMappers(ToMetricRegistry.createDefault())

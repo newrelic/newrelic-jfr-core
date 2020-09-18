@@ -122,8 +122,7 @@ public class EventConverter {
 
     public EventConverter build() {
       if (commonAttributes == null) {
-        logger.warn("Warning: defaulting common attributes.");
-        commonAttributes = new Attributes();
+        throw new IllegalStateException("Common attributes are required");
       }
       return new EventConverter(this);
     }
