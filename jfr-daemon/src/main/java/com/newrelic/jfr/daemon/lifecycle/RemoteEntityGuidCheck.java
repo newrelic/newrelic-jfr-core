@@ -47,12 +47,7 @@ public class RemoteEntityGuidCheck {
    * Attempts to poll a remote LinkingMetadata MBean every second for the linking metadata so that
    * it can obtain the entity guid. If the remote MBean is not found, this method invokes the
    * onComplete callback with an empty Optional. When the MBean is found, it is polled until the
-   * entity guid is obtained. will be executed with an empty Optional. will return null. When the
-   * linking metadata does not yet contain an entity guid, then this code will enter a busy-wait
-   * loop, checking every second forever until the entity guid is contained in the linking metadata.
-   *
-   * @return The entity guid of the remote service or null if the remote service does not expose the
-   *     expected MBean.
+   * entity guid is obtained. Finally, when the entity guid is available the callback is invoked.
    */
   public void start() {
     start(Duration.ofSeconds(1));
