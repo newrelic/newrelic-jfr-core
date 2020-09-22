@@ -5,9 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Coming soon
-* If the agent is present, no longer wait for the agent to connect to obtain an entity guid.
+
+## Version 0.4.0 (2020-09-22)
+
+* JFR Daemon - If the agent is present, no longer wait for the agent to connect to obtain an entity guid.
 Instead, buffer the data and wait to send it until the entity guid is available.
-* Omit the app name from the common attributes when the entity guid is present
+* JFR Daemon - Omit the app name from the common attributes when the entity guid is present
 
 ## Version 0.3.0 (2020-07-31)
 
