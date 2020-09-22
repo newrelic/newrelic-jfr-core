@@ -11,6 +11,11 @@ allprojects {
     }
 }
 
+// -Prelease=true will render a non-snapshot version
+// All other values (including unset) will render a snapshot version.
+val release: String? by project
+version = if("true" == release) "${version}" else "${version}-SNAPSHOT"
+
 object Versions {
     const val junit = "5.6.2"
     const val mockitoJunit = "3.3.3"
@@ -54,7 +59,8 @@ subprojects {
             maven {
                 val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
                 val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-                url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+
+                url = if("true" == release) releasesRepoUrl else snapshotsRepoUrl
                 credentials {
                     username = System.getenv("SONATYPE_USERNAME")
                     password = System.getenv("SONATYPE_PASSWORD")
