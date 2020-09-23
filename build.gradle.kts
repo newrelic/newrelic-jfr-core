@@ -14,7 +14,6 @@ allprojects {
 // -Prelease=true will render a non-snapshot version
 // All other values (including unset) will render a snapshot version.
 val release: String? by project
-version = if("true" == release) "${version}" else "${version}-SNAPSHOT"
 
 object Versions {
     const val junit = "5.6.2"
@@ -23,6 +22,7 @@ object Versions {
 }
 
 subprojects {
+    version = if("true" == release) "${version}" else "${version}-SNAPSHOT"
 
     apply(plugin = "java")
     apply(plugin = "java-library")
