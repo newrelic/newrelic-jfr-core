@@ -105,7 +105,7 @@ default behavior, the following environment variables are recognized:
 | REMOTE_JMX_HOST       |     N     |  localhost          | The host to pull JFR data from via JMX        |
 | REMOTE_JMX_PORT       |     N     |  1099               | The port to pull JFR data from via JMX        |
 | METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1)         | Where to send metric data
-| EVENTS_INGEST_URI     |     N     |  [US production](https://trace-api.newrelic.com/v1/accounts/events) | Where to send event data
+| EVENTS_INGEST_URI     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events) | Where to send event data
 | JFR_SHARED_FILESYSTEM |     N     |  false              | Use a shared filesystem instead of streaming data from JMX
 
 ---
