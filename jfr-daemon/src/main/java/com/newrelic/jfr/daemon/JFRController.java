@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
 import javax.management.MBeanException;
 import javax.management.MalformedObjectNameException;
 import javax.management.ReflectionException;
@@ -58,7 +59,7 @@ public final class JFRController {
     }
   }
 
-  void loop(Duration harvestInterval) throws IOException {
+  void loop(Duration harvestInterval) throws IOException, JMException {
     while (!shutdown) {
       try {
         TimeUnit.MILLISECONDS.sleep(harvestInterval.toMillis());
@@ -90,9 +91,7 @@ public final class JFRController {
     executorService.shutdown();
   }
 
-  private void restartRecording()
-      throws IOException, MalformedObjectNameException, ReflectionException,
-          InstanceNotFoundException, MBeanException, OpenDataException {
+  private void restartRecording() throws IOException, JMException {
     recorder = JFRJMXRecorder.connectWithBackOff(config);
     recorder.startRecordingWithBackOff();
   }

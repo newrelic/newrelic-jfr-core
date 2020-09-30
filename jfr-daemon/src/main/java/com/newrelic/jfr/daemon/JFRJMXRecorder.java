@@ -12,7 +12,6 @@ import static javax.management.remote.JMXConnectorFactory.newJMXConnector;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import javax.management.*;
 import javax.management.openmbean.*;
 import javax.management.remote.JMXServiceURL;
-import jdk.jfr.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,15 +61,11 @@ public final class JFRJMXRecorder {
     }
   }
 
-  public void startRecordingWithBackOff()
-      throws MalformedObjectNameException, ReflectionException, IOException,
-          InstanceNotFoundException, MBeanException, OpenDataException {
+  public void startRecordingWithBackOff() throws JMException, IOException {
     startRecordingWithBackOff(0);
   }
 
-  public void startRecordingWithBackOff(int backoffIndex)
-      throws MalformedObjectNameException, ReflectionException, IOException,
-          InstanceNotFoundException, MBeanException, OpenDataException {
+  public void startRecordingWithBackOff(int backoffIndex) throws JMException, IOException {
     try {
       startRecording();
     } catch (Exception e) {
@@ -113,28 +107,17 @@ public final class JFRJMXRecorder {
     return new JFRJMXRecorder(connection, config.getHarvestInterval(), config.streamFromJmx());
   }
 
-  void startRecording()
-      throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
-          ReflectionException, IOException, OpenDataException {
+  void startRecording() throws JMException, IOException {
     logger.debug("In startRecording()");
 
-    final var objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
+    ObjectName objectName = makeFlightRecorderObjectName();
     var o = connection.invoke(objectName, "newRecording", new Object[] {}, new String[] {});
     if (!(o instanceof Long)) {
       throw new RuntimeException("JMX returned something that wasn't a Long: " + o);
     }
     recordingId = (Long) o;
 
-    try {
-      final String content = Configuration.getConfiguration("profile").getContents();
-      connection.invoke(
-          objectName,
-          "setConfiguration",
-          new Object[] {recordingId, content},
-          new String[] {"long", "java.lang.String"});
-    } catch (ParseException e) {
-      // TODO: Something
-    }
+    configureDefaultProfile();
 
     var maxAge = (harvestCycleDuration.toSeconds() + 10) + "s";
     Map<String, String> options = new HashMap<>();
@@ -150,6 +133,19 @@ public final class JFRJMXRecorder {
     // Now start the recording
     connection.invoke(
         objectName, "startRecording", new Object[] {recordingId}, new String[] {"long"});
+  }
+
+  private void configureDefaultProfile() throws IOException, JMException {
+    ObjectName objectName = makeFlightRecorderObjectName();
+    connection.invoke(
+        objectName,
+        "setPredefinedConfiguration",
+        new Object[] {recordingId, "profile"},
+        new String[] {"long", "java.lang.String"});
+  }
+
+  private ObjectName makeFlightRecorderObjectName() throws MalformedObjectNameException {
+    return new ObjectName("jdk.management.jfr:type=FlightRecorder");
   }
 
   /**
@@ -185,7 +181,7 @@ public final class JFRJMXRecorder {
       throws MalformedObjectNameException, ReflectionException, MBeanException,
           InstanceNotFoundException, IOException, OpenDataException {
 
-    var objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
+    ObjectName objectName = makeFlightRecorderObjectName();
     var oClone =
         connection.invoke(
             objectName,
@@ -273,7 +269,7 @@ public final class JFRJMXRecorder {
   Path copyRecordingToFile()
       throws MalformedObjectNameException, MBeanException, InstanceNotFoundException,
           ReflectionException, IOException {
-    var objectName = new ObjectName("jdk.management.jfr:type=FlightRecorder");
+    ObjectName objectName = makeFlightRecorderObjectName();
 
     var oClone =
         connection.invoke(
