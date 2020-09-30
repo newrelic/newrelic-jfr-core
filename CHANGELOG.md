@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Coming soon
 
+* tbd
+
 ## Version 0.5.0 (2020-09-30)
 * Update telemetry sdk to 0.8.0
 * Minor documentation/readme [change](https://github.com/newrelic/newrelic-jfr-core/pull/83).
