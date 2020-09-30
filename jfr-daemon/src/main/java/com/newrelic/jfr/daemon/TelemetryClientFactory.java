@@ -38,7 +38,7 @@ public class TelemetryClientFactory {
             .auditLoggingEnabled(true)
             .secondaryUserAgent(makeUserAgent(config));
     if (config.getEventsUri() != null) {
-      eventsConfig = eventsConfig.endpointWithPath(config.getEventsUri().toURL());
+      eventsConfig = eventsConfig.endpoint(config.getEventsUri().toURL());
     }
     return EventBatchSender.create(eventsConfig.build());
   }
@@ -51,7 +51,7 @@ public class TelemetryClientFactory {
             .secondaryUserAgent(makeUserAgent(config))
             .auditLoggingEnabled(true);
     if (config.getMetricsUri() != null) {
-      metricConfig = metricConfig.endpointWithPath(config.getMetricsUri().toURL());
+      metricConfig = metricConfig.endpoint(config.getMetricsUri().toURL());
     }
     return MetricBatchSender.create(metricConfig.build());
   }
