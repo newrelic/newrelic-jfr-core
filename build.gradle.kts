@@ -18,7 +18,7 @@ val release: String? by project
 object Versions {
     const val junit = "5.6.2"
     const val mockitoJunit = "3.3.3"
-    const val newRelicTelemetry = "0.8.0-SNAPSHOT"
+    const val newRelicTelemetry = "0.8.0"
 }
 
 subprojects {
