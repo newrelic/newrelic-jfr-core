@@ -2,6 +2,7 @@ private object Versions {
     const val slf4j = "1.7.26"
     const val gson = "2.8.6"
     const val log4j = "2.13.3"
+    const val newRelicTelemetry = "0.8.0"
 }
 
 plugins {
@@ -19,6 +20,7 @@ dependencies {
     api("org.slf4j:slf4j-api:${Versions.slf4j}")
     api("org.apache.logging.log4j:log4j-slf4j-impl:${Versions.log4j}")
     api("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
+    api("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
     implementation("com.google.code.gson:gson:${Versions.gson}")
 }
 
