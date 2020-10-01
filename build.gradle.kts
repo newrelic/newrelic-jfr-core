@@ -32,7 +32,6 @@ subprojects {
 
     dependencies {
         "api"("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
-        "api"("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
         "testImplementation"("org.mockito:mockito-junit-jupiter:${Versions.mockitoJunit}")
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
