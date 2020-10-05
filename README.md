@@ -18,10 +18,11 @@ send telemetry to New Relic.
 
 ## Installation
 
->[Include a step-by-step procedure on how to get your code installed. Be sure to include any third-party dependencies that need to be installed separately]
+For general usage of the produced artifacts see [JFR Mappers](#jfr-mappers) and [JFR Daemon](#jfr-daemon).
 
 ## Getting Started
->[Simple steps to start working with the software similar to a "Hello World"]
+
+To build the project see [Building](#building).
 
 ## Building
 
