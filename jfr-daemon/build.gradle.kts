@@ -6,6 +6,8 @@ val slf4jVersion: String by project
 
 plugins {
     id("org.beryx.jlink")
+    id("com.newrelic.jfr.package")
+    id("nebula.ospackage")
 }
 
 java {
@@ -25,8 +27,7 @@ jpmsExtraModules {
 
 dependencies {
     implementation(project(":jfr-mappers"))
-    implementation(jpms.asModule("org.apache.logging.log4j:log4j-core:${log4jVersion}", "org.apache.logging.log4j.core"))
-    implementation(jpms.asModule("org.apache.logging.log4j:log4j-api:${log4jVersion}", "log4j.api"))
+    implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
 }
 
 publishing {
@@ -79,6 +80,7 @@ application {
 jlink {
     imageDir.set(file("${buildDir}/jlink/${project.name}-${project.version}"))
     imageZip.set(file("${buildDir}/distributions/${project.name}-${project.version}-jlink.zip"))
+
 }
 
 tasks.named("build") {

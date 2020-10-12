@@ -1,7 +1,6 @@
 
 plugins {
     id("com.github.sherter.google-java-format") version "0.8" apply false
-    id("org.beryx.jlink") version("2.22.1") apply false
     id( "org.ysb33r.java.modulehelper") version("0.10.0") apply false
     id("com.github.johnrengelman.shadow") version ("5.2.0") apply false
 }

@@ -2,7 +2,7 @@
 
 # Required JDK
 
-THis can be built with JDK11, but if packaging is required then JDK14 must be used. The class files will still be JDK11-compatible.
+THis can be built with JDK11, The class files will be built to be JDK11-compatible.
 
 # JFR Core
 
