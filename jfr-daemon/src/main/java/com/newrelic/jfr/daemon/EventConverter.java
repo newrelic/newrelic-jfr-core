@@ -47,7 +47,8 @@ public class EventConverter {
 
     toSummaryRegistry.all().forEach(s -> s.summarizeAndReset().forEach(batches::addMetric));
 
-    logger.info("This conversion had " + eventCount.toString() + " events");
+    logger.debug("This conversion had " + eventCount.size() + " events");
+    logger.debug("Detailed view of event counts:  " + eventCount.toString());
     eventCount.clear();
 
     return batches;
