@@ -116,6 +116,15 @@ default behavior, the following environment variables are recognized:
 | EVENTS_INGEST_URI     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events) | Where to send event data
 | JFR_SHARED_FILESYSTEM |     N     |  false              | Use a shared filesystem instead of streaming data from JMX
 
+Expose remote JMX on the application that the jfr-daemon will be attaching to by adding the following system properties:
+
+```
+-Dcom.sun.management.jmxremote 
+-Dcom.sun.management.jmxremote.port=1099 
+-Dcom.sun.management.jmxremote.ssl=false 
+-Dcom.sun.management.jmxremote.authenticate=false
+```
+
 ---
 ## Support
 
