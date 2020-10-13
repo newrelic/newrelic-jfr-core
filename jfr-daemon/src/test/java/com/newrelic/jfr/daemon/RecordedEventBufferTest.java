@@ -92,7 +92,6 @@ class RecordedEventBufferTest {
     verify(recordingFile, times(3)).readEvent();
     // read 3 times, but only 1 and 2 made it in, even thought we always say we have more events
     assertEquals(List.of(e1, e2), result);
-
   }
 
   private RecordedEvent makeEvent(long ms) {
