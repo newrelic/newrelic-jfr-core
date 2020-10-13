@@ -1,5 +1,6 @@
 package com.newrelic.jfr.daemon;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
@@ -14,6 +15,8 @@ import com.newrelic.telemetry.events.EventBatch;
 import com.newrelic.telemetry.metrics.MetricBatch;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -80,6 +83,16 @@ class JFRUploaderTest {
 
     assertThrows(RuntimeException.class, () -> testClass.handleFile(filePath));
     assertTrue(deleterCalled.get());
+  }
+
+  @Test
+  public void testParentAlsoDeleted() throws Exception {
+    var expected = List.of(filePath, filePath.getParent());
+    var deletedPaths = new ArrayList<Path>();
+    deleter = deletedPaths::add;
+    JFRUploader testClass = buildTestClass();
+    testClass.handleFile(filePath);
+    assertEquals(expected, deletedPaths);
   }
 
   @Test

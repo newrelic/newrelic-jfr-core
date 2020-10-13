@@ -57,6 +57,7 @@ public final class JFRUploader {
       logger.error("Error handling raw dump file", e);
     } finally {
       fileDeleter.accept(dumpFile);
+      fileDeleter.accept(dumpFile.getParent());
     }
   }
 
