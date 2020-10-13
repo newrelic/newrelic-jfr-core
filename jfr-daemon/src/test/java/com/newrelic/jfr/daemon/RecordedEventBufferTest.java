@@ -8,6 +8,8 @@ package com.newrelic.jfr.daemon;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -68,6 +70,28 @@ class RecordedEventBufferTest {
     var result = testClass.drainToStream().collect(Collectors.toList());
     assertEquals(List.of(e11, e12, e22), result);
     assertEquals(0, queue.size());
+  }
+
+  @Test
+  public void testQueueGetsFilledUp() throws Exception {
+    var queue = new ArrayBlockingQueue<RecordedEvent>(2);
+    var dumpPath = new File("/tmp/file.jfr").toPath();
+
+    var e1 = makeEvent(666);
+    var e2 = makeEvent(667);
+    var e3 = makeEvent(668);
+    var recordingFile = mock(RecordingFile.class);
+
+    when(recordingFile.hasMoreEvents()).thenReturn(true);
+    when(recordingFile.readEvent()).thenReturn(e1, e2, e3);
+
+    var testClass = new RecordedEventBuffer(queue);
+    testClass.bufferEvents(dumpPath, recordingFile);
+    assertEquals(2, queue.size());
+    var result = testClass.drainToStream().collect(Collectors.toList());
+    verify(recordingFile, times(3)).readEvent();
+    // read 3 times, but only 1 and 2 made it in, even thought we always say we have more events
+    assertEquals(List.of(e1, e2), result);
   }
 
   private RecordedEvent makeEvent(long ms) {
