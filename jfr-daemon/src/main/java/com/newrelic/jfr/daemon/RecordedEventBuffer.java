@@ -38,7 +38,10 @@ public class RecordedEventBuffer {
     logger.debug("Looking in " + dumpFile + " for events after: " + ctx.getLastSeen());
     while (file.hasMoreEvents()) {
       var event = file.readEvent();
-      handleEvent(event);
+      if(!handleEvent(event)){
+        logger.warn("Ignoring remaining events in this file due to full queue!");
+        break;
+      }
     }
     logger.debug(
         "Queued events from: "
@@ -52,20 +55,20 @@ public class RecordedEventBuffer {
             + dumpFile);
   }
 
-  private void handleEvent(RecordedEvent event) {
+  private boolean handleEvent(RecordedEvent event) {
     ctx.update(event);
     if (event.getStartTime().isAfter(ctx.getLastSeen())) {
-      enqueue(event);
+      return enqueue(event);
     }
+    return true;
   }
 
-  private void enqueue(RecordedEvent event) {
-    try {
-      queue.put(event);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException("Error adding raw event to queue", e);
-    }
+  private boolean enqueue(RecordedEvent event) {
+      boolean success = queue.offer(event);
+      if(!success) {
+        logger.error("Rejecting RecordedEvent -- queue is full!!!");
+      }
+      return success;
   }
 
   public Stream<RecordedEvent> drainToStream() {

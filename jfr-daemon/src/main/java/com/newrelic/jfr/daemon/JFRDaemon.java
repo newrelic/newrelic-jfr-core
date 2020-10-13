@@ -86,7 +86,7 @@ public class JFRDaemon {
       AtomicReference<EventConverter> eventConverterReference)
       throws MalformedURLException {
     var telemetryClient = new TelemetryClientFactory().build(config);
-    var queue = new LinkedBlockingQueue<RecordedEvent>(50000);
+    var queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
     var recordedEventBuffer = new RecordedEventBuffer(queue);
     return JFRUploader.builder()
         .telemetryClient(telemetryClient)
