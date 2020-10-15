@@ -15,14 +15,14 @@ import jdk.jfr.consumer.RecordedEvent;
 public class PerThreadNetworkWriteSummarizer implements EventToSummary {
   private final String threadName;
   private final LongSummarizer bytesSummary;
-  private final DurationSummarizer duration;
+  private final SimpleDurationSummarizer duration;
 
   public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
-    this(threadName, new LongSummarizer("bytesWritten"), new DurationSummarizer(startTimeMs));
+    this(threadName, new LongSummarizer("bytesWritten"), new SimpleDurationSummarizer(startTimeMs));
   }
 
   public PerThreadNetworkWriteSummarizer(
-      String threadName, LongSummarizer longSummarizer, DurationSummarizer duration) {
+      String threadName, LongSummarizer longSummarizer, SimpleDurationSummarizer duration) {
     this.threadName = threadName;
     this.bytesSummary = longSummarizer;
     this.duration = duration;
