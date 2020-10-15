@@ -11,13 +11,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Supplier;
-import jdk.jfr.consumer.RecordedEvent;
 
 public abstract class BaseDurationSummarizer {
 
   public static final Supplier<Long> DEFAULT_CLOCK = () -> Instant.now().toEpochMilli();
   private final Supplier<Long> clock;
-  private final Optional<String> durationName;
+  protected final Optional<String> durationName;
   private long startTimeMs;
   protected long endTimeMs;
   protected Duration duration = Duration.ofNanos(0L);
@@ -37,10 +36,6 @@ public abstract class BaseDurationSummarizer {
     this.endTimeMs = this.startTimeMs;
     this.clock = clock;
     this.durationName = Optional.ofNullable(durationName);
-  }
-
-  protected Duration getDuration(RecordedEvent ev) {
-    return durationName.map(ev::getDuration).orElse(ev.getDuration());
   }
 
   public void reset() {

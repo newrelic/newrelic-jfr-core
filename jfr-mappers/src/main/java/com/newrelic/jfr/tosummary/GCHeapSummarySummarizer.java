@@ -17,20 +17,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 
-// jdk.GCHeapSummary {
-//        startTime = 12:02:06.330
-//        gcId = 940
-//        when = "Before GC"
-//        heapSpace = {
-//        start = 0xF4000000
-//        committedEnd = 0xFF9A0000
-//        committedSize = 185.6 MB
-//        reservedEnd = 0x100000000
-//        reservedSize = 192.0 MB
-//        }
-//        heapUsed = 175.8 MB
-//        }
-
 /**
  * This class aggregates the duration of GCHeapSummary JFR events. For GC purposes they come in
  * pairs.

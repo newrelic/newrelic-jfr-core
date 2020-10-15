@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class SimpleDurationSummarizer extends BaseDurationSummarizer {
+
   public SimpleDurationSummarizer(long startTimeMs) {
     super(startTimeMs);
   }
@@ -15,6 +16,10 @@ public class SimpleDurationSummarizer extends BaseDurationSummarizer {
 
   public SimpleDurationSummarizer(long startTimeMs, Supplier<Long> clock, String durationName) {
     super(startTimeMs, clock, durationName);
+  }
+
+  private Duration getDuration(RecordedEvent ev) {
+    return durationName.map(ev::getDuration).orElse(ev.getDuration());
   }
 
   public void accept(RecordedEvent ev) {
