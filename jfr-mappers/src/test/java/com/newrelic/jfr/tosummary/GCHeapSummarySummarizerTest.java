@@ -1,13 +1,17 @@
 package com.newrelic.jfr.tosummary;
 
+import com.newrelic.jfr.toevent.JITCompilationMapper;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
+
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +39,7 @@ class GCHeapSummarySummarizerTest {
   }
 
   @Test
-  void pairEventSummaryAndReset() {
+  void mock_pairEventSummaryAndReset() {
     var summaryStartTime = Instant.now().toEpochMilli();
 
     var before = mock(RecordedEvent.class);
@@ -51,7 +55,7 @@ class GCHeapSummarySummarizerTest {
 
     var after = mock(RecordedEvent.class);
     numOfEvents = numOfEvents + 1;
-    var afterStartTime = summaryStartTime + 2;
+    var afterStartTime = summaryStartTime + 11;
     var afterDurationNanos = 24800000; // max duration of final summary
     var afterDurationMillis = Duration.ofNanos(afterDurationNanos).toMillis();
 
@@ -59,17 +63,15 @@ class GCHeapSummarySummarizerTest {
     when(after.getStartTime()).thenReturn(Instant.ofEpochMilli(afterStartTime));
     when(after.getDuration("duration")).thenReturn(Duration.ofNanos(afterDurationNanos));
 
-
-    var summedDurationNanos = beforeDurationNanos + afterDurationNanos;
-    var summedDurationMillis = Duration.ofNanos(summedDurationNanos).toMillis();
+    var pairDurationMillis = afterStartTime - beforeStartTime;
 
     var expectedSummaryMetric =
             new Summary(
-                    "jfr:G1GarbageCollection.duration",
+                    "jfr:GarbageCollection.duration",
                     numOfEvents, // count
-                    summedDurationMillis, // sum
-                    beforeDurationMillis, // min
-                    afterDurationMillis, // max
+                    pairDurationMillis, // sum
+                    pairDurationMillis, // min
+                    pairDurationMillis, // max
                     summaryStartTime, // startTimeMs
                     afterStartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of
                     // each RecordedEvent
@@ -93,7 +95,57 @@ class GCHeapSummarySummarizerTest {
     assertEquals(defaultSummary.getSum(), resetResultSummary.getSum());
     assertEquals(defaultSummary.getMin(), resetResultSummary.getMin());
     assertEquals(defaultSummary.getMax(), resetResultSummary.getMax());
-
   }
 
+  @Test
+  void read_real_event() throws Exception {
+    final var dumpFile = Path.of("src", "test", "resources", "hotspot-pid-241-2020_10_15_12_02_23.jfr");
+
+    var testClass = new GCHeapSummarySummarizer();
+
+    try (final var recordingFile = new RecordingFile(dumpFile)) {
+      while (recordingFile.hasMoreEvents()) {
+        var event = recordingFile.readEvent();
+
+        if (event != null) {
+          if (event.getEventType().getName().equals(GCHeapSummarySummarizer.EVENT_NAME)) {
+            testClass.accept(event);
+          }
+        }
+      }
+    }
+    var resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+
+    // Summary should be reset to default values
+    assertEquals(2, resetResultSummary.getCount());
+    assertEquals(109.0, resetResultSummary.getSum());
+    assertEquals(109.0, resetResultSummary.getMin());
+    assertEquals(109.0, resetResultSummary.getMax());
+  }
+
+  @Test
+  void read_multiple_real_events() throws Exception {
+    final var dumpFile = Path.of("src", "test", "resources", "startup3.jfr");
+
+    var testClass = new GCHeapSummarySummarizer();
+
+    try (final var recordingFile = new RecordingFile(dumpFile)) {
+      while (recordingFile.hasMoreEvents()) {
+        var event = recordingFile.readEvent();
+
+        if (event != null) {
+          if (event.getEventType().getName().equals(GCHeapSummarySummarizer.EVENT_NAME)) {
+            testClass.accept(event);
+          }
+        }
+      }
+    }
+    var resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+
+    // Summary should be reset to default values
+    assertEquals(350, resetResultSummary.getCount());
+    assertEquals(105.0, resetResultSummary.getSum());
+    assertEquals(0.0, resetResultSummary.getMin());
+    assertEquals(3.0, resetResultSummary.getMax());
+  }
 }

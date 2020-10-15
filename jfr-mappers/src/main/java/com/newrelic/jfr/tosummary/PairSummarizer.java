@@ -11,16 +11,16 @@ public class PairSummarizer extends BaseDurationSummarizer {
   }
 
   public void accept(RecordedEvent before, RecordedEvent after) {
-    var duration =
+    var pairDuration =
         Duration.ofMillis(
             after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
     endTimeMs = after.getStartTime().toEpochMilli();
-    this.duration = this.duration.plus(duration);
-    if (duration.compareTo(maxDuration) > 0) {
-      maxDuration = duration;
+    duration = duration.plus(pairDuration);
+    if (pairDuration.compareTo(maxDuration) > 0) {
+      maxDuration = pairDuration;
     }
-    if (duration.compareTo(minDuration) < 0) {
-      minDuration = duration;
+    if (pairDuration.compareTo(minDuration) < 0) {
+      minDuration = pairDuration;
     }
   }
 }
