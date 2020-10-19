@@ -29,7 +29,7 @@ class JITCompilationMapperTest {
             .put("duration", duration.toMillis())
             .put("desc", "[missing]")
             .put("succeeded", true);
-    var expectedEvent = new Event("jfr:Compilation", expectedAttrs, startTime.toEpochMilli());
+    var expectedEvent = new Event("JfrCompilation", expectedAttrs, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);

@@ -33,9 +33,9 @@ public class GCHeapSummaryMapper implements EventToMetric {
             .put("reservedEnd", heapSpace.getLong("reservedEnd"));
 
     return List.of(
-        new Gauge("jfr:GCHeapSummary.heapUsed", heapUsed, timestamp, attr),
-        new Gauge("jfr:GCHeapSummary.heapCommittedSize", committedSize, timestamp, attr),
-        new Gauge("jfr:GCHeapSummary.reservedSize", reservedSize, timestamp, attr));
+        new Gauge("jfr.GCHeapSummary.heapUsed", heapUsed, timestamp, attr),
+        new Gauge("jfr.GCHeapSummary.heapCommittedSize", committedSize, timestamp, attr),
+        new Gauge("jfr.GCHeapSummary.reservedSize", reservedSize, timestamp, attr));
   }
 
   @Override

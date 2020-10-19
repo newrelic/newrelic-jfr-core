@@ -21,7 +21,7 @@ class ContextSwitchRateMapperTest {
 
     Gauge expectedGauge =
         new Gauge(
-            "jfr:ThreadContextSwitchRate", switchRate, timestamp.toEpochMilli(), new Attributes());
+            "jfr.ThreadContextSwitchRate", switchRate, timestamp.toEpochMilli(), new Attributes());
 
     RecordedEvent event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(timestamp);

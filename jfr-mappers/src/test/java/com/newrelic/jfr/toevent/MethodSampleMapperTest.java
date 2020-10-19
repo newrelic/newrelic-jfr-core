@@ -27,7 +27,7 @@ class MethodSampleMapperTest {
             .put(
                 "stackTrace",
                 "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":[]}");
-    var expectedEvent = new Event("jfr:MethodSample", expectedAttrs, startTime.toEpochMilli());
+    var expectedEvent = new Event("JfrMethodSample", expectedAttrs, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);

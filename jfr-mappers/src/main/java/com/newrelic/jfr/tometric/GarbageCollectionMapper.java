@@ -24,7 +24,7 @@ public class GarbageCollectionMapper implements EventToMetric {
     var attr =
         new Attributes().put("name", ev.getString("name")).put("cause", ev.getString("cause"));
 
-    return List.of(new Gauge("jfr:GarbageCollection.longestPause", longestPause, timestamp, attr));
+    return List.of(new Gauge("jfr.GarbageCollection.longestPause", longestPause, timestamp, attr));
   }
 
   @Override

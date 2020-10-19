@@ -44,7 +44,7 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
     var attr = new Attributes().put("thread.name", threadName);
     var outRead =
         new Summary(
-            "jfr:SocketRead.bytesRead",
+            "jfr.SocketRead.bytesRead",
             bytesSummary.getCount(),
             bytesSummary.getSum(),
             bytesSummary.getMin(),
@@ -54,7 +54,7 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
             attr);
     var outDuration =
         new Summary(
-            "jfr:SocketRead.duration",
+            "jfr.SocketRead.duration",
             bytesSummary.getCount(),
             duration.getDurationMillis(),
             duration.getMinDurationMillis(),

@@ -59,7 +59,7 @@ public class MethodSampleMapper implements EventToEvent {
     attr.put("thread.state", ev.getString("state"));
     attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
 
-    return List.of(new Event("jfr:MethodSample", attr, timestamp));
+    return List.of(new Event("JfrMethodSample", attr, timestamp));
   }
 
   @Override

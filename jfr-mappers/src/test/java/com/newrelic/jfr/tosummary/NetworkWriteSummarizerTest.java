@@ -27,7 +27,7 @@ class NetworkWriteSummarizerTest {
 
     var summary1bytes =
         new Summary(
-            "jfr:SocketWrite.bytesWritten",
+            "jfr.SocketWrite.bytesWritten",
             2,
             13 + 17,
             13,
@@ -37,7 +37,7 @@ class NetworkWriteSummarizerTest {
             new Attributes().put("thread.name", threadName1));
     var summary1duration =
         new Summary(
-            "jfr:SocketWrite.duration",
+            "jfr.SocketWrite.duration",
             2,
             Duration.between(time1, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
@@ -47,7 +47,7 @@ class NetworkWriteSummarizerTest {
             new Attributes().put("thread.name", threadName1));
     var summary2bytes =
         new Summary(
-            "jfr:SocketWrite.bytesWritten",
+            "jfr.SocketWrite.bytesWritten",
             1,
             12,
             12,
@@ -57,7 +57,7 @@ class NetworkWriteSummarizerTest {
             new Attributes().put("thread.name", threadName2));
     var summary2duration =
         new Summary(
-            "jfr:SocketWrite.duration",
+            "jfr.SocketWrite.duration",
             1,
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),

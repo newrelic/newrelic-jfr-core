@@ -26,7 +26,7 @@ class JVMInformationMapperTest {
             .put("jvmStartTime", startTime.toEpochMilli())
             .put("jvmVersion", jvmVersion);
     var expectedEvent =
-        new Event("jfr:JVMInformation", expectedAttributes, eventTime.toEpochMilli());
+        new Event("JfrJVMInformation", expectedAttributes, eventTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);

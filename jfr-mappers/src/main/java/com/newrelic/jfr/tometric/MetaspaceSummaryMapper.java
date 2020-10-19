@@ -17,7 +17,7 @@ import jdk.jfr.consumer.RecordedObject;
 
 public class MetaspaceSummaryMapper implements EventToMetric {
   public static final String EVENT_NAME = "jdk.MetaspaceSummary";
-  static final String NR_METRIC_PREFIX = "jfr:MetaspaceSummary.";
+  static final String NR_METRIC_PREFIX = "jfr.MetaspaceSummary.";
   static final String METASPACE_KEY = "metaspace";
   static final String DATA_SPACE_KEY = "dataSpace";
   static final String CLASS_SPACE_KEY = "classSpace";

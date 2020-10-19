@@ -22,7 +22,7 @@ class PerThreadObjectAllocationOutsideTLABSummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             0,
             0L,
             Long.MAX_VALUE,
@@ -45,7 +45,7 @@ class PerThreadObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             numOfEvents, // count
             eventAllocationSize, // sum
             eventAllocationSize, // min
@@ -105,7 +105,7 @@ class PerThreadObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             numOfEvents, // count
             summedAllocationSize, // sum
             event2AllocationSize, // min

@@ -22,7 +22,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             0,
             0L,
             Long.MAX_VALUE,
@@ -45,7 +45,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             numOfEvents, // count
             eventAllocationSize, // sum
             eventAllocationSize, // min
@@ -104,7 +104,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             numOfEvents, // count
             summedAllocationSize, // sum
             event2AllocationSize, // min

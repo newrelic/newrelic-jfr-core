@@ -27,7 +27,7 @@ class AllocationRequiringGCMapperTest {
     var size = 32784L;
 
     var attr = new Attributes().put("thread.name", eventThread);
-    var gauge = new Gauge("jfr:AllocationRequiringGC.allocationSize", size, now, attr);
+    var gauge = new Gauge("jfr.AllocationRequiringGC.allocationSize", size, now, attr);
     var expected = List.of(gauge);
 
     var testClass = new AllocationRequiringGCMapper();

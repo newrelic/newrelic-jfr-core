@@ -43,6 +43,6 @@ public class JVMInformationMapper implements EventToEvent {
     attr.put("jvmStartTime", event.getInstant("jvmStartTime").toEpochMilli());
     attr.put("jvmVersion", event.getString("jvmVersion"));
 
-    return List.of(new Event("jfr:JVMInformation", attr, timestamp));
+    return List.of(new Event("JfrJVMInformation", attr, timestamp));
   }
 }

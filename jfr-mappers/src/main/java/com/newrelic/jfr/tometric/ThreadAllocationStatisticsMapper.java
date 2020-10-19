@@ -27,7 +27,7 @@ public class ThreadAllocationStatisticsMapper implements EventToMetric {
       attr.put("thread.name", t.getJavaName()).put("thread.osName", t.getOSName());
     }
 
-    return List.of(new Gauge("jfr:ThreadAllocationStatistics.allocated", allocated, time, attr));
+    return List.of(new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, time, attr));
   }
 
   @Override
