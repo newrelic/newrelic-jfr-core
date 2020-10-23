@@ -24,7 +24,7 @@ class GarbageCollectionMapperTest {
     attr.put("name", name);
     attr.put("cause", cause);
     var longestPause = 21.77;
-    var gauge1 = new Gauge("jfr:GarbageCollection.longestPause", longestPause, now, attr);
+    var gauge1 = new Gauge("jfr.GarbageCollection.longestPause", longestPause, now, attr);
     List<Metric> expected = List.of(gauge1);
 
     var testClass = new GarbageCollectionMapper();

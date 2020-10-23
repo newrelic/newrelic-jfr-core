@@ -23,9 +23,9 @@ class OverallCPULoadMapperTest {
     var jvmUser = 21.77;
     var jvmSystem = 22.98;
     var machineTotal = 1203987.22;
-    var gauge1 = new Gauge("jfr:CPULoad.jvmUser", jvmUser, now, attr);
-    var gauge2 = new Gauge("jfr:CPULoad.jvmSystem", jvmSystem, now, attr);
-    var gauge3 = new Gauge("jfr:CPULoad.machineTotal", machineTotal, now, attr);
+    var gauge1 = new Gauge("jfr.CPULoad.jvmUser", jvmUser, now, attr);
+    var gauge2 = new Gauge("jfr.CPULoad.jvmSystem", jvmSystem, now, attr);
+    var gauge3 = new Gauge("jfr.CPULoad.machineTotal", machineTotal, now, attr);
     List<Metric> expected = List.of(gauge1, gauge2, gauge3);
 
     var testClass = new OverallCPULoadMapper();

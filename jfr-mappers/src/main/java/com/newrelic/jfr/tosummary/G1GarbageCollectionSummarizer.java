@@ -55,7 +55,7 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
     var attr = new Attributes();
     var out =
         new Summary(
-            "jfr:G1GarbageCollection.duration",
+            "jfr.G1GarbageCollection.duration",
             count,
             summarizer.getDurationMillis(),
             summarizer.getMinDurationMillis(),

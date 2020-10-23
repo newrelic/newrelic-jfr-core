@@ -50,7 +50,7 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
     var attr = new Attributes().put("thread.name", threadName);
     var out =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             summarizer.getCount(),
             summarizer.getSum(),
             summarizer.getMin(),

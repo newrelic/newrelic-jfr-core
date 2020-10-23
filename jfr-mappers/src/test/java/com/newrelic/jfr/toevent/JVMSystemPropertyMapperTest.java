@@ -23,7 +23,7 @@ class JVMSystemPropertyMapperTest {
     expectedAttrs.put("jvmProperty", key);
     expectedAttrs.put("jvmPropertyValue", value);
 
-    var expectedEvent = new Event("jfr:JVMInformation", expectedAttrs, startTime.toEpochMilli());
+    var expectedEvent = new Event("JfrJVMInformation", expectedAttrs, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var mapper = new JVMSystemPropertyMapper();

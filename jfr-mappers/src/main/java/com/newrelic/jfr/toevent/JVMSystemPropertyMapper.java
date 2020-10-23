@@ -33,6 +33,6 @@ public class JVMSystemPropertyMapper implements EventToEvent {
     attr.put("jvmProperty", event.getString("key"));
     attr.put("jvmPropertyValue", event.getString("value"));
 
-    return List.of(new Event("jfr:JVMInformation", attr, timestamp));
+    return List.of(new Event("JfrJVMInformation", attr, timestamp));
   }
 }

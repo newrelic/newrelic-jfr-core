@@ -29,7 +29,7 @@ class ThreadLockEventMapperTest {
             .put("class", monitorClassName)
             .put("duration", duration.toMillis());
     var expectedEvent =
-        new Event("jfr:JavaMonitorWait", expectedAttributes, startTime.toEpochMilli());
+        new Event("JfrJavaMonitorWait", expectedAttributes, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);

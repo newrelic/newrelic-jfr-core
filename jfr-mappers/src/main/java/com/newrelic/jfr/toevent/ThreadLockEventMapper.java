@@ -29,7 +29,7 @@ public class ThreadLockEventMapper implements EventToEvent {
       attr.put("class", ev.getClass("monitorClass").getName());
       attr.put("duration", duration.toMillis());
 
-      return List.of(new Event("jfr:JavaMonitorWait", attr, timestamp));
+      return List.of(new Event("JfrJavaMonitorWait", attr, timestamp));
     }
     return List.of();
   }

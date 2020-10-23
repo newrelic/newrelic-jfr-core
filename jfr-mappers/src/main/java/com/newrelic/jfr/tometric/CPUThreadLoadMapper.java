@@ -37,8 +37,8 @@ public class CPUThreadLoadMapper implements EventToMetric {
 
       // Do we need to throttle these events somehow? Or just send everything?
       return List.of(
-          new Gauge("jfr:ThreadCPULoad.user", ev.getDouble("user"), timestamp, attr),
-          new Gauge("jfr:ThreadCPULoad.system", ev.getDouble("system"), timestamp, attr));
+          new Gauge("jfr.ThreadCPULoad.user", ev.getDouble("user"), timestamp, attr),
+          new Gauge("jfr.ThreadCPULoad.system", ev.getDouble("system"), timestamp, attr));
     }
     return List.of();
   }

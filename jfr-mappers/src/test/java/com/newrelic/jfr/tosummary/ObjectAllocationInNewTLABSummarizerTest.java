@@ -22,7 +22,7 @@ class ObjectAllocationInNewTLABSummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             0,
             0L,
             Long.MAX_VALUE,
@@ -45,7 +45,7 @@ class ObjectAllocationInNewTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             numOfEvents, // count
             eventTlabSize, // sum
             eventTlabSize, // min
@@ -104,7 +104,7 @@ class ObjectAllocationInNewTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             numOfEvents, // count
             summedTlabSize, // sum
             event2TlabSize, // min

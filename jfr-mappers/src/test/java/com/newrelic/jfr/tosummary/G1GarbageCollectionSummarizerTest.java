@@ -23,7 +23,7 @@ class G1GarbageCollectionSummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             0,
             Duration.ofNanos(0L).toMillis(),
             Duration.ofNanos(Long.MAX_VALUE).toMillis(),
@@ -45,7 +45,7 @@ class G1GarbageCollectionSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:G1GarbageCollection.duration",
+            "jfr.G1GarbageCollection.duration",
             numOfEvents, // count
             eventDurationMillis, // sum
             eventDurationMillis, // min
@@ -100,7 +100,7 @@ class G1GarbageCollectionSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:G1GarbageCollection.duration",
+            "jfr.G1GarbageCollection.duration",
             numOfEvents, // count
             summedDurationMillis, // sum
             event3DurationMillis, // min

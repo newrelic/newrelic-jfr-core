@@ -26,8 +26,8 @@ class CPUThreadLoadMapperTest {
 
     Attributes attributes = new Attributes().put("thread.name", threadName);
 
-    Metric gauge1 = new Gauge("jfr:ThreadCPULoad.user", user, timestamp, attributes);
-    Metric gauge2 = new Gauge("jfr:ThreadCPULoad.system", system, timestamp, attributes);
+    Metric gauge1 = new Gauge("jfr.ThreadCPULoad.user", user, timestamp, attributes);
+    Metric gauge2 = new Gauge("jfr.ThreadCPULoad.system", system, timestamp, attributes);
     List<Metric> expected = List.of(gauge1, gauge2);
 
     RecordedEvent event = mock(RecordedEvent.class);

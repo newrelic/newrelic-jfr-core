@@ -27,7 +27,7 @@ class NetworkReadSummarizerTest {
 
     var summary1bytes =
         new Summary(
-            "jfr:SocketRead.bytesRead",
+            "jfr.SocketRead.bytesRead",
             2,
             13 + 17,
             13,
@@ -37,7 +37,7 @@ class NetworkReadSummarizerTest {
             new Attributes().put("thread.name", threadName1));
     var summary1duration =
         new Summary(
-            "jfr:SocketRead.duration",
+            "jfr.SocketRead.duration",
             2,
             Duration.between(time1, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
@@ -47,7 +47,7 @@ class NetworkReadSummarizerTest {
             new Attributes().put("thread.name", threadName1));
     var summary2bytes =
         new Summary(
-            "jfr:SocketRead.bytesRead",
+            "jfr.SocketRead.bytesRead",
             1,
             12,
             12,
@@ -57,7 +57,7 @@ class NetworkReadSummarizerTest {
             new Attributes().put("thread.name", threadName2));
     var summary2duration =
         new Summary(
-            "jfr:SocketRead.duration",
+            "jfr.SocketRead.duration",
             1,
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),

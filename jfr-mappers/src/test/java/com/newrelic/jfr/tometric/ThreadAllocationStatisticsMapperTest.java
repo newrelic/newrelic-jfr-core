@@ -26,7 +26,7 @@ class ThreadAllocationStatisticsMapperTest {
     var allocated = 1250229920d;
 
     var attr = new Attributes().put("thread.name", threadName).put("thread.osName", threadOsName);
-    var gauge = new Gauge("jfr:ThreadAllocationStatistics.allocated", allocated, now, attr);
+    var gauge = new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, now, attr);
     var expected = List.of(gauge);
 
     var testClass = new ThreadAllocationStatisticsMapper();
@@ -50,7 +50,7 @@ class ThreadAllocationStatisticsMapperTest {
     var allocated = 1250229920d;
 
     var attr = new Attributes();
-    var gauge = new Gauge("jfr:ThreadAllocationStatistics.allocated", allocated, now, attr);
+    var gauge = new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, now, attr);
     var expected = List.of(gauge);
 
     var testClass = new ThreadAllocationStatisticsMapper();

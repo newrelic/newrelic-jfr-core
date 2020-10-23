@@ -50,7 +50,7 @@ public final class PerThreadObjectAllocationInNewTLABSummarizer implements Event
     var attr = new Attributes().put("thread.name", threadName);
     var out =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             summarizer.getCount(),
             summarizer.getSum(),
             summarizer.getMin(),
