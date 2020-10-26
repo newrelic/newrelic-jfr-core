@@ -46,7 +46,7 @@ public final class PerThreadObjectAllocationInNewTLABSummarizer implements Event
   }
 
   @Override
-  public Stream<Summary> summarizeAndReset() {
+  public Stream<Summary> summarize() {
     var attr = new Attributes().put("thread.name", threadName);
     var out =
         new Summary(
@@ -58,7 +58,6 @@ public final class PerThreadObjectAllocationInNewTLABSummarizer implements Event
             startTimeMs,
             endTimeMs,
             attr);
-    reset();
     return Stream.of(out);
   }
 

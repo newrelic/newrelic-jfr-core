@@ -45,7 +45,10 @@ public interface EventToSummary extends Consumer<RecordedEvent>, Predicate<Recor
    *
    * @return List of Summary metrics for JFR Events
    */
-  Stream<Summary> summarizeAndReset();
+  Stream<Summary> summarize();
+
+  /** Clears the summary information */
+  void reset();
 
   /**
    * Returns the Java version where particular JFR events were added.
