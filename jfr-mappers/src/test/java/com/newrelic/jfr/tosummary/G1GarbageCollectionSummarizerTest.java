@@ -34,7 +34,7 @@ class G1GarbageCollectionSummarizerTest {
   }
 
   @Test
-  void testSingleEventSummaryAndReset() {
+  void testSingleEventSummary() {
     var summaryStartTime = Instant.now().toEpochMilli();
 
     var event = mock(RecordedEvent.class);
@@ -62,20 +62,12 @@ class G1GarbageCollectionSummarizerTest {
     when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(event);
-    final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
-
+    final List<Summary> result = testClass.summarize().collect(toList());
     assertEquals(expected, result);
-
-    // Summary should be reset to default values
-    assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
-    assertEquals(defaultSummary.getSum(), resetResultSummary.getSum());
-    assertEquals(defaultSummary.getMin(), resetResultSummary.getMin());
-    assertEquals(defaultSummary.getMax(), resetResultSummary.getMax());
   }
 
   @Test
-  void testMultipleEventSummaryAndReset() {
+  void testMultipleEventSummary() {
     var summaryStartTime = Instant.now().toEpochMilli();
 
     var event1 = mock(RecordedEvent.class);
@@ -128,10 +120,44 @@ class G1GarbageCollectionSummarizerTest {
     testClass.accept(event2);
     testClass.accept(event3);
 
-    var result = testClass.summarizeAndReset().collect(toList());
+    var result = testClass.summarize().collect(toList());
+    assertEquals(expected, result);
+  }
+
+  @Test
+  void testReset() {
+    var summaryStartTime = Instant.now().toEpochMilli();
+
+    var event = mock(RecordedEvent.class);
+    var numOfEvents = 1;
+    var eventStartTime = summaryStartTime + 1;
+    var eventDurationNanos = 13700000;
+    var eventDurationMillis = Duration.ofNanos(eventDurationNanos).toMillis();
+
+    var expectedSummaryMetric =
+        new Summary(
+            "jfr.G1GarbageCollection.duration",
+            numOfEvents, // count
+            eventDurationMillis, // sum
+            eventDurationMillis, // min
+            eventDurationMillis, // max
+            summaryStartTime, // startTimeMs
+            eventStartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of each
+            // RecordedEvent
+            new Attributes());
+
+    List<Metric> expected = List.of(expectedSummaryMetric);
+    var testClass = new G1GarbageCollectionSummarizer(summaryStartTime);
+
+    when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
+    when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+
+    testClass.accept(event);
+    final List<Summary> result = testClass.summarize().collect(toList());
     assertEquals(expected, result);
 
-    var resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+    testClass.reset();
+    final Summary resetResultSummary = testClass.summarize().collect(toList()).get(0);
 
     // Summary should be reset to default values
     assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());

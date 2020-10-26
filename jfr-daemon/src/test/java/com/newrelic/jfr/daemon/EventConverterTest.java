@@ -62,7 +62,7 @@ class EventConverterTest {
 
     when(toSummaryRegistry.all()).thenAnswer(x -> Stream.of(eventToSummary));
     when(eventToSummary.test(e3)).thenReturn(true);
-    doReturn(Stream.of(summary)).when(eventToSummary).summarizeAndReset();
+    doReturn(Stream.of(summary)).when(eventToSummary).summarize();
 
     var testClass =
         EventConverter.builder()
