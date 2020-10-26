@@ -18,8 +18,7 @@ public abstract class AbstractThreadDispatchingSummarizer implements EventToSumm
 
   @Override
   public Stream<Summary> summarize() {
-    Stream<Summary> summaryStream = perThread.values().stream().flatMap(EventToSummary::summarize);
-    return summaryStream;
+    return perThread.values().stream().flatMap(EventToSummary::summarize);
   }
 
   @Override
