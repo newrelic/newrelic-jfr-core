@@ -49,7 +49,6 @@ class JFRCommonAttributesTest {
 
     var expected =
         new Attributes(COMMON_ATTRIBUTES)
-            .put(SERVICE_NAME, config.getMonitoredAppName())
             .put(HOSTNAME, "example.com")
             .put("entity.guid", entityGuid.get());
 
