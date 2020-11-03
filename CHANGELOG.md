@@ -5,8 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Coming soon
-
 * tbd
+
+## Version 1.0.0 (2020-11-03)
+* **Initial 1.0.0 GA release**
+* `jfr-mappers` module [no longer depends on `telemetry-java-http11`](https://github.com/newrelic/newrelic-jfr-core/pull/90).
+* [Fix for a potential freeze](https://github.com/newrelic/newrelic-jfr-core/pull/97) when the number of events in a 
+single JFR recording file exceeds the maximum queue size.
+* [Clean up temp dirs](https://github.com/newrelic/newrelic-jfr-core/pull/96) to prevent resource leak.
+* [Use camel case](https://github.com/newrelic/newrelic-jfr-core/pull/100) for event/metric names instead of inconsistent delimiter.
+* [Clear per-thread cache data](https://github.com/newrelic/newrelic-jfr-core/pull/101) between harvest cycles to prevent monotonic growth.
+* [Omit the service name](https://github.com/newrelic/newrelic-jfr-core/pull/102) when the java agent is also running on the target process (favor using entity guid instead).
 
 ## Version 0.5.0 (2020-09-30)
 * Update telemetry sdk to 0.8.0.
