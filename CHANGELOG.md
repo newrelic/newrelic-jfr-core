@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
-## Version 1.0.0 (2020-11-02)
+## Version 1.0.0 (2020-11-03)
 * **Initial 1.0.0 GA release**
 * `jfr-mappers` module [no longer depends on `telemetry-java-http11`](https://github.com/newrelic/newrelic-jfr-core/pull/90).
 * [Fix for a potential freeze](https://github.com/newrelic/newrelic-jfr-core/pull/97) when the number of events in a 
