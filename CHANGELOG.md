@@ -15,7 +15,7 @@ single JFR recording file exceeds the maximum queue size.
 * [Clean up temp dirs](https://github.com/newrelic/newrelic-jfr-core/pull/96) to prevent resource leak.
 * [Use camel case](https://github.com/newrelic/newrelic-jfr-core/pull/100) for event/metric names instead of inconsistent delimiter.
 * [Clear per-thread cache data](https://github.com/newrelic/newrelic-jfr-core/pull/101) between harvest cycles to prevent monotonic growth.
-* [Omit the service name](https://github.com/newrelic/newrelic-jfr-core/pull/102) when 
+* [Omit the service name](https://github.com/newrelic/newrelic-jfr-core/pull/102) when the java agent is also running on the target process (favor using entity guid instead).
 
 ## Version 0.5.0 (2020-09-30)
 * Update telemetry sdk to 0.8.0.
