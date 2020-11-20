@@ -76,7 +76,7 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
   }
 
   @Override
-  public Stream<Summary> summarizeAndReset() {
+  public Stream<Summary> summarize() {
     var attr = new Attributes();
     var out =
         new Summary(
@@ -92,6 +92,7 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
     return Stream.of(out);
   }
 
+  @Override
   public void reset() {
     startTimeMs = Instant.now().toEpochMilli();
     endTimeMs = 0L;
