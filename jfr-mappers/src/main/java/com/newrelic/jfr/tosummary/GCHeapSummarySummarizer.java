@@ -80,7 +80,7 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
     var attr = new Attributes();
     var out =
         new Summary(
-            "jfr:GarbageCollection.duration",
+            "jfr.GarbageCollection.duration",
             count,
             summarizer.getDurationMillis(),
             summarizer.getMinDurationMillis(),

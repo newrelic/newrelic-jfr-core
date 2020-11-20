@@ -24,7 +24,7 @@ class GCHeapSummarySummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             0,
             Duration.ofNanos(0L).toMillis(),
             Duration.ofNanos(Long.MAX_VALUE).toMillis(),
@@ -62,7 +62,7 @@ class GCHeapSummarySummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:GarbageCollection.duration",
+            "jfr.GarbageCollection.duration",
             numOfEvents, // count
             pairDurationMillis, // sum
             pairDurationMillis, // min
