@@ -2,6 +2,7 @@ package com.newrelic.jfr.tosummary;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +23,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             0,
             0L,
             Long.MAX_VALUE,
@@ -33,7 +34,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
   }
 
   @Test
-  void testSingleEventSummaryAndReset() {
+  void testSingleEventSummary() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
 
@@ -45,7 +46,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             numOfEvents, // count
             eventAllocationSize, // sum
             eventAllocationSize, // min
@@ -67,20 +68,14 @@ class ObjectAllocationOutsideTLABSummarizerTest {
 
     testClass.accept(event);
 
-    final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+    final List<Summary> result = testClass.summarize().collect(toList());
+    final Summary resetResultSummary = testClass.summarize().collect(toList()).get(0);
 
     assertEquals(expected, result);
-
-    // Summary should be reset to default values
-    assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
-    assertEquals(defaultSummary.getSum(), resetResultSummary.getSum());
-    assertEquals(defaultSummary.getMin(), resetResultSummary.getMin());
-    assertEquals(defaultSummary.getMax(), resetResultSummary.getMax());
   }
 
   @Test
-  void testMultipleEventSummaryAndReset() {
+  void testMultipleEventSummary() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
 
@@ -104,7 +99,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             numOfEvents, // count
             summedAllocationSize, // sum
             event2AllocationSize, // min
@@ -137,15 +132,36 @@ class ObjectAllocationOutsideTLABSummarizerTest {
     testClass.accept(event2);
     testClass.accept(event3);
 
-    final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+    final List<Summary> result = testClass.summarize().collect(toList());
+    final Summary resetResultSummary = testClass.summarize().collect(toList()).get(0);
 
     assertEquals(expected, result);
+  }
 
-    // Summary should be reset to default values
-    assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
-    assertEquals(defaultSummary.getSum(), resetResultSummary.getSum());
-    assertEquals(defaultSummary.getMin(), resetResultSummary.getMin());
-    assertEquals(defaultSummary.getMax(), resetResultSummary.getMax());
+  @Test
+  void testReset() {
+    var recordedThread = mock(RecordedThread.class);
+    var eventThreadName = "main";
+
+    var event = mock(RecordedEvent.class);
+    var eventStartTime = Instant.now().toEpochMilli();
+    var eventAllocationSize = 1500L;
+
+    var testClass = new ObjectAllocationOutsideTLABSummarizer();
+
+    when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
+    when(event.getValue("eventThread")).thenReturn(recordedThread);
+    when(event.getLong("allocationSize")).thenReturn(eventAllocationSize);
+
+    when(recordedThread.getJavaName()).thenReturn(eventThreadName);
+
+    testClass.accept(event);
+
+    final List<Summary> result = testClass.summarize().collect(toList());
+    assertEquals(1, result.size());
+
+    testClass.reset();
+    final List<Summary> summarizers = testClass.summarize().collect(toList());
+    assertTrue(summarizers.isEmpty());
   }
 }

@@ -22,7 +22,7 @@ class PerThreadObjectAllocationInNewTLABSummarizerTest {
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             0,
             0L,
             Long.MAX_VALUE,
@@ -33,7 +33,7 @@ class PerThreadObjectAllocationInNewTLABSummarizerTest {
   }
 
   @Test
-  void testSingleEventSummaryAndReset() {
+  void testSingleEventSummary() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
 
@@ -45,7 +45,7 @@ class PerThreadObjectAllocationInNewTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             numOfEvents, // count
             eventTlabSize, // sum
             eventTlabSize, // min
@@ -68,20 +68,14 @@ class PerThreadObjectAllocationInNewTLABSummarizerTest {
 
     testClass.accept(event);
 
-    final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
+    final List<Summary> result = testClass.summarize().collect(toList());
+    final Summary resetResultSummary = testClass.summarize().collect(toList()).get(0);
 
     assertEquals(expected, result);
-
-    // Summary should be reset to default values
-    assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());
-    assertEquals(defaultSummary.getSum(), resetResultSummary.getSum());
-    assertEquals(defaultSummary.getMin(), resetResultSummary.getMin());
-    assertEquals(defaultSummary.getMax(), resetResultSummary.getMax());
   }
 
   @Test
-  void testMultipleEventSummaryAndReset() {
+  void testMultipleEventSummary() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
 
@@ -105,7 +99,7 @@ class PerThreadObjectAllocationInNewTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr:ObjectAllocationInNewTLAB.allocation",
+            "jfr.ObjectAllocationInNewTLAB.allocation",
             numOfEvents, // count
             summedTlabSize, // sum
             event2TlabSize, // min
@@ -139,10 +133,51 @@ class PerThreadObjectAllocationInNewTLABSummarizerTest {
     testClass.accept(event2);
     testClass.accept(event3);
 
-    final List<Summary> result = testClass.summarizeAndReset().collect(toList());
-    final Summary resetResultSummary = testClass.summarizeAndReset().collect(toList()).get(0);
-
+    final List<Summary> result = testClass.summarize().collect(toList());
     assertEquals(expected, result);
+  }
+
+  @Test
+  public void testReset() {
+    var recordedThread = mock(RecordedThread.class);
+    var eventThreadName = "main";
+
+    var event = mock(RecordedEvent.class);
+    var numOfEvents = 1;
+    var eventStartTime = Instant.now().toEpochMilli();
+    var eventTlabSize = 847L;
+    var attr = new Attributes().put("thread.name", eventThreadName);
+
+    var expectedSummaryMetric =
+        new Summary(
+            "jfr.ObjectAllocationInNewTLAB.allocation",
+            numOfEvents, // count
+            eventTlabSize, // sum
+            eventTlabSize, // min
+            eventTlabSize, // max
+            eventStartTime, // startTimeMs: the summary metric startTimeMs is the eventStartTime of
+            // the initial RecordedEvent
+            eventStartTime, // endTimeMs: the summary metric endTimeMs is the eventStartTime of the
+            // last RecordedEvent
+            attr); // attributes contain threadName
+
+    List<Metric> expected = List.of(expectedSummaryMetric);
+    var testClass =
+        new PerThreadObjectAllocationInNewTLABSummarizer(eventThreadName, eventStartTime);
+
+    when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
+    when(event.getValue("eventThread")).thenReturn(recordedThread);
+    when(event.getLong("tlabSize")).thenReturn(eventTlabSize);
+
+    when(recordedThread.getJavaName()).thenReturn(eventThreadName);
+
+    testClass.accept(event);
+
+    final List<Summary> result = testClass.summarize().collect(toList());
+    assertEquals(expected, result);
+
+    testClass.reset();
+    final Summary resetResultSummary = testClass.summarize().collect(toList()).get(0);
 
     // Summary should be reset to default values
     assertEquals(defaultSummary.getCount(), resetResultSummary.getCount());

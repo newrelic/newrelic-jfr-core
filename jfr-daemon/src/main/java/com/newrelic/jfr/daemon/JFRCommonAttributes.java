@@ -44,11 +44,13 @@ public class JFRCommonAttributes {
 
   public Attributes build(Optional<String> entityGuid) {
     var hostname = findHostname();
-    var attr =
-        COMMON_ATTRIBUTES.put(SERVICE_NAME, config.getMonitoredAppName()).put(HOSTNAME, hostname);
+    var attr = COMMON_ATTRIBUTES.put(HOSTNAME, hostname);
     entityGuid.ifPresentOrElse(
         guid -> attr.put("entity.guid", guid),
-        () -> attr.put(APP_NAME, config.getMonitoredAppName()));
+        () -> {
+          attr.put(APP_NAME, config.getMonitoredAppName());
+          attr.put(SERVICE_NAME, config.getMonitoredAppName());
+        });
     return attr;
   }
 

@@ -25,9 +25,9 @@ public class OverallCPULoadMapper implements EventToMetric {
     var timestamp = ev.getStartTime().toEpochMilli();
     var attr = new Attributes();
     return List.of(
-        new Gauge("jfr:CPULoad.jvmUser", ev.getDouble("jvmUser"), timestamp, attr),
-        new Gauge("jfr:CPULoad.jvmSystem", ev.getDouble("jvmSystem"), timestamp, attr),
-        new Gauge("jfr:CPULoad.machineTotal", ev.getDouble("machineTotal"), timestamp, attr));
+        new Gauge("jfr.CPULoad.jvmUser", ev.getDouble("jvmUser"), timestamp, attr),
+        new Gauge("jfr.CPULoad.jvmSystem", ev.getDouble("jvmSystem"), timestamp, attr),
+        new Gauge("jfr.CPULoad.machineTotal", ev.getDouble("machineTotal"), timestamp, attr));
   }
 
   @Override

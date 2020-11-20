@@ -10,6 +10,7 @@ package com.newrelic.jfr.daemon;
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
+import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.telemetry.Attributes;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +46,8 @@ public class EventConverter {
         .filter(Objects::nonNull)
         .forEach(recordedEvent -> convertAndBuffer(batches, recordedEvent));
 
-    toSummaryRegistry.all().forEach(s -> s.summarizeAndReset().forEach(batches::addMetric));
+    toSummaryRegistry.all().forEach(s -> s.summarize().forEach(batches::addMetric));
+    toSummaryRegistry.all().forEach(EventToSummary::reset);
 
     logger.info("This conversion had " + eventCount.size() + " events");
     logger.debug("Detailed view of event counts:  " + eventCount.toString());

@@ -17,8 +17,13 @@ public abstract class AbstractThreadDispatchingSummarizer implements EventToSumm
   protected final Map<String, EventToSummary> perThread = new HashMap<>();
 
   @Override
-  public Stream<Summary> summarizeAndReset() {
-    return perThread.values().stream().flatMap(EventToSummary::summarizeAndReset);
+  public Stream<Summary> summarize() {
+    return perThread.values().stream().flatMap(EventToSummary::summarize);
+  }
+
+  @Override
+  public void reset() {
+    perThread.clear();
   }
 
   public abstract String getEventName();

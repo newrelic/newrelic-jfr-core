@@ -46,11 +46,11 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
   }
 
   @Override
-  public Stream<Summary> summarizeAndReset() {
+  public Stream<Summary> summarize() {
     var attr = new Attributes().put("thread.name", threadName);
     var out =
         new Summary(
-            "jfr:ObjectAllocationOutsideTLAB.allocation",
+            "jfr.ObjectAllocationOutsideTLAB.allocation",
             summarizer.getCount(),
             summarizer.getSum(),
             summarizer.getMin(),
@@ -58,7 +58,6 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
             startTimeMs,
             endTimeMs,
             attr);
-    reset();
     return Stream.of(out);
   }
 

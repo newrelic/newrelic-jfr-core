@@ -25,7 +25,7 @@ public class ContextSwitchRateMapper implements EventToMetric {
     var timestamp = ev.getStartTime().toEpochMilli();
     var attr = new Attributes();
     return List.of(
-        new Gauge("jfr:ThreadContextSwitchRate", ev.getDouble("switchRate"), timestamp, attr));
+        new Gauge("jfr.ThreadContextSwitchRate", ev.getDouble("switchRate"), timestamp, attr));
   }
 
   @Override

@@ -24,7 +24,7 @@ public class AllocationRequiringGCMapper implements EventToMetric {
     var threadName = Workarounds.getThreadName(ev);
     threadName.ifPresent(thread -> attr.put("thread.name", thread));
     return List.of(
-        new Gauge("jfr:AllocationRequiringGC.allocationSize", ev.getLong("size"), timestamp, attr));
+        new Gauge("jfr.AllocationRequiringGC.allocationSize", ev.getLong("size"), timestamp, attr));
   }
 
   @Override

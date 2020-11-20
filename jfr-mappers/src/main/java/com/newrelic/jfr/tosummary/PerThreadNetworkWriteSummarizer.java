@@ -40,11 +40,11 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
   }
 
   @Override
-  public Stream<Summary> summarizeAndReset() {
+  public Stream<Summary> summarize() {
     var attr = new Attributes().put("thread.name", threadName);
     var outWritten =
         new Summary(
-            "jfr:SocketWrite.bytesWritten",
+            "jfr.SocketWrite.bytesWritten",
             bytesSummary.getCount(),
             bytesSummary.getSum(),
             bytesSummary.getMin(),
@@ -54,7 +54,7 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
             attr);
     var outDuration =
         new Summary(
-            "jfr:SocketWrite.duration",
+            "jfr.SocketWrite.duration",
             bytesSummary.getCount(),
             duration.getDurationMillis(),
             duration.getMinDurationMillis(),
@@ -63,8 +63,11 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
             duration.getEndTimeMs(),
             attr);
 
+    return Stream.of(outWritten, outDuration);
+  }
+
+  public void reset() {
     bytesSummary.reset();
     duration.reset();
-    return Stream.of(outWritten, outDuration);
   }
 }

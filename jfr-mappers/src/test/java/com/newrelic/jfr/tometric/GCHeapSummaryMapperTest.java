@@ -32,9 +32,9 @@ class GCHeapSummaryMapperTest {
     attr.put("committedEnd", committedEnd);
     attr.put("reservedEnd", reservedEnd);
 
-    var gauge1 = new Gauge("jfr:GCHeapSummary.heapUsed", heapUsed, now, attr);
-    var gauge2 = new Gauge("jfr:GCHeapSummary.heapCommittedSize", heapCommittedSize, now, attr);
-    var gauge3 = new Gauge("jfr:GCHeapSummary.reservedSize", reservedSize, now, attr);
+    var gauge1 = new Gauge("jfr.GCHeapSummary.heapUsed", heapUsed, now, attr);
+    var gauge2 = new Gauge("jfr.GCHeapSummary.heapCommittedSize", heapCommittedSize, now, attr);
+    var gauge3 = new Gauge("jfr.GCHeapSummary.reservedSize", reservedSize, now, attr);
     List<Metric> expected = List.of(gauge1, gauge2, gauge3);
 
     var testClass = new GCHeapSummaryMapper();

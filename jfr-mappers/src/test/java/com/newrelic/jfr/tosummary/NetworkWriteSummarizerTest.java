@@ -27,7 +27,7 @@ class NetworkWriteSummarizerTest {
 
     var summary1bytes =
         new Summary(
-            "jfr:SocketWrite.bytesWritten",
+            "jfr.SocketWrite.bytesWritten",
             2,
             13 + 17,
             13,
@@ -37,7 +37,7 @@ class NetworkWriteSummarizerTest {
             new Attributes().put("thread.name", threadName1));
     var summary1duration =
         new Summary(
-            "jfr:SocketWrite.duration",
+            "jfr.SocketWrite.duration",
             2,
             Duration.between(time1, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
@@ -47,7 +47,7 @@ class NetworkWriteSummarizerTest {
             new Attributes().put("thread.name", threadName1));
     var summary2bytes =
         new Summary(
-            "jfr:SocketWrite.bytesWritten",
+            "jfr.SocketWrite.bytesWritten",
             1,
             12,
             12,
@@ -57,7 +57,7 @@ class NetworkWriteSummarizerTest {
             new Attributes().put("thread.name", threadName2));
     var summary2duration =
         new Summary(
-            "jfr:SocketWrite.duration",
+            "jfr.SocketWrite.duration",
             1,
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
@@ -77,9 +77,29 @@ class NetworkWriteSummarizerTest {
     summarizer.accept(event2);
     summarizer.accept(event3);
 
-    var result = summarizer.summarizeAndReset();
+    var result = summarizer.summarize();
 
     assertEquals(expected, result.collect(toList()));
+  }
+
+  @Test
+  void testReset() {
+    var threadName1 = "spam";
+    final Instant time1 = Instant.now();
+    final Instant time2 = time1.plus(3, SECONDS);
+
+    var event1 = buildEvent(threadName1, 13, time1, time2);
+
+    NetworkWriteSummarizer summarizer = new NetworkWriteSummarizer();
+    summarizer.accept(event1);
+
+    var summaries = summarizer.summarize();
+
+    assertEquals(2, summaries.collect(toList()).size());
+
+    summarizer.reset();
+    var emptySummaries = summarizer.summarize();
+    assertEquals(0, emptySummaries.collect(toList()).size());
   }
 
   private RecordedEvent buildEvent(

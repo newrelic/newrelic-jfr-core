@@ -51,11 +51,11 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
   }
 
   @Override
-  public Stream<Summary> summarizeAndReset() {
+  public Stream<Summary> summarize() {
     var attr = new Attributes();
     var out =
         new Summary(
-            "jfr:G1GarbageCollection.duration",
+            "jfr.G1GarbageCollection.duration",
             count,
             summarizer.getDurationMillis(),
             summarizer.getMinDurationMillis(),
@@ -63,7 +63,6 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
             startTimeMs,
             endTimeMs,
             attr);
-    reset();
     return Stream.of(out);
   }
 
