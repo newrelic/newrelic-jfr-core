@@ -20,6 +20,7 @@ public class ToEventRegistry {
   private static final List<EventToEvent> ALL_MAPPERS =
       List.of(
           new JITCompilationMapper(),
+          new JITCompilationFailureMapper(),
           new JVMInformationMapper(),
           new JVMSystemPropertyMapper(),
           new ThreadLockEventMapper(),
