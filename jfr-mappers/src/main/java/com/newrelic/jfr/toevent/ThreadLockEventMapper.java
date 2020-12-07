@@ -9,6 +9,7 @@ package com.newrelic.jfr.toevent;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.time.Duration;
@@ -28,6 +29,9 @@ public class ThreadLockEventMapper implements EventToEvent {
       attr.put("thread.name", ev.getThread("eventThread").getJavaName());
       attr.put("class", ev.getClass("monitorClass").getName());
       attr.put("duration", duration.toMillis());
+      if (ev.getStackTrace() != null) {
+        attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
+      }
 
       return List.of(new Event("JfrJavaMonitorWait", attr, timestamp));
     }
