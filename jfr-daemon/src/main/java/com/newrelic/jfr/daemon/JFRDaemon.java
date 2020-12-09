@@ -63,7 +63,7 @@ public class JFRDaemon {
     }
   }
 
-  private static DaemonConfig buildConfig() {
+  public static DaemonConfig buildConfig() {
 
     var daemonVersion = new VersionFinder().get();
 
@@ -80,7 +80,7 @@ public class JFRDaemon {
     return builder.build();
   }
 
-  static JFRUploader buildUploader(
+  public static JFRUploader buildUploader(
       DaemonConfig config,
       AtomicBoolean readinessCheck,
       AtomicReference<EventConverter> eventConverterReference)
@@ -96,7 +96,7 @@ public class JFRDaemon {
         .build();
   }
 
-  private static EventConverter buildEventConverter(Attributes attr) {
+  public static EventConverter buildEventConverter(Attributes attr) {
     return EventConverter.builder()
         .commonAttributes(attr)
         .metricMappers(ToMetricRegistry.createDefault())
