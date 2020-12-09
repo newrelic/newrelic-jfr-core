@@ -23,6 +23,7 @@ public class ToEventRegistry {
           new JVMInformationMapper(),
           new JVMSystemPropertyMapper(),
           new ThreadLockEventMapper(),
+          new ValhallaVBCDetector(),
           MethodSampleMapper.forExecutionSample(),
           MethodSampleMapper.forNativeMethodSample());
 
