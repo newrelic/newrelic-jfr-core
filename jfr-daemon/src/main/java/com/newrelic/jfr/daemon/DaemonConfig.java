@@ -19,7 +19,7 @@ public class DaemonConfig {
   static final int DEFAULT_JMX_PORT = 1099;
   static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
   static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
-  static final String DEFAULT_MONITORED_APP_NAME = "eventing_hobgoblin";
+  static final String DEFAULT_MONITORED_APP_NAME = "My Application";
 
   private final String apiKey;
   private final URI metricsUri;
