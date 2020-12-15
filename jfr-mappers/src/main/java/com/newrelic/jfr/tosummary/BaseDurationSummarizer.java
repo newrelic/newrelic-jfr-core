@@ -28,7 +28,7 @@ public abstract class BaseDurationSummarizer {
   }
 
   public BaseDurationSummarizer(long startTimeMs, Supplier<Long> clock) {
-    this(startTimeMs, clock, "");
+    this(startTimeMs, clock, null);
   }
 
   public BaseDurationSummarizer(long startTimeMs, Supplier<Long> clock, String durationName) {
