@@ -109,7 +109,7 @@ default behavior, the following environment variables are recognized:
 | env var name          | required? | default             | description  |
 |-----------------------|-----------|---------------------|--------------|
 | INSIGHTS_INSERT_KEY   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) for your account |
-| NEW_RELIC_APP_NAME    |     N(!)  |  eventing_hobgoblin | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform. 
+| NEW_RELIC_APP_NAME    |     N(!)  |  My Application     | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform.
 | REMOTE_JMX_HOST       |     N     |  localhost          | The host to pull JFR data from via JMX        |
 | REMOTE_JMX_PORT       |     N     |  1099               | The port to pull JFR data from via JMX        |
 | METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1)          | Where to send metric data
