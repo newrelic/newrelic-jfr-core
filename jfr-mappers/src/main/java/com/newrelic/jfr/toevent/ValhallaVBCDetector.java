@@ -34,12 +34,18 @@ public class ValhallaVBCDetector implements EventToEvent {
   @Override
   public List<Event> apply(RecordedEvent event) {
     var timestamp = event.getStartTime().toEpochMilli();
-
     var attr = new Attributes();
-    attr.put("boxClass", event.getClass("boxClass").getName());
-    attr.put("thread.name", event.getThread("eventThread").getJavaName());
-    attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
-
+    var boxClass = event.getClass("boxClass");
+    var eventThread = event.getThread("eventThread");
+    if (boxClass != null) {
+      attr.put("boxClass", boxClass.getName());
+    }
+    if (eventThread != null && eventThread.getJavaName() != null) {
+      attr.put("thread.name", eventThread.getJavaName());
+    }
+    if (event.getStackTrace() != null) {
+      attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
+    }
     return List.of(new Event("JfrValhallaVBCSync", attr, timestamp));
   }
 }

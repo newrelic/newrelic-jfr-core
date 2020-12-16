@@ -30,8 +30,15 @@ public class JVMSystemPropertyMapper implements EventToEvent {
   public List<Event> apply(RecordedEvent event) {
     var timestamp = event.getStartTime().toEpochMilli();
     var attr = new Attributes();
-    attr.put("jvmProperty", event.getString("key"));
-    attr.put("jvmPropertyValue", event.getString("value"));
+    // Can be null
+    var jvmProperty = event.getString("key");
+    if (jvmProperty != null) {
+      attr.put("jvmProperty", jvmProperty);
+    }
+    var jvmPropertyValue = event.getString("value");
+    if (jvmPropertyValue != null) {
+      attr.put("jvmPropertyValue", jvmPropertyValue);
+    }
 
     return List.of(new Event("JfrJVMInformation", attr, timestamp));
   }

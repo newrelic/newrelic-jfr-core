@@ -10,6 +10,7 @@ package com.newrelic.jfr.tometric;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
+import java.util.ArrayList;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
@@ -21,21 +22,26 @@ public class GCHeapSummaryMapper implements EventToMetric {
   public List<? extends Metric> apply(RecordedEvent ev) {
     var timestamp = ev.getStartTime().toEpochMilli();
     long heapUsed = ev.getLong("heapUsed");
+
+    var attr = new Attributes();
+    var list = new ArrayList<Gauge>();
+
     RecordedObject heapSpace = ev.getValue("heapSpace");
-    long committedSize = heapSpace.getLong("committedSize");
-    long reservedSize = heapSpace.getLong("reservedSize");
+    if (heapSpace != null) {
+      long committedSize = heapSpace.getLong("committedSize");
+      long reservedSize = heapSpace.getLong("reservedSize");
 
-    var attr =
-        new Attributes()
-            .put("when", ev.getString("when"))
-            .put("heapStart", heapSpace.getLong("start"))
-            .put("committedEnd", heapSpace.getLong("committedEnd"))
-            .put("reservedEnd", heapSpace.getLong("reservedEnd"));
-
-    return List.of(
-        new Gauge("jfr.GCHeapSummary.heapUsed", heapUsed, timestamp, attr),
-        new Gauge("jfr.GCHeapSummary.heapCommittedSize", committedSize, timestamp, attr),
-        new Gauge("jfr.GCHeapSummary.reservedSize", reservedSize, timestamp, attr));
+      if (ev.getString("when") != null) {
+        attr.put("when", ev.getString("when"));
+      }
+      attr.put("heapStart", heapSpace.getLong("start"));
+      attr.put("committedEnd", heapSpace.getLong("committedEnd"));
+      attr.put("reservedEnd", heapSpace.getLong("reservedEnd"));
+      list.add(new Gauge("jfr.GCHeapSummary.heapCommittedSize", committedSize, timestamp, attr));
+      list.add(new Gauge("jfr.GCHeapSummary.reservedSize", reservedSize, timestamp, attr));
+    }
+    list.add(new Gauge("jfr.GCHeapSummary.heapUsed", heapUsed, timestamp, attr));
+    return list;
   }
 
   @Override
