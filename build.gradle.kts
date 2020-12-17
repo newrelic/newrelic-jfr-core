@@ -25,7 +25,7 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
     apply(plugin = "com.github.sherter.google-java-format")
-    apply(plugin = "org.ysb33r.java.modulehelper")
+//    apply(plugin = "org.ysb33r.java.modulehelper")
 
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${junitVersion}")

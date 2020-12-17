@@ -1,13 +1,12 @@
 val gsonVersion: String by project
 val log4jVersion: String by project
 val mockitoVersion: String by project
+val newRelicTelemetryVersion: String by project
 val objenesisVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
-    id("org.beryx.jlink")
-    id("com.newrelic.jfr.package")
-    id("nebula.ospackage")
+    id("com.github.johnrengelman.shadow")
 }
 
 java {
@@ -16,18 +15,26 @@ java {
     disableAutoTargetJvm()
 }
 
-jpmsExtraModules {
-    module("mockito-junit-jupiter-${mockitoVersion}.jar", "mockito.junit.jupiter", mockitoVersion) {
-        exports("org.mockito.junit.jupiter")
-    }
-    module("objenesis-${objenesisVersion}.jar", "org.objenesis", objenesisVersion) {
-        exports("org.objenesis")
-    }
-}
-
 dependencies {
     implementation(project(":jfr-mappers"))
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
+    implementation("com.newrelic.telemetry:telemetry-http-java11:${newRelicTelemetryVersion}")
+    implementation("com.newrelic.telemetry:telemetry:${newRelicTelemetryVersion}")
+    implementation("com.google.code.gson:gson:${gsonVersion}")
+}
+
+tasks.shadowJar {
+    archiveClassifier.set("")
+    manifest {
+        attributes(
+                "Main-Class" to "com.newrelic.jfr.daemon.JFRDaemon",
+                "Implementation-Version" to project.version
+        )
+    }
+}
+
+tasks.named("build") {
+    dependsOn("shadowJar")
 }
 
 publishing {
@@ -72,17 +79,4 @@ signing {
     this.sign(publishing.publications["maven"])
 }
 
-application {
-    mainClass.set("com.newrelic.jfr.daemon.JFRDaemon")
-    mainModule.set("com.newrelic.jfr.daemon")
-}
 
-jlink {
-    imageDir.set(file("${buildDir}/jlink/${project.name}-${project.version}"))
-    imageZip.set(file("${buildDir}/distributions/${project.name}-${project.version}-jlink.zip"))
-
-}
-
-tasks.named("build") {
-    dependsOn("jlink")
-}
