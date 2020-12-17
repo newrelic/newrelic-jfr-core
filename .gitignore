@@ -5,6 +5,7 @@
 .settings/
 .vscode/
 .gradle/
+.generated-src/
 build/
 target/
 build/
