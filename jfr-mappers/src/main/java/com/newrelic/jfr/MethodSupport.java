@@ -37,6 +37,9 @@ public final class MethodSupport {
   }
 
   public static String serialize(final RecordedStackTrace trace) {
+    if (trace == null) {
+      return null;
+    }
     var payload = new ArrayList<Map<String, String>>();
     var frames = trace.getFrames();
     for (int i = 0; i < frames.size(); i++) {
