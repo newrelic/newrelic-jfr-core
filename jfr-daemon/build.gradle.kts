@@ -2,17 +2,10 @@ val gsonVersion: String by project
 val log4jVersion: String by project
 val mockitoVersion: String by project
 val newRelicTelemetryVersion: String by project
-val objenesisVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
-    id("com.github.johnrengelman.shadow")
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    disableAutoTargetJvm()
+    id("com.github.johnrengelman.shadow") version ("5.2.0")
 }
 
 dependencies {

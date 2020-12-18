@@ -1,22 +1,12 @@
 module com.newrelic.jfr.daemon {
-    exports com.newrelic.jfr.daemon;
+  exports com.newrelic.jfr.daemon;
 
-    requires jdk.jfr;
-    requires java.net.http;
-    requires java.management;
-    requires org.slf4j;
-    requires com.newrelic.telemetry;
-    requires com.google.gson;
-//    requires com.newrelic.jfr;
+  requires jdk.crypto.ec;
+  requires jdk.jfr;
+  requires jdk.naming.rmi;
+  requires java.management.rmi;
+  requires java.net.http;
+  requires org.slf4j;
+  requires com.newrelic.telemetry;
+  requires com.google.gson;
 }
-
-//module com.newrelic.jfr {
-//        exports com.newrelic.jfr;
-//        exports com.newrelic.jfr.toevent;
-//        exports com.newrelic.jfr.tometric;
-//        exports com.newrelic.jfr.tosummary;
-//
-//        requires jdk.jfr;
-//        requires com.google.gson;
-//        requires com.newrelic.telemetry;
-//        }

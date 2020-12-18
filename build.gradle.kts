@@ -1,8 +1,6 @@
 
 plugins {
     id("com.github.sherter.google-java-format") version "0.8" apply false
-    id( "org.ysb33r.java.modulehelper") version("0.10.0") apply false
-    id("com.github.johnrengelman.shadow") version ("5.2.0") apply false
 }
 
 allprojects {
@@ -25,7 +23,6 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
     apply(plugin = "com.github.sherter.google-java-format")
-//    apply(plugin = "org.ysb33r.java.modulehelper")
 
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${junitVersion}")

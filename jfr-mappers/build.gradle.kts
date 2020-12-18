@@ -1,17 +1,9 @@
 val newRelicTelemetryVersion: String by project
 val gsonVersion: String by project
-val mockitoVersion: String by project
-val objenesisVersion: String by project
 
 dependencies {
     implementation("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    disableAutoTargetJvm()
 }
 
 tasks {
