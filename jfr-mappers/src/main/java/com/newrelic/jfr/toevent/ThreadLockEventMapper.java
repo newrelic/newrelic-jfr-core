@@ -27,19 +27,11 @@ public class ThreadLockEventMapper implements EventToEvent {
       var timestamp = ev.getStartTime().toEpochMilli();
       var attr = new Attributes();
       attr.put("duration", duration.toMillis());
-      // Can be null
       var eventThread = ev.getThread("eventThread");
-      if (eventThread != null && eventThread.getJavaName() != null) {
-        attr.put("thread.name", eventThread.getJavaName());
-      }
+      attr.put("thread.name", eventThread == null ? null : eventThread.getJavaName());
       var monitorClass = ev.getClass("monitorClass");
-      if (monitorClass != null) {
-        attr.put("class", monitorClass.getName());
-      }
-      if (ev.getStackTrace() != null) {
-        attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
-      }
-
+      attr.put("class", monitorClass == null ? null : monitorClass.getName());
+      attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
       return List.of(new Event("JfrJavaMonitorWait", attr, timestamp));
     }
     return List.of();

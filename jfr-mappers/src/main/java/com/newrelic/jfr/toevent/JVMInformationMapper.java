@@ -41,15 +41,8 @@ public class JVMInformationMapper implements EventToEvent {
     var attr = new Attributes();
 
     attr.put("jvmStartTime", event.getInstant("jvmStartTime").toEpochMilli());
-    // Can be null
-    var jvmArguments = event.getString("jvmArguments");
-    if (jvmArguments != null) {
-      attr.put("jvmArguments", jvmArguments);
-    }
-    var jvmVersion = event.getString("jvmVersion");
-    if (jvmVersion != null) {
-      attr.put("jvmVersion", jvmVersion);
-    }
+    attr.put("jvmArguments", event.getString("jvmArguments"));
+    attr.put("jvmVersion", event.getString("jvmVersion"));
 
     return List.of(new Event("JfrJVMInformation", attr, timestamp));
   }

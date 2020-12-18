@@ -29,10 +29,6 @@ public class Workarounds {
     return Optional.empty();
   }
 
-  public static Optional<String> getValue(RecordedEvent event, String value) {
-    return Optional.of(event.getValue(value));
-  }
-
   /**
    * There is a typo in the field names in JFR. This unifies them in a way that is forward
    * compatible when the mistake is fixed. See

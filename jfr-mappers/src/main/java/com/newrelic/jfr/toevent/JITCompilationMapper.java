@@ -39,9 +39,7 @@ public class JITCompilationMapper implements EventToEvent {
     attr.put("succeeded", Workarounds.getSucceeded(event));
 
     var threadId = event.getThread("eventThread");
-    if (threadId != null && threadId.getJavaName() != null) {
-      attr.put("thread.name", threadId.getJavaName());
-    }
+    attr.put("thread.name", threadId == null ? null : threadId.getJavaName());
     return List.of(new Event("JfrCompilation", attr, timestamp));
   }
 

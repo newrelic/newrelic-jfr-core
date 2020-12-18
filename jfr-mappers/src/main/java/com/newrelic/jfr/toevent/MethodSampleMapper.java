@@ -56,16 +56,9 @@ public class MethodSampleMapper implements EventToEvent {
     var timestamp = ev.getStartTime().toEpochMilli();
     var attr = new Attributes();
     var sampledThread = ev.getThread("sampledThread");
-    if (sampledThread != null && sampledThread.getJavaName() != null) {
-      attr.put("thread.name", sampledThread.getJavaName());
-    }
-    var state = ev.getString("state");
-    if (state != null) {
-      attr.put("thread.state", state);
-    }
-    if (ev.getStackTrace() != null) {
-      attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
-    }
+    attr.put("thread.name", sampledThread == null ? null : sampledThread.getJavaName());
+    attr.put("thread.state", ev.getString("state"));
+    attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
 
     return List.of(new Event("JfrMethodSample", attr, timestamp));
   }

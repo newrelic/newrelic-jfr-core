@@ -26,7 +26,6 @@ public class MetaspaceSummaryMapper implements EventToMetric {
   public List<? extends Metric> apply(RecordedEvent ev) {
     var timestamp = ev.getStartTime().toEpochMilli();
     RecordedObject metaspace = ev.getValue(METASPACE_KEY);
-
     RecordedObject dataSpace = ev.getValue(DATA_SPACE_KEY);
     RecordedObject classSpace = ev.getValue(CLASS_SPACE_KEY);
 
@@ -34,12 +33,8 @@ public class MetaspaceSummaryMapper implements EventToMetric {
 
     List<Metric> metrics = new ArrayList<>(9);
     metrics.addAll(generateMetric(METASPACE_KEY, metaspace, attr, timestamp));
-    if (dataSpace != null) {
-      metrics.addAll(generateMetric(DATA_SPACE_KEY, dataSpace, attr, timestamp));
-    }
-    if (classSpace != null) {
-      metrics.addAll(generateMetric(CLASS_SPACE_KEY, classSpace, attr, timestamp));
-    }
+    metrics.addAll(generateMetric(DATA_SPACE_KEY, dataSpace, attr, timestamp));
+    metrics.addAll(generateMetric(CLASS_SPACE_KEY, classSpace, attr, timestamp));
 
     return metrics;
   }

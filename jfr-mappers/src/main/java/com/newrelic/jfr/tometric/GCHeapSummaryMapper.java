@@ -30,10 +30,7 @@ public class GCHeapSummaryMapper implements EventToMetric {
     if (heapSpace != null) {
       long committedSize = heapSpace.getLong("committedSize");
       long reservedSize = heapSpace.getLong("reservedSize");
-
-      if (ev.getString("when") != null) {
-        attr.put("when", ev.getString("when"));
-      }
+      attr.put("when", ev.getString("when"));
       attr.put("heapStart", heapSpace.getLong("start"));
       attr.put("committedEnd", heapSpace.getLong("committedEnd"));
       attr.put("reservedEnd", heapSpace.getLong("reservedEnd"));
