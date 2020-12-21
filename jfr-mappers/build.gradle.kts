@@ -1,7 +1,9 @@
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    disableAutoTargetJvm()
+val newRelicTelemetryVersion: String by project
+val gsonVersion: String by project
+
+dependencies {
+    implementation("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
+    implementation("com.google.code.gson:gson:${gsonVersion}")
 }
 
 tasks {
@@ -45,11 +47,10 @@ publishing {
             }
         }
     }
-
 }
 
 signing {
-    val signingKey : String? by project
+    val signingKey: String? by project
     val signingKeyId: String? by project
     val signingPassword: String? by project
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
