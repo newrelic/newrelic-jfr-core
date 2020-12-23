@@ -52,18 +52,27 @@ public class PackagePlugin implements Plugin<org.gradle.api.Project> {
                 var rpm = tasks.named("buildRpm", Rpm.class);
                 tasks.named(PACKAGE_TASK).configure(t -> t.dependsOn(deb, rpm));
 
+                deb.configure(p -> {
+                    p.setArchStr("amd64");
+                });
+
+                rpm.configure(p -> {
+                    p.setArchStr("X86_64");
+                    p.setAddParentDirs(false);
+                    p.setUser("root");
+                });
+
                 Stream.of(deb, rpm).forEach(t -> t.configure(p -> {
                     String type = p.getName().substring(5).toLowerCase(Locale.US);
                     p.setGroup(GROUP);
                     p.setDescription("Bundles the jlink-ed application as a ." + type + " package");
                     p.dependsOn(tasks.named("jlink"));
-                    p.setArchStr("X86_64");
                     p.from(project.getRootDir(), cs -> {
                         cs.include("LICENSE", "README.md");
                         cs.into("/usr/share/doc/" + project.getName());
                     });
                     p.from(jlink.getImageDir(), cs -> {
-                        cs.include("**");
+                        cs.include("jfr-daemon-linux-x64/**");
                         cs.into("/usr/lib/" + project.getName());
                     });
                     p.from("/src/" + type, cs -> {

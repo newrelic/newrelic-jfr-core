@@ -1,3 +1,5 @@
+import org.beryx.jlink.util.JdkUtil.JdkDownloadOptions
+
 val gsonVersion: String by project
 val newRelicTelemetryVersion: String by project
 val slf4jVersion: String by project
@@ -45,6 +47,23 @@ jlink {
 
     launcher {
         name = "jfr-daemon"
+    }
+
+    targetPlatform("linux-x64") {
+        val downloadUrl = "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9.1_1.tar.gz";
+        setJdkHome(jdkDownload(downloadUrl, closureOf<JdkDownloadOptions> {
+            setDownloadDir("$projectDir/jlink-jdks/linux-x64")
+            setArchiveName("linux-jdk")
+            setArchiveExtension("tar.gz")
+        }))
+    }
+    targetPlatform("mac") {
+        val downloadUrl = "https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.9.1%2B1/OpenJDK11U-jdk_x64_mac_hotspot_11.0.9.1_1.tar.gz";
+        setJdkHome(jdkDownload(downloadUrl, closureOf<JdkDownloadOptions> {
+            setDownloadDir("$projectDir/jlink-jdks/mac")
+            setArchiveName("mac-jdk")
+            setArchiveExtension("tar.gz")
+        }))
     }
 }
 
