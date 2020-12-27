@@ -136,7 +136,7 @@ public class JlinkPackageTest {
                 builder ->
                     builder
                         .from("openjdk:11-jre-slim-buster")
-                        .add("smoke-test/smoke-tests*.jar", appFilename)
+                        .add("smoke-test/smoke-tests-*-SNAPSHOT.jar", appFilename)
                         .entryPoint(entryPoint)
                         .build());
 
