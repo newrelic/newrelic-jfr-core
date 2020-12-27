@@ -28,6 +28,8 @@ public class JlinkPackageTest {
 
   private static final Logger logger = LoggerFactory.getLogger(JlinkPackageTest.class);
 
+  private static String smokeTestsBuildLibsDir;
+  private static String jlinkDistributionsDir;
   private static Network network;
   private static GenericContainer<?> edgeContainer;
   private static GenericContainer<?> appContainer;
@@ -35,6 +37,11 @@ public class JlinkPackageTest {
 
   @BeforeAll
   static void setup() {
+    // The gradle smokeTest task sets system properties specifying where to find artifacts needed
+    // for testing
+    smokeTestsBuildLibsDir = System.getProperty("SMOKE_TESTS_BUILD_LIBS_DIR");
+    jlinkDistributionsDir = System.getProperty("JLINK_DISTRIBUTIONS_DIR");
+
     network = Network.newNetwork();
     edgeContainer = buildAppContainer("smoke-test-edge", false);
     appContainer = buildAppContainer("smoke-test-app", true);
@@ -124,9 +131,7 @@ public class JlinkPackageTest {
     // Create the docker image definition, equivalent of creating a Dockerfile programmatically
     var dockerImage =
         new ImageFromDockerfile()
-            .withFileFromPath(
-                "smoke-test",
-                Paths.get("/Users/jberg/code/newrelic-jfr-core/jfr-jlink/smoke-tests/build/libs"))
+            .withFileFromPath("smoke-test", Paths.get(smokeTestsBuildLibsDir))
             .withDockerfileFromBuilder(
                 builder ->
                     builder
@@ -168,9 +173,7 @@ public class JlinkPackageTest {
     // Create the docker image definition, equivalent of creating a Dockerfile programmatically
     var dockerImage =
         new ImageFromDockerfile()
-            .withFileFromPath(
-                "jlink-distributions",
-                Paths.get("/Users/jberg/code/newrelic-jfr-core/jfr-jlink/build/distributions"))
+            .withFileFromPath("jlink-distributions", Paths.get(jlinkDistributionsDir))
             .withDockerfileFromBuilder(
                 builder ->
                     builder

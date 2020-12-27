@@ -17,6 +17,9 @@ task<Test>("smokeTest") {
     description = "Runs smoke tests."
     group = "verification"
 
+    systemProperty("SMOKE_TESTS_BUILD_LIBS_DIR", project.buildDir.toString() + "/libs")
+    systemProperty("JLINK_DISTRIBUTIONS_DIR", rootProject.project("jfr-jlink").buildDir.toString() + "/distributions")
+
     useJUnitPlatform()
 
     dependsOn(":jfr-jlink:package")
