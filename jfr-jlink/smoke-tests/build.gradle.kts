@@ -1,6 +1,12 @@
 plugins {
-    id("org.springframework.boot") version "2.4.0"
+    id("org.springframework.boot") version "2.4.1"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
+}
+
+configurations {
+    testImplementation {
+        resolutionStrategy.force("junit:junit:4.13.1")
+    }
 }
 
 dependencies {
