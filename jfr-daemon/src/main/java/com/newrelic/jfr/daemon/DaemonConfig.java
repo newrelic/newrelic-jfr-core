@@ -18,6 +18,7 @@ public class DaemonConfig {
   static final String DEFAULT_JMX_HOST = "localhost";
   static final int DEFAULT_JMX_PORT = 1099;
   static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
+  static final boolean DEFAULT_AUDIT_LOGGING = false;
   static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
   static final String DEFAULT_MONITORED_APP_NAME = "My Application";
 
@@ -30,8 +31,10 @@ public class DaemonConfig {
   private final Duration harvestInterval;
   private final String daemonVersion;
   private final String monitoredAppName;
+  private final boolean auditLogging;
 
   public DaemonConfig(Builder builder) {
+    this.auditLogging = builder.auditLogging;
     this.apiKey = builder.apiKey;
     this.metricsUri = builder.metricsUri;
     this.eventsUri = builder.eventsUri;
@@ -41,6 +44,10 @@ public class DaemonConfig {
     this.harvestInterval = builder.harvestInterval;
     this.daemonVersion = builder.daemonVersion;
     this.monitoredAppName = builder.monitoredAppName;
+  }
+
+  public boolean auditLogging() {
+    return auditLogging;
   }
 
   public String getApiKey() {
@@ -88,6 +95,7 @@ public class DaemonConfig {
   }
 
   public static class Builder {
+    public boolean auditLogging = DEFAULT_AUDIT_LOGGING;
     private String apiKey;
     private URI metricsUri;
     private URI eventsUri;
@@ -97,6 +105,11 @@ public class DaemonConfig {
     private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
     public String daemonVersion = "UNKNOWN-VERSION";
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
+
+    public Builder auditLogging(boolean auditLogging) {
+      this.auditLogging = auditLogging;
+      return this;
+    }
 
     public Builder apiKey(String apiKey) {
       this.apiKey = apiKey;
