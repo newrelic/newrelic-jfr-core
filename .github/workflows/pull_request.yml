@@ -18,5 +18,5 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
     - name: Run Smoke Tests
-      run: ./gradlew smokeTest
+      run: ./gradlew --console=plain smokeTest -i
 
