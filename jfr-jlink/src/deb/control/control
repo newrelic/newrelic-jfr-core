@@ -1,7 +1,0 @@
-Package: [[name]]
-Version: [[version]]
-Section: misc
-Priority: low
-Architecture: x86_64
-Maintainer: New Relic Infrastructure Team <infrastructure-eng@newrelic.com>
-Description:New Relic JMX tool. [[description]]

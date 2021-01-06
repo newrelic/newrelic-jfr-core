@@ -10,7 +10,6 @@ build/
 target/
 build/
 .DS_STORE
-jfr-jlink/jlink-jdks
 
 pom.xml.tag
 pom.xml.releaseBackup

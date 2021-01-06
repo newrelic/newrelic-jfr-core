@@ -23,12 +23,11 @@ task<Test>("smokeTest") {
     description = "Runs smoke tests."
     group = "verification"
 
+    systemProperty("PROJECT_ROOT_DIR", project.rootDir.toString())
     systemProperty("SMOKE_TESTS_BUILD_LIBS_DIR", project.buildDir.toString() + "/libs")
-    systemProperty("JLINK_DISTRIBUTIONS_DIR", rootProject.project("jfr-jlink").buildDir.toString() + "/distributions")
 
     useJUnitPlatform()
 
-    dependsOn(":jfr-jlink:package")
     dependsOn(tasks.bootJar)
 
     testClassesDirs = sourceSets["test"].output.classesDirs
