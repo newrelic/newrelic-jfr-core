@@ -15,12 +15,13 @@ import java.util.function.Function;
 
 public class DaemonConfig {
 
-  static final String DEFAULT_JMX_HOST = "localhost";
   static final int DEFAULT_JMX_PORT = 1099;
-  static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
-  static final boolean DEFAULT_AUDIT_LOGGING = false;
-  static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
-  static final String DEFAULT_MONITORED_APP_NAME = "My Application";
+
+  private static final String DEFAULT_JMX_HOST = "localhost";
+  private static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
+  private static final boolean DEFAULT_AUDIT_LOGGING = false;
+  private static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
+  private static final String DEFAULT_MONITORED_APP_NAME = "My Application";
 
   private final String apiKey;
   private final URI metricsUri;
@@ -95,7 +96,7 @@ public class DaemonConfig {
   }
 
   public static class Builder {
-    public boolean auditLogging = DEFAULT_AUDIT_LOGGING;
+    private boolean auditLogging = DEFAULT_AUDIT_LOGGING;
     private String apiKey;
     private URI metricsUri;
     private URI eventsUri;
