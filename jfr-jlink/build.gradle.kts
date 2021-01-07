@@ -3,9 +3,7 @@ val newRelicTelemetryVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
-    id("org.beryx.jlink")
-    id("com.newrelic.jfr.package")
-    id("nebula.ospackage")
+    id("org.beryx.jlink") version("2.22.3")
     id( "org.ysb33r.java.modulehelper") version("0.10.0")
 }
 

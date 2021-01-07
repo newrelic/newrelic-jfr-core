@@ -9,6 +9,7 @@
 build/
 target/
 build/
+.DS_STORE
 
 pom.xml.tag
 pom.xml.releaseBackup
