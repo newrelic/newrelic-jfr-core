@@ -7,12 +7,12 @@
 
 package com.newrelic.jfr.toevent;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
@@ -22,10 +22,10 @@ public class ThreadLockEventMapper implements EventToEvent {
 
   @Override
   public List<Event> apply(RecordedEvent ev) {
-    var duration = ev.getDuration();
+    Duration duration = ev.getDuration();
     if (duration.toMillis() > 20) {
-      var timestamp = ev.getStartTime().toEpochMilli();
-      var attr = new Attributes();
+      long timestamp = ev.getStartTime().toEpochMilli();
+      Attributes attr = new Attributes();
       attr.put("thread.name", ev.getThread("eventThread").getJavaName());
       attr.put("class", ev.getClass("monitorClass").getName());
       attr.put("duration", duration.toMillis());
@@ -33,9 +33,9 @@ public class ThreadLockEventMapper implements EventToEvent {
         attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
       }
 
-      return List.of(new Event("JfrJavaMonitorWait", attr, timestamp));
+      return Collections.singletonList(new Event("JfrJavaMonitorWait", attr, timestamp));
     }
-    return List.of();
+    return Collections.emptyList();
   }
 
   @Override
@@ -45,6 +45,6 @@ public class ThreadLockEventMapper implements EventToEvent {
 
   @Override
   public Optional<Duration> getPollingDuration() {
-    return Optional.of(Duration.of(1, SECONDS.toChronoUnit()));
+    return Optional.of(Duration.of(1, ChronoUnit.SECONDS));
   }
 }

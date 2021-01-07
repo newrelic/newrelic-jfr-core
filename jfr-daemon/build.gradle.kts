@@ -7,12 +7,23 @@ plugins {
     id("com.github.johnrengelman.shadow") version ("5.2.0")
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
 dependencies {
     implementation(project(":jfr-mappers"))
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
     implementation("com.newrelic.telemetry:telemetry-http-java11:${newRelicTelemetryVersion}")
     implementation("com.newrelic.telemetry:telemetry:${newRelicTelemetryVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
+}
+
+tasks.jar {
+    // Create shadowJar instead of jar
+    enabled = false
 }
 
 tasks.shadowJar {
@@ -35,7 +46,7 @@ publishing {
             groupId = "com.newrelic"
             artifactId = "jfr-daemon"
             version = version
-            from(components["java"])
+            project.shadow.component(this)
             pom {
                 name.set(project.name)
                 description.set("JFR Daemon")

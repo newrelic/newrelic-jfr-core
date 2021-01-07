@@ -6,18 +6,16 @@ dependencies {
     implementation("com.google.code.gson:gson:${gsonVersion}")
 }
 
-java {
-    disableAutoTargetJvm()
-}
-
+// Main source set compiles against java 8
 tasks.withType<JavaCompile>().configureEach {
     javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(8))
     })
 }
 
-tasks.withType<Test>().configureEach {
-    javaLauncher.set(javaToolchains.launcherFor {
+// Test source set compiles against java 11
+tasks.named<JavaCompile>("compileTestJava") {
+    javaCompiler.set(javaToolchains.compilerFor {
         languageVersion.set(JavaLanguageVersion.of(11))
     })
 }

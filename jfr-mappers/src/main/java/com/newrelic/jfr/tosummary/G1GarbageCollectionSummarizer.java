@@ -52,8 +52,8 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    var attr = new Attributes();
-    var out =
+    Attributes attr = new Attributes();
+    Summary out =
         new Summary(
             "jfr.G1GarbageCollection.duration",
             count,
