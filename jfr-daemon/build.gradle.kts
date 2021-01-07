@@ -1,5 +1,4 @@
 val gsonVersion: String by project
-val log4jVersion: String by project
 val mockitoVersion: String by project
 val newRelicTelemetryVersion: String by project
 val slf4jVersion: String by project
