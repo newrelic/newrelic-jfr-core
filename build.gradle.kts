@@ -6,20 +6,14 @@ plugins {
 allprojects {
     group = "com.newrelic.telemetry"
     repositories {
-        mavenLocal()
         mavenCentral()
     }
 }
 
-// -Prelease=true will render a non-snapshot version
-// All other values (including unset) will render a snapshot version.
 val release: String? by project
-
-object Versions {
-    const val junit = "5.6.2"
-    const val mockitoJunit = "3.3.3"
-    const val newRelicTelemetry = "0.9.0"
-}
+val junitVersion: String by project
+val mockitoVersion: String by project
+val newRelicTelemetry: String by project
 
 subprojects {
     version = if("true" == release) "${version}" else "${version}-SNAPSHOT"
@@ -31,15 +25,17 @@ subprojects {
     apply(plugin = "com.github.sherter.google-java-format")
 
     dependencies {
-        "api"("com.newrelic.telemetry:telemetry:${Versions.newRelicTelemetry}")
-        "testImplementation"("org.junit.jupiter:junit-jupiter-api:${Versions.junit}")
-        "testImplementation"("org.mockito:mockito-junit-jupiter:${Versions.mockitoJunit}")
-        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:${Versions.junit}")
+        "testImplementation"("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+        "testImplementation"("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
+        "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     }
 
     configure<JavaPluginExtension> {
         withSourcesJar()
         withJavadocJar()
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+        disableAutoTargetJvm()
     }
 
     tasks.named<Test>("test") {

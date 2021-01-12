@@ -26,7 +26,7 @@ class DurationSummarizerTest {
     when(ev2.getStartTime()).thenReturn(Instant.ofEpochMilli(start2));
     when(ev2.getDuration()).thenReturn(duration2);
 
-    DurationSummarizer testClass = new DurationSummarizer(start1);
+    var testClass = new SimpleDurationSummarizer(start1);
     testClass.accept(ev1);
     testClass.accept(ev2);
 
@@ -41,7 +41,7 @@ class DurationSummarizerTest {
   void testDefaultState() {
     var start = System.currentTimeMillis();
 
-    DurationSummarizer testClass = new DurationSummarizer(start);
+    BaseDurationSummarizer testClass = new SimpleDurationSummarizer(start);
 
     assertEquals(0, testClass.getDurationMillis());
     assertEquals(start, testClass.getStartTimeMs());
@@ -65,7 +65,7 @@ class DurationSummarizerTest {
     when(ev2.getStartTime()).thenReturn(Instant.ofEpochMilli(start2));
     when(ev2.getDuration()).thenReturn(duration2);
 
-    DurationSummarizer testClass = new DurationSummarizer(start1, () -> start2);
+    var testClass = new SimpleDurationSummarizer(start1, () -> start2);
     testClass.accept(ev1);
     testClass.reset();
     testClass.accept(ev2);
@@ -87,8 +87,8 @@ class DurationSummarizerTest {
     when(ev.getStartTime()).thenReturn(Instant.ofEpochMilli(start));
     when(ev.getDuration()).thenReturn(duration);
 
-    DurationSummarizer testClass =
-        new DurationSummarizer(start, DurationSummarizer.DEFAULT_CLOCK, "myDuration");
+    var testClass =
+        new SimpleDurationSummarizer(start, BaseDurationSummarizer.DEFAULT_CLOCK, "myDuration");
     testClass.accept(ev);
     testClass.reset();
     testClass.accept(ev);

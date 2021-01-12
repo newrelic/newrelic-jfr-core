@@ -66,10 +66,10 @@ public class BusyWait<T> {
           return result;
         }
       } catch (Exception e) {
-        logger.debug("Error while busy waiting for " + name, e);
+        logger.info("Error while busy waiting for " + name, e);
       }
       if (Instant.now().isAfter(lastLogTime.plus(logInterval.toNanos(), ChronoUnit.NANOS))) {
-        logger.info("Busy waiting for " + name + " continues...");
+        logger.debug("Busy waiting for " + name + " continues...");
         lastLogTime = Instant.now();
       }
       SafeSleep.nanos(interval.toNanos());

@@ -1,4 +1,4 @@
-[![Community Project header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Community_Project.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#community-project)
+[![Community Plus header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Community_Plus.png)](https://opensource.newrelic.com/oss-category/#community-plus)
 
 # JFR Core
 
@@ -109,11 +109,11 @@ default behavior, the following environment variables are recognized:
 | env var name          | required? | default             | description  |
 |-----------------------|-----------|---------------------|--------------|
 | INSIGHTS_INSERT_KEY   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) for your account |
-| NEW_RELIC_APP_NAME    |     N(!)  |  eventing_hobgoblin | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform. 
+| NEW_RELIC_APP_NAME    |     N(!)  |  My Application     | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform.
 | REMOTE_JMX_HOST       |     N     |  localhost          | The host to pull JFR data from via JMX        |
 | REMOTE_JMX_PORT       |     N     |  1099               | The port to pull JFR data from via JMX        |
-| METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1)         | Where to send metric data
-| EVENTS_INGEST_URI     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events) | Where to send event data
+| METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1)          | Where to send metric data
+| EVENTS_INGEST_URI     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events), [EU production](https://insights-collector.eu01.nr-data.net/v1/accounts/events) | Where to send event data
 | JFR_SHARED_FILESYSTEM |     N     |  false              | Use a shared filesystem instead of streaming data from JMX
 
 Expose remote JMX on the application that the jfr-daemon will be attaching to by adding the following system properties:

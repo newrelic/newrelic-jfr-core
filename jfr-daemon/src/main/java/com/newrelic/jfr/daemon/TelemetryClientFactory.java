@@ -35,7 +35,7 @@ public class TelemetryClientFactory {
     var eventsConfig =
         EventBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
-            .auditLoggingEnabled(true)
+            .auditLoggingEnabled(config.auditLogging())
             .secondaryUserAgent(makeUserAgent(config));
     if (config.getEventsUri() != null) {
       eventsConfig = eventsConfig.endpoint(config.getEventsUri().toURL());
@@ -49,7 +49,7 @@ public class TelemetryClientFactory {
         MetricBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .secondaryUserAgent(makeUserAgent(config))
-            .auditLoggingEnabled(true);
+            .auditLoggingEnabled(config.auditLogging());
     if (config.getMetricsUri() != null) {
       metricConfig = metricConfig.endpoint(config.getMetricsUri().toURL());
     }

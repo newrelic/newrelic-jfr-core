@@ -1,0 +1,9 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  'snyk:lic:maven:junit:junit:EPL-1.0':
+    - '*':
+        reason: 'The smoke tests rely on org.testcontainers:testcontainers:1.15.1, which has a transitive dependency on junit 4. Version 2.0 should break the dependency, as described here: https://github.com/testcontainers/testcontainers-java/issues/970.'
+        expires: 2021-12-31T16:56:59.177Z
+patch: {}

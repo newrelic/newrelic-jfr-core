@@ -1,27 +1,18 @@
-private object Versions {
-    const val slf4j = "1.7.26"
-    const val gson = "2.8.6"
-    const val log4j = "2.13.3"
-    const val newRelicTelemetry = "0.8.0"
-}
+val gsonVersion: String by project
+val mockitoVersion: String by project
+val newRelicTelemetryVersion: String by project
+val slf4jVersion: String by project
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    disableAutoTargetJvm()
+    id("com.github.johnrengelman.shadow") version ("5.2.0")
 }
 
 dependencies {
-    api(project(":jfr-mappers"))
-    api("org.slf4j:slf4j-api:${Versions.slf4j}")
-    api("org.apache.logging.log4j:log4j-slf4j-impl:${Versions.log4j}")
-    api("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
-    api("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
-    implementation("com.google.code.gson:gson:${Versions.gson}")
+    implementation(project(":jfr-mappers"))
+    implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
+    implementation("com.newrelic.telemetry:telemetry-http-java11:${newRelicTelemetryVersion}")
+    implementation("com.newrelic.telemetry:telemetry:${newRelicTelemetryVersion}")
+    implementation("com.google.code.gson:gson:${gsonVersion}")
 }
 
 tasks.shadowJar {
@@ -36,7 +27,9 @@ tasks.shadowJar {
     }
 }
 
-tasks.named("build") { dependsOn("shadowJar") }
+tasks.named("build") {
+    dependsOn("shadowJar")
+}
 
 publishing {
     publications {
@@ -79,3 +72,5 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
 }
+
+

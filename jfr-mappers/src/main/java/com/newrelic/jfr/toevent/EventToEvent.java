@@ -37,7 +37,7 @@ public interface EventToEvent
    * @return true if event is interesting, false otherwise
    */
   default boolean test(RecordedEvent event) {
-    return event.getEventType().getName().startsWith(getEventName());
+    return event.getEventType().getName().equalsIgnoreCase(getEventName());
   }
 
   /**

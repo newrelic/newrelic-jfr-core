@@ -7,7 +7,7 @@
 
 package com.newrelic.jfr;
 
-import com.newrelic.relocated.stream.JsonWriter;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
@@ -24,6 +24,16 @@ public final class MethodSupport {
     }
 
     return method.getType().getName() + "." + method.getName() + method.getDescriptor();
+  }
+
+  // {"type":"stacktrace","language":"java","version":1,"truncated":false,"payload":[]}
+  public static String empty() {
+    List<Map<String, String>> payload = List.of();
+    try {
+      return new String(jsonWrite(payload, Optional.empty()).getBytes());
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to generate stacktrace json", e);
+    }
   }
 
   public static String serialize(final RecordedStackTrace trace) {
