@@ -8,6 +8,7 @@
 package com.newrelic.jfr.tosummary;
 
 import com.newrelic.jfr.Workarounds;
+import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 // jdk.SocketWrite {
@@ -33,7 +34,7 @@ public class NetworkWriteSummarizer extends AbstractThreadDispatchingSummarizer 
 
   @Override
   public void accept(RecordedEvent ev) {
-    var possibleThreadName = Workarounds.getThreadName(ev);
+    Optional<String> possibleThreadName = Workarounds.getThreadName(ev);
     possibleThreadName.ifPresent(
         threadName -> {
           if (perThread.get(threadName) == null) {

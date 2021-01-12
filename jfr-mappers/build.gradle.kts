@@ -6,6 +6,20 @@ dependencies {
     implementation("com.google.code.gson:gson:${gsonVersion}")
 }
 
+// Main source set compiles against java 8
+tasks.withType<JavaCompile>().configureEach {
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    })
+}
+
+// Test source set compiles against java 11
+tasks.named<JavaCompile>("compileTestJava") {
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    })
+}
+
 tasks {
     val taskScope = this
     val jar: Jar by taskScope

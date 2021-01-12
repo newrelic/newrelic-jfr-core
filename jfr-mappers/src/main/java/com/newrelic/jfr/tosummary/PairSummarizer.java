@@ -11,7 +11,7 @@ public class PairSummarizer extends BaseDurationSummarizer {
   }
 
   public void accept(RecordedEvent before, RecordedEvent after) {
-    var pairDuration =
+    Duration pairDuration =
         Duration.ofMillis(
             after.getStartTime().toEpochMilli() - before.getStartTime().toEpochMilli());
     endTimeMs = after.getStartTime().toEpochMilli();

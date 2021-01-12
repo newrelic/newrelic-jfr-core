@@ -3,6 +3,7 @@ package com.newrelic.jfr.toevent;
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -27,19 +28,19 @@ public class ValhallaVBCDetector implements EventToEvent {
 
   @Override
   public boolean test(RecordedEvent event) {
-    var name = event.getEventType().getName();
+    String name = event.getEventType().getName();
     return name.equalsIgnoreCase(EVENT_NAME) || name.equalsIgnoreCase(OLD_EVENT_NAME);
   }
 
   @Override
   public List<Event> apply(RecordedEvent event) {
-    var timestamp = event.getStartTime().toEpochMilli();
+    long timestamp = event.getStartTime().toEpochMilli();
 
-    var attr = new Attributes();
+    Attributes attr = new Attributes();
     attr.put("boxClass", event.getClass("boxClass").getName());
     attr.put("thread.name", event.getThread("eventThread").getJavaName());
     attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
 
-    return List.of(new Event("JfrValhallaVBCSync", attr, timestamp));
+    return Collections.singletonList(new Event("JfrValhallaVBCSync", attr, timestamp));
   }
 }

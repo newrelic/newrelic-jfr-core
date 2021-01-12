@@ -3,6 +3,12 @@ plugins {
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
 configurations {
     testImplementation {
         resolutionStrategy.force("junit:junit:4.13.1")

@@ -47,8 +47,8 @@ public final class PerThreadObjectAllocationInNewTLABSummarizer implements Event
 
   @Override
   public Stream<Summary> summarize() {
-    var attr = new Attributes().put("thread.name", threadName);
-    var out =
+    Attributes attr = new Attributes().put("thread.name", threadName);
+    Summary out =
         new Summary(
             "jfr.ObjectAllocationInNewTLAB.allocation",
             summarizer.getCount(),

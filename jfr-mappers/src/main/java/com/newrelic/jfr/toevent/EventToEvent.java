@@ -7,7 +7,6 @@
 
 package com.newrelic.jfr.toevent;
 
-import com.newrelic.jfr.Constants;
 import com.newrelic.telemetry.events.Event;
 import java.time.Duration;
 import java.util.List;
@@ -48,14 +47,5 @@ public interface EventToEvent
    */
   default Optional<Duration> getPollingDuration() {
     return Optional.empty();
-  }
-
-  /**
-   * Returns the Java version where particular JFR events were added.
-   *
-   * @return int indicating Java version that introduced the event type
-   */
-  default int since() {
-    return Constants.JAVA_11;
   }
 }
