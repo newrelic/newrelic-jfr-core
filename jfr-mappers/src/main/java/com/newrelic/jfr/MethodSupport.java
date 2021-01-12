@@ -11,6 +11,7 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
+import jdk.jfr.consumer.RecordedFrame;
 import jdk.jfr.consumer.RecordedMethod;
 import jdk.jfr.consumer.RecordedStackTrace;
 
@@ -28,7 +29,7 @@ public final class MethodSupport {
 
   // {"type":"stacktrace","language":"java","version":1,"truncated":false,"payload":[]}
   public static String empty() {
-    List<Map<String, String>> payload = List.of();
+    List<Map<String, String>> payload = Collections.emptyList();
     try {
       return new String(jsonWrite(payload, Optional.empty()).getBytes());
     } catch (IOException e) {
@@ -37,11 +38,10 @@ public final class MethodSupport {
   }
 
   public static String serialize(final RecordedStackTrace trace) {
-    var payload = new ArrayList<Map<String, String>>();
-    var frames = trace.getFrames();
-    for (int i = 0; i < frames.size(); i++) {
-      var frameData = new HashMap<String, String>();
-      var frame = frames.get(i);
+    List<Map<String, String>> payload = new ArrayList<>();
+    List<RecordedFrame> frames = trace.getFrames();
+    for (RecordedFrame frame : frames) {
+      Map<String, String> frameData = new HashMap<>();
       frameData.put("desc", describeMethod(frame.getMethod()));
       frameData.put("line", "" + frame.getLineNumber());
       frameData.put("bytecodeIndex", "" + frame.getBytecodeIndex());
@@ -57,9 +57,9 @@ public final class MethodSupport {
 
   static String jsonWrite(final List<Map<String, String>> frames, final Optional<Integer> limit)
       throws IOException {
-    var strOut = new StringWriter();
-    var jsonWriter = new JsonWriter(strOut);
-    var frameCount = Math.min(limit.orElse(frames.size()), frames.size());
+    StringWriter strOut = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(strOut);
+    int frameCount = Math.min(limit.orElse(frames.size()), frames.size());
 
     jsonWriter.beginObject();
     jsonWriter.name("type").value("stacktrace");
@@ -68,7 +68,7 @@ public final class MethodSupport {
     jsonWriter.name("truncated").value(frameCount < frames.size());
     jsonWriter.name("payload").beginArray();
     for (int i = 0; i < frameCount; i++) {
-      var frame = frames.get(i);
+      Map<String, String> frame = frames.get(i);
       jsonWriter.beginObject();
       jsonWriter.name("desc").value(frame.get("desc"));
       jsonWriter.name("line").value(frame.get("line"));
@@ -78,8 +78,8 @@ public final class MethodSupport {
 
     jsonWriter.endArray();
     jsonWriter.endObject();
-    var out = strOut.toString();
-    var length = out.length();
+    String out = strOut.toString();
+    int length = out.length();
     if (length > HEADROOM_75PC) {
       // Truncate the stack frame and try again
       double percentageOfFramesToTry = ((double) HEADROOM_75PC) / length;

@@ -7,6 +7,12 @@ plugins {
     id( "org.ysb33r.java.modulehelper") version("0.10.0")
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
 sourceSets {
     main {
         java.setSrcDirs(listOf(

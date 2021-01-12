@@ -55,21 +55,21 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
   @Override
   public void accept(RecordedEvent ev) {
     endTimeMs = ev.getStartTime().toEpochMilli();
-    var when = ev.getString("when");
+    String when = ev.getString("when");
     if (!(when.equals(BEFORE) || when.equals(AFTER))) {
       return;
     }
 
     count = count + 1;
-    var gcId = ev.getLong("gcId");
-    var pair = awaitingPairs.get(gcId);
+    long gcId = ev.getLong("gcId");
+    RecordedEvent pair = awaitingPairs.get(gcId);
     if (pair == null) {
       awaitingPairs.put(gcId, ev);
     } else {
       awaitingPairs.remove(gcId);
       if (when.equals(BEFORE)) {
         summarizer.accept(ev, pair);
-      } else if (when.equals(AFTER)) {
+      } else { //  i.e. when.equals(AFTER)
         summarizer.accept(pair, ev);
       }
     }
@@ -77,8 +77,8 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    var attr = new Attributes();
-    var out =
+    Attributes attr = new Attributes();
+    Summary out =
         new Summary(
             "jfr.GarbageCollection.duration",
             count,
