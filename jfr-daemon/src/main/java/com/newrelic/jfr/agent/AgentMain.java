@@ -9,11 +9,11 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.management.JMException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AgentMain {
-  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AgentMain.class);
+  private static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
@@ -32,9 +32,7 @@ public class AgentMain {
     }
   }
 
-  private void start() throws IOException, JMException {
-    registerListeners();
-
+  private void start() throws IOException {
     var config = buildConfig();
     var attr = new JFRCommonAttributes(config).build(Optional.empty());
     var eventConverter = buildEventConverter(attr);
@@ -48,11 +46,10 @@ public class AgentMain {
         () -> {
           try {
             jfrController.loop(config.getHarvestInterval());
-          } catch (IOException | JMException e) {
+          } catch (IOException e) {
             logger.error("Error in agent, shutting down", e);
+            jfrController.cleanup();
           }
         });
   }
-
-  private void registerListeners() {}
 }
