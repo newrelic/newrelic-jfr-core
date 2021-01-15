@@ -9,4 +9,5 @@ module com.newrelic.jfr.daemon {
   requires org.slf4j;
   requires com.newrelic.telemetry;
   requires com.google.gson;
+  requires java.instrument;
 }
