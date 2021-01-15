@@ -17,7 +17,7 @@ import jdk.jfr.Recording;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AgentController {
+class AgentController {
   private static final Logger logger = LoggerFactory.getLogger(AgentController.class);
 
   private final DaemonConfig config;
@@ -35,14 +35,9 @@ public class AgentController {
             return result;
           });
 
-  public AgentController(JFRUploader uploader, DaemonConfig config) {
+  AgentController(JFRUploader uploader, DaemonConfig config) {
     this.uploader = uploader;
     this.config = config;
-  }
-
-  // This needs to be exposed to JMX / k8s
-  public void shutdown() {
-    shutdown = true;
   }
 
   void cleanup() {
@@ -53,7 +48,7 @@ public class AgentController {
     }
   }
 
-  public void loop(final Duration harvestInterval) throws IOException {
+  void loop(final Duration harvestInterval) throws IOException {
     while (!shutdown) {
       try {
         TimeUnit.MILLISECONDS.sleep(harvestInterval.toMillis());
@@ -68,7 +63,7 @@ public class AgentController {
     executorService.shutdown();
   }
 
-  public void startRecording() {
+  void startRecording() {
     final Configuration jfrConfig;
     try {
       jfrConfig = Configuration.getConfiguration("profile");
@@ -85,10 +80,8 @@ public class AgentController {
     this.recording = recording;
   }
 
-  public Path cloneJfrRecording() throws IOException {
+  Path cloneJfrRecording() throws IOException {
     final var output = Files.createTempFile("local-recording", ".jfr");
-    // Is this still necessary?
-    //    output.toFile().deleteOnExit();
     recording.copy(false);
     recording.dump(output);
     return output;
