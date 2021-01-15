@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.util.function.Function;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 class SmokeTestAppClient {
+
+  private static final RequestBody EMPTY_REQUEST = RequestBody.create(null, "");
 
   private final OkHttpClient httpClient;
   private final String host;
@@ -23,9 +26,21 @@ class SmokeTestAppClient {
     return executeRequest(request, SmokeTestAppClient::parseForInteger);
   }
 
+  void resetEvents() {
+    var request =
+        new Request.Builder().url(url("/event/reset")).method("POST", EMPTY_REQUEST).build();
+    executeRequest(request, Function.identity());
+  }
+
   int getMetricCount() {
     var request = new Request.Builder().url(url("/metric/count")).build();
     return executeRequest(request, SmokeTestAppClient::parseForInteger);
+  }
+
+  void resetMetrics() {
+    var request =
+        new Request.Builder().url(url("/metric/reset")).method("POST", EMPTY_REQUEST).build();
+    executeRequest(request, Function.identity());
   }
 
   private String url(String path) {

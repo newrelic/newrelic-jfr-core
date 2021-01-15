@@ -10,5 +10,5 @@ rootProject.name = "newrelic-jfr-core"
 
 include("jfr-daemon")
 include("jfr-jlink")
-include("jfr-jlink:smoke-tests")
+include("smoke-tests")
 include("jfr-mappers")
