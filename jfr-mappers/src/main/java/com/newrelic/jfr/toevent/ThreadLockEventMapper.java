@@ -7,34 +7,35 @@
 
 package com.newrelic.jfr.toevent;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedThread;
 
 public class ThreadLockEventMapper implements EventToEvent {
   public static final String EVENT_NAME = "jdk.JavaMonitorWait"; // jdk.JavaMonitorEnter
 
   @Override
   public List<Event> apply(RecordedEvent ev) {
-    var duration = ev.getDuration();
+    Duration duration = ev.getDuration();
     if (duration.toMillis() > 20) {
-      var timestamp = ev.getStartTime().toEpochMilli();
-      var attr = new Attributes();
+      long timestamp = ev.getStartTime().toEpochMilli();
+      Attributes attr = new Attributes();
+      attr.put("thread.name", ev.getThread("eventThread").getJavaName());
+      attr.put("class", ev.getClass("monitorClass").getName());
       attr.put("duration", duration.toMillis());
-      var eventThread = ev.getThread("eventThread");
+      RecordedThread eventThread = ev.getThread("eventThread");
       attr.put("thread.name", eventThread == null ? null : eventThread.getJavaName());
-      var monitorClass = ev.getClass("monitorClass");
-      attr.put("class", monitorClass == null ? null : monitorClass.getName());
       attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
-      return List.of(new Event("JfrJavaMonitorWait", attr, timestamp));
+      return Collections.singletonList(new Event("JfrJavaMonitorWait", attr, timestamp));
     }
-    return List.of();
+    return Collections.emptyList();
   }
 
   @Override
@@ -44,6 +45,6 @@ public class ThreadLockEventMapper implements EventToEvent {
 
   @Override
   public Optional<Duration> getPollingDuration() {
-    return Optional.of(Duration.of(1, SECONDS.toChronoUnit()));
+    return Optional.of(Duration.of(1, ChronoUnit.SECONDS));
   }
 }

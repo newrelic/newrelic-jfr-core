@@ -7,13 +7,7 @@
 
 package com.newrelic.jfr.daemon;
 
-import static com.newrelic.jfr.daemon.EnvironmentVars.ENV_APP_NAME;
-import static com.newrelic.jfr.daemon.EnvironmentVars.EVENTS_INGEST_URI;
-import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
-import static com.newrelic.jfr.daemon.EnvironmentVars.JFR_SHARED_FILESYSTEM;
-import static com.newrelic.jfr.daemon.EnvironmentVars.METRICS_INGEST_URI;
-import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_HOST;
-import static com.newrelic.jfr.daemon.EnvironmentVars.REMOTE_JMX_PORT;
+import static com.newrelic.jfr.daemon.EnvironmentVars.*;
 import static java.util.function.Function.identity;
 
 import com.newrelic.jfr.ToEventRegistry;
@@ -63,7 +57,7 @@ public class JFRDaemon {
     }
   }
 
-  private static DaemonConfig buildConfig() {
+  public static DaemonConfig buildConfig() {
 
     var daemonVersion = new VersionFinder().get();
 
@@ -76,11 +70,12 @@ public class JFRDaemon {
     builder.maybeEnv(METRICS_INGEST_URI, URI::create, builder::metricsUri);
     builder.maybeEnv(EVENTS_INGEST_URI, URI::create, builder::eventsUri);
     builder.maybeEnv(JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
+    builder.maybeEnv(AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
 
     return builder.build();
   }
 
-  static JFRUploader buildUploader(
+  public static JFRUploader buildUploader(
       DaemonConfig config,
       AtomicBoolean readinessCheck,
       AtomicReference<EventConverter> eventConverterReference)
@@ -96,7 +91,7 @@ public class JFRDaemon {
         .build();
   }
 
-  private static EventConverter buildEventConverter(Attributes attr) {
+  public static EventConverter buildEventConverter(Attributes attr) {
     return EventConverter.builder()
         .commonAttributes(attr)
         .metricMappers(ToMetricRegistry.createDefault())

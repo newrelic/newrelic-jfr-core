@@ -47,7 +47,7 @@ public final class JFRUploader {
     this.readinessCheck = builder.readinessCheck;
   }
 
-  void handleFile(final Path dumpFile) {
+  public void handleFile(final Path dumpFile) {
     try {
       bufferFileData(dumpFile);
       maybeDrainAndSend();

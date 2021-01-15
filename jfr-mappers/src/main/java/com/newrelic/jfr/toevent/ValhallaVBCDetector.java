@@ -3,8 +3,11 @@ package com.newrelic.jfr.toevent;
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.Collections;
 import java.util.List;
+import jdk.jfr.consumer.RecordedClass;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedThread;
 
 // jdk.SyncOnPrimitiveWrapper {
 //        startTime = 17:16:25.584
@@ -27,19 +30,20 @@ public class ValhallaVBCDetector implements EventToEvent {
 
   @Override
   public boolean test(RecordedEvent event) {
-    var name = event.getEventType().getName();
+    String name = event.getEventType().getName();
     return name.equalsIgnoreCase(EVENT_NAME) || name.equalsIgnoreCase(OLD_EVENT_NAME);
   }
 
   @Override
   public List<Event> apply(RecordedEvent event) {
-    var timestamp = event.getStartTime().toEpochMilli();
-    var attr = new Attributes();
-    var eventThread = event.getThread("eventThread");
-    var boxClass = event.getClass("boxClass");
+    long timestamp = event.getStartTime().toEpochMilli();
+    Attributes attr = new Attributes();
+    RecordedThread eventThread = event.getThread("eventThread");
+    RecordedClass boxClass = event.getClass("boxClass");
+
     attr.put("thread.name", eventThread == null ? null : eventThread.getJavaName());
     attr.put("boxClass", boxClass == null ? null : boxClass.getName());
     attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
-    return List.of(new Event("JfrValhallaVBCSync", attr, timestamp));
+    return Collections.singletonList(new Event("JfrValhallaVBCSync", attr, timestamp));
   }
 }

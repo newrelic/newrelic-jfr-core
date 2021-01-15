@@ -11,8 +11,11 @@ import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedThread;
 
 // jdk.Compilation {
 //        startTime = 16:04:14.403
@@ -31,16 +34,16 @@ public class JITCompilationMapper implements EventToEvent {
 
   @Override
   public List<Event> apply(RecordedEvent event) {
-    var timestamp = event.getStartTime().toEpochMilli();
-    var duration = event.getDuration();
-    var attr = new Attributes();
+    long timestamp = event.getStartTime().toEpochMilli();
+    Duration duration = event.getDuration();
+    Attributes attr = new Attributes();
     attr.put("desc", MethodSupport.describeMethod(event.getValue("method")));
     attr.put("duration", duration.toMillis());
     attr.put("succeeded", Workarounds.getSucceeded(event));
 
-    var threadId = event.getThread("eventThread");
+    RecordedThread threadId = event.getThread("eventThread");
     attr.put("thread.name", threadId == null ? null : threadId.getJavaName());
-    return List.of(new Event("JfrCompilation", attr, timestamp));
+    return Collections.singletonList(new Event("JfrCompilation", attr, timestamp));
   }
 
   @Override

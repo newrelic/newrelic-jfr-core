@@ -8,6 +8,7 @@
 package com.newrelic.jfr.daemon;
 
 import java.io.IOException;
+import java.rmi.ConnectIOException;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,7 +75,8 @@ public final class JFRController {
           | MBeanException
           | InstanceNotFoundException
           | OpenDataException
-          | ReflectionException e) {
+          | ReflectionException
+          | ConnectIOException e) {
         logger.error("JMX streaming failed: ", e);
         try {
           restartRecording();

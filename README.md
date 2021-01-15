@@ -115,6 +115,7 @@ default behavior, the following environment variables are recognized:
 | METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1)          | Where to send metric data
 | EVENTS_INGEST_URI     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events), [EU production](https://insights-collector.eu01.nr-data.net/v1/accounts/events) | Where to send event data
 | JFR_SHARED_FILESYSTEM |     N     |  false              | Use a shared filesystem instead of streaming data from JMX
+| AUDIT_LOGGING |     N     |  false              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK
 
 Expose remote JMX on the application that the jfr-daemon will be attaching to by adding the following system properties:
 
@@ -124,6 +125,9 @@ Expose remote JMX on the application that the jfr-daemon will be attaching to by
 -Dcom.sun.management.jmxremote.ssl=false 
 -Dcom.sun.management.jmxremote.authenticate=false
 ```
+### Logging
+
+The JFR daemon logs with the Slf4j-Simple implementation at the default `Info` level. For audit logging from the underlying Telemetry SDK, set the log level to `Debug` and enable audit logging via environment variable as described above. 
 
 ---
 ## Support

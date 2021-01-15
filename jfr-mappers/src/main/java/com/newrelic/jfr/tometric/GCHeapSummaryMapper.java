@@ -20,12 +20,10 @@ public class GCHeapSummaryMapper implements EventToMetric {
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
-    var timestamp = ev.getStartTime().toEpochMilli();
+    long timestamp = ev.getStartTime().toEpochMilli();
     long heapUsed = ev.getLong("heapUsed");
-
-    var attr = new Attributes();
-    var list = new ArrayList<Gauge>();
-
+    List<Gauge> list = new ArrayList<>();
+    Attributes attr = new Attributes();
     RecordedObject heapSpace = ev.getValue("heapSpace");
     if (heapSpace != null) {
       long committedSize = heapSpace.getLong("committedSize");

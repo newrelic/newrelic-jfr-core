@@ -10,8 +10,11 @@ package com.newrelic.jfr.toevent;
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedStackTrace;
+import jdk.jfr.consumer.RecordedThread;
 
 // Need to handle both jdk.ExecutionSample and jdk.NativeMethodSample...
 
@@ -48,19 +51,19 @@ public class MethodSampleMapper implements EventToEvent {
 
   @Override
   public List<Event> apply(RecordedEvent ev) {
-    var trace = ev.getStackTrace();
+    RecordedStackTrace trace = ev.getStackTrace();
     if (trace == null) {
-      return List.of();
+      return Collections.emptyList();
     }
 
-    var timestamp = ev.getStartTime().toEpochMilli();
-    var attr = new Attributes();
-    var sampledThread = ev.getThread("sampledThread");
+    long timestamp = ev.getStartTime().toEpochMilli();
+    Attributes attr = new Attributes();
+    RecordedThread sampledThread = ev.getThread("sampledThread");
     attr.put("thread.name", sampledThread == null ? null : sampledThread.getJavaName());
     attr.put("thread.state", ev.getString("state"));
     attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
 
-    return List.of(new Event("JfrMethodSample", attr, timestamp));
+    return Collections.singletonList(new Event("JfrMethodSample", attr, timestamp));
   }
 
   @Override
