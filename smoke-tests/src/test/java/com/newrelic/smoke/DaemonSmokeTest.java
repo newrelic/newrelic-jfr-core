@@ -10,8 +10,8 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
- * This class tests the jfr daemon, defined in the {@code projectDir/jfr-daemon} module, as a alone
- * java process. To do so, it creates a dummy application for jfr to monitor, a dummy edge
+ * This class tests the jfr daemon, defined in the {@code projectDir/jfr-daemon} module, as a stand
+ * alone java process. To do so, it creates a dummy application for jfr to monitor, a dummy edge
  * application for jfr to report data to, and a docker container with a jfr daemon process running.
  * The tests ensure that jfr daemon process executable starts up, connects to the dummy application,
  * and reports data to the dummy edge application.
