@@ -10,6 +10,7 @@ package com.newrelic.jfr.tometric;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
+import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;
@@ -19,15 +20,16 @@ public class ThreadAllocationStatisticsMapper implements EventToMetric {
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
-    var time = ev.getStartTime().toEpochMilli();
-    var allocated = ev.getDouble("allocated");
+    long time = ev.getStartTime().toEpochMilli();
+    double allocated = ev.getDouble("allocated");
     RecordedThread t = ev.getValue("thread");
-    var attr = new Attributes();
+    Attributes attr = new Attributes();
     if (t != null) {
       attr.put("thread.name", t.getJavaName()).put("thread.osName", t.getOSName());
     }
 
-    return List.of(new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, time, attr));
+    return Collections.singletonList(
+        new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, time, attr));
   }
 
   @Override

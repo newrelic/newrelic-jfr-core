@@ -40,18 +40,21 @@ public class AgentController {
     this.config = config;
   }
 
-  // This needs to be exposed to JMX / k8s
-  public void shutdown() {
-    shutdown = true;
+  void cleanup() {
+    var shouldBeEmpty = executorService.shutdownNow();
+    if (shouldBeEmpty.size() > 0) {
+      logger.error(
+          "Non-empty list of runnable tasks seen, this should not happen: " + shouldBeEmpty);
+    }
   }
 
-  public void loop(final Duration harvestInterval) throws IOException, JMException {
+  public void loop(final Duration harvestInterval) throws IOException {
     while (!shutdown) {
       try {
         TimeUnit.MILLISECONDS.sleep(harvestInterval.toMillis());
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
-        // Ignore the premature return and trigger the next JMX dump at once
+        // Ignore the premature return and trigger the next dump at once
       }
 
       final var pathToFile = cloneJfrRecording();
@@ -77,10 +80,8 @@ public class AgentController {
     this.recording = recording;
   }
 
-  public Path cloneJfrRecording() throws IOException {
+  Path cloneJfrRecording() throws IOException {
     final var output = Files.createTempFile("local-recording", ".jfr");
-    // Is this still necessary?
-    //    output.toFile().deleteOnExit();
     recording.copy(false);
     recording.dump(output);
     return output;

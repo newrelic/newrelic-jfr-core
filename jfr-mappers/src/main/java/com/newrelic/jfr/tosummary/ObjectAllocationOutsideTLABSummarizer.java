@@ -8,6 +8,7 @@
 package com.newrelic.jfr.tosummary;
 
 import com.newrelic.jfr.Workarounds;
+import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 /**
@@ -21,7 +22,7 @@ public final class ObjectAllocationOutsideTLABSummarizer
 
   @Override
   public void accept(RecordedEvent ev) {
-    var threadName = Workarounds.getThreadName(ev);
+    Optional<String> threadName = Workarounds.getThreadName(ev);
     threadName.ifPresent(
         thread -> {
           if (perThread.get(thread) == null) {

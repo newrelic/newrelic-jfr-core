@@ -8,14 +8,15 @@
 package com.newrelic.jfr;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
+import com.newrelic.jfr.tosummary.GCHeapSummarySummarizer;
 import com.newrelic.jfr.tosummary.NetworkReadSummarizer;
 import com.newrelic.jfr.tosummary.NetworkWriteSummarizer;
 import com.newrelic.jfr.tosummary.ObjectAllocationInNewTLABSummarizer;
 import com.newrelic.jfr.tosummary.ObjectAllocationOutsideTLABSummarizer;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +25,9 @@ import java.util.stream.Stream;
 public class ToSummaryRegistry {
 
   private static final List<EventToSummary> ALL_MAPPERS =
-      List.of(
+      Arrays.asList(
           new G1GarbageCollectionSummarizer(),
+          new GCHeapSummarySummarizer(),
           new NetworkReadSummarizer(),
           new NetworkWriteSummarizer(),
           new ObjectAllocationInNewTLABSummarizer(),
@@ -42,7 +44,7 @@ public class ToSummaryRegistry {
   }
 
   public static ToSummaryRegistry create(Collection<String> eventNames) {
-    var filtered =
+    List<EventToSummary> filtered =
         ALL_MAPPERS
             .stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
@@ -51,7 +53,7 @@ public class ToSummaryRegistry {
   }
 
   private static List<String> allEventNames() {
-    return ALL_MAPPERS.stream().map(EventToSummary::getEventName).collect(toUnmodifiableList());
+    return ALL_MAPPERS.stream().map(EventToSummary::getEventName).collect(toList());
   }
 
   public Stream<EventToSummary> all() {

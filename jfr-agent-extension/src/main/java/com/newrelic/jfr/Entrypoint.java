@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import javax.management.JMException;
 import org.slf4j.LoggerFactory;
 
 public class Entrypoint {
@@ -58,7 +57,7 @@ public class Entrypoint {
     }
   }
 
-  private void start() throws IOException, JMException {
+  private void start() throws IOException {
 
     var config = buildConfig();
     var attr = new JFRCommonAttributes(config).build(Optional.empty());
@@ -73,7 +72,7 @@ public class Entrypoint {
         () -> {
           try {
             jfrController.loop(config.getHarvestInterval());
-          } catch (IOException | JMException e) {
+          } catch (IOException e) {
             logger.error("Error in agent, shutting down", e);
           }
         });

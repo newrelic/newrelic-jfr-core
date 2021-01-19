@@ -8,7 +8,6 @@
 package com.newrelic.jfr;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
 
 import com.newrelic.jfr.tometric.AllocationRequiringGCMapper;
 import com.newrelic.jfr.tometric.CPUThreadLoadMapper;
@@ -20,6 +19,7 @@ import com.newrelic.jfr.tometric.MetaspaceSummaryMapper;
 import com.newrelic.jfr.tometric.OverallCPULoadMapper;
 import com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public class ToMetricRegistry {
 
   private static final List<EventToMetric> ALL_MAPPERS =
-      List.of(
+      Arrays.asList(
           new AllocationRequiringGCMapper(),
           new ContextSwitchRateMapper(),
           new CPUThreadLoadMapper(),
@@ -48,7 +48,7 @@ public class ToMetricRegistry {
   }
 
   public static ToMetricRegistry create(Collection<String> eventNames) {
-    var filtered =
+    List<EventToMetric> filtered =
         ALL_MAPPERS
             .stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
@@ -57,7 +57,7 @@ public class ToMetricRegistry {
   }
 
   private static List<String> allEventNames() {
-    return ALL_MAPPERS.stream().map(EventToMetric::getEventName).collect(toUnmodifiableList());
+    return ALL_MAPPERS.stream().map(EventToMetric::getEventName).collect(toList());
   }
 
   /** @return a stream of all EventToMetric entries in this registry. */

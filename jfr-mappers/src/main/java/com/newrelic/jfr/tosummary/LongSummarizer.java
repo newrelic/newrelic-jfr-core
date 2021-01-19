@@ -23,7 +23,7 @@ public class LongSummarizer {
 
   public void accept(RecordedEvent ev) {
     count++;
-    var currentValue = ev.getLong(fieldName);
+    long currentValue = ev.getLong(fieldName);
     sum = sum + currentValue;
 
     if (currentValue > max) {

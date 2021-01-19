@@ -9,6 +9,7 @@ package com.newrelic.jfr.toevent;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
@@ -28,11 +29,11 @@ public class JVMSystemPropertyMapper implements EventToEvent {
 
   @Override
   public List<Event> apply(RecordedEvent event) {
-    var timestamp = event.getStartTime().toEpochMilli();
-    var attr = new Attributes();
+    long timestamp = event.getStartTime().toEpochMilli();
+    Attributes attr = new Attributes();
     attr.put("jvmProperty", event.getString("key"));
     attr.put("jvmPropertyValue", event.getString("value"));
 
-    return List.of(new Event("JfrJVMInformation", attr, timestamp));
+    return Collections.singletonList(new Event("JfrJVMInformation", attr, timestamp));
   }
 }

@@ -7,7 +7,6 @@
 
 package com.newrelic.jfr.tosummary;
 
-import com.newrelic.jfr.Constants;
 import com.newrelic.telemetry.metrics.Summary;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -37,7 +36,7 @@ public interface EventToSummary extends Consumer<RecordedEvent>, Predicate<Recor
    * @return true if event is interesting, false otherwise
    */
   default boolean test(RecordedEvent event) {
-    return event.getEventType().getName().startsWith(getEventName());
+    return event.getEventType().getName().equalsIgnoreCase(getEventName());
   }
 
   /**
@@ -49,13 +48,4 @@ public interface EventToSummary extends Consumer<RecordedEvent>, Predicate<Recor
 
   /** Clears the summary information */
   void reset();
-
-  /**
-   * Returns the Java version where particular JFR events were added.
-   *
-   * @return int indicating Java version that introduced the event type
-   */
-  default int since() {
-    return Constants.JAVA_11;
-  }
 }

@@ -7,7 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
-import static com.newrelic.jfr.tosummary.DurationSummarizer.DEFAULT_CLOCK;
+import static com.newrelic.jfr.tosummary.BaseDurationSummarizer.DEFAULT_CLOCK;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
@@ -20,7 +20,7 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
 
   public static final String EVENT_NAME = "jdk.G1GarbageCollection";
 
-  private final DurationSummarizer summarizer;
+  private final SimpleDurationSummarizer summarizer;
   private int count = 0;
   private long startTimeMs;
   private long endTimeMs = 0L;
@@ -30,10 +30,10 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
   }
 
   public G1GarbageCollectionSummarizer(long startTimeMs) {
-    this(startTimeMs, new DurationSummarizer(startTimeMs, DEFAULT_CLOCK, "duration"));
+    this(startTimeMs, new SimpleDurationSummarizer(startTimeMs, DEFAULT_CLOCK, "duration"));
   }
 
-  public G1GarbageCollectionSummarizer(long startTimeMs, DurationSummarizer summarizer) {
+  public G1GarbageCollectionSummarizer(long startTimeMs, SimpleDurationSummarizer summarizer) {
     this.startTimeMs = startTimeMs;
     this.summarizer = summarizer;
   }
@@ -52,8 +52,8 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    var attr = new Attributes();
-    var out =
+    Attributes attr = new Attributes();
+    Summary out =
         new Summary(
             "jfr.G1GarbageCollection.duration",
             count,

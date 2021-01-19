@@ -11,6 +11,7 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
@@ -24,12 +25,12 @@ public class MetaspaceSummaryMapper implements EventToMetric {
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
-    var timestamp = ev.getStartTime().toEpochMilli();
+    long timestamp = ev.getStartTime().toEpochMilli();
     RecordedObject metaspace = ev.getValue(METASPACE_KEY);
     RecordedObject dataSpace = ev.getValue(DATA_SPACE_KEY);
     RecordedObject classSpace = ev.getValue(CLASS_SPACE_KEY);
 
-    var attr = new Attributes().put("when", ev.getString("when"));
+    Attributes attr = new Attributes().put("when", ev.getString("when"));
 
     List<Metric> metrics = new ArrayList<>(9);
     metrics.addAll(generateMetric(METASPACE_KEY, metaspace, attr, timestamp));
@@ -41,7 +42,7 @@ public class MetaspaceSummaryMapper implements EventToMetric {
 
   private List<? extends Metric> generateMetric(
       String name, RecordedObject recordedObject, Attributes attr, long timestamp) {
-    return List.of(
+    return Arrays.asList(
         new Gauge(
             NR_METRIC_PREFIX + name + ".committed",
             recordedObject.getDouble("committed"),

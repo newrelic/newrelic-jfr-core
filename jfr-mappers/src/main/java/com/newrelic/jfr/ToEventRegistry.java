@@ -10,6 +10,7 @@ package com.newrelic.jfr;
 import static java.util.stream.Collectors.*;
 
 import com.newrelic.jfr.toevent.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +19,12 @@ import java.util.stream.Stream;
 public class ToEventRegistry {
 
   private static final List<EventToEvent> ALL_MAPPERS =
-      List.of(
+      Arrays.asList(
           new JITCompilationMapper(),
           new JVMInformationMapper(),
           new JVMSystemPropertyMapper(),
           new ThreadLockEventMapper(),
+          new ValhallaVBCDetector(),
           MethodSampleMapper.forExecutionSample(),
           MethodSampleMapper.forNativeMethodSample());
 
@@ -37,7 +39,7 @@ public class ToEventRegistry {
   }
 
   public static ToEventRegistry create(Collection<String> eventNames) {
-    var filtered =
+    List<EventToEvent> filtered =
         ALL_MAPPERS
             .stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
@@ -50,7 +52,7 @@ public class ToEventRegistry {
   }
 
   private static List<String> allEventNames() {
-    return ALL_MAPPERS.stream().map(EventToEvent::getEventName).collect(toUnmodifiableList());
+    return ALL_MAPPERS.stream().map(EventToEvent::getEventName).collect(toList());
   }
 
   /** @return a stream of all EventToEvent entries in this registry. */

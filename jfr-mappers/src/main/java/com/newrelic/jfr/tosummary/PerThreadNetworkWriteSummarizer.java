@@ -15,14 +15,14 @@ import jdk.jfr.consumer.RecordedEvent;
 public class PerThreadNetworkWriteSummarizer implements EventToSummary {
   private final String threadName;
   private final LongSummarizer bytesSummary;
-  private final DurationSummarizer duration;
+  private final SimpleDurationSummarizer duration;
 
   public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
-    this(threadName, new LongSummarizer("bytesWritten"), new DurationSummarizer(startTimeMs));
+    this(threadName, new LongSummarizer("bytesWritten"), new SimpleDurationSummarizer(startTimeMs));
   }
 
   public PerThreadNetworkWriteSummarizer(
-      String threadName, LongSummarizer longSummarizer, DurationSummarizer duration) {
+      String threadName, LongSummarizer longSummarizer, SimpleDurationSummarizer duration) {
     this.threadName = threadName;
     this.bytesSummary = longSummarizer;
     this.duration = duration;
@@ -41,8 +41,8 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    var attr = new Attributes().put("thread.name", threadName);
-    var outWritten =
+    Attributes attr = new Attributes().put("thread.name", threadName);
+    Summary outWritten =
         new Summary(
             "jfr.SocketWrite.bytesWritten",
             bytesSummary.getCount(),
@@ -52,7 +52,7 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
             duration.getStartTimeMs(),
             duration.getEndTimeMs(),
             attr);
-    var outDuration =
+    Summary outDuration =
         new Summary(
             "jfr.SocketWrite.duration",
             bytesSummary.getCount(),
