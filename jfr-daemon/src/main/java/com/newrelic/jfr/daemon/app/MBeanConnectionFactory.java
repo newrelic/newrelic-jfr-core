@@ -4,6 +4,7 @@ import com.newrelic.jfr.daemon.SafeSleep;
 import com.newrelic.telemetry.Backoff;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -51,6 +52,19 @@ public class MBeanConnectionFactory {
         }
       }
     }
+  }
+
+  /**
+   * Obtain a backoff instance which will wait indefinitely.
+   *
+   * @return the backoff instance
+   */
+  public static Backoff waitForeverBackoff() {
+    return Backoff.builder()
+        .maxBackoff(15, TimeUnit.SECONDS)
+        .backoffFactor(1, TimeUnit.SECONDS)
+        .maxRetries(Integer.MAX_VALUE)
+        .build();
   }
 
   JMXConnector connect(JMXServiceURL url) throws IOException {

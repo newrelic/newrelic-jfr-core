@@ -7,18 +7,15 @@
 
 package com.newrelic.jfr.daemon.app;
 
-import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
-import static com.newrelic.jfr.daemon.AttributeNames.ENTITY_GUID;
-import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
+import static com.newrelic.jfr.daemon.app.MBeanConnectionFactory.waitForeverBackoff;
 
 import com.newrelic.jfr.daemon.AttributeNames;
 import com.newrelic.jfr.daemon.SafeSleep;
-import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.Backoff;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -34,45 +31,24 @@ public class RemoteEntityBridge {
 
   private static final Logger logger = LoggerFactory.getLogger(RemoteEntityBridge.class);
 
-  private final MBeanConnectionFactory connectionFactory;
-
-  public RemoteEntityBridge(MBeanConnectionFactory connectionFactory) {
-    this.connectionFactory = connectionFactory;
-  }
+  public RemoteEntityBridge() {}
 
   /**
-   * Connect to the remote MBean Server and append relevant attributes. If the remote server has the
-   * New Relic Java Agent running, obtain and set the {@link AttributeNames#ENTITY_GUID}. If the New
-   * Relic Java Agent is not running, set the {@link AttributeNames#APP_NAME} and {@link
-   * AttributeNames#SERVICE_NAME} to the given {@code appName}.
+   * Asynchronously fetch the remote entity id using the {@code connection}. If no remote agent is
+   * detected, returns empty. If a remote agent is available, it periodically check if the {@code
+   * LinkingMetadata} MBean is available. When it becomes available, it will return the {@link
+   * AttributeNames#ENTITY_GUID} property.
    *
-   * <p>This will attempt to connect to the remote server indefinitely.
-   *
-   * @param attributes the attributes to append to
-   * @param appName the app name
-   * @throws Exception if an unknown error occurs connecting to the remote server
+   * @param connection the connection to the remote server
+   * @return a completable future resolving the remote entity id
    */
-  public void connectAndAppendRemoteAttributes(Attributes attributes, String appName)
-      throws Exception {
-    MBeanServerConnection connection = connectionFactory.awaitConnection(waitForeverBackoff());
-    Optional<String> optGuid = awaitRemoteEntityGuid(connection, waitForeverBackoff());
-    if (optGuid.isPresent()) {
-      attributes.put(ENTITY_GUID, optGuid.get());
-    } else {
-      attributes.put(APP_NAME, appName);
-      attributes.put(SERVICE_NAME, appName);
-    }
+  public CompletableFuture<Optional<String>> fetchRemoteEntityIdAsync(
+      MBeanServerConnection connection) {
+    return CompletableFuture.supplyAsync(
+        () -> awaitRemoteEntityId(connection, waitForeverBackoff()));
   }
 
-  private static Backoff waitForeverBackoff() {
-    return Backoff.builder()
-        .maxBackoff(15, TimeUnit.SECONDS)
-        .backoffFactor(1, TimeUnit.SECONDS)
-        .maxRetries(Integer.MAX_VALUE)
-        .build();
-  }
-
-  Optional<String> awaitRemoteEntityGuid(MBeanServerConnection connection, Backoff backoff) {
+  Optional<String> awaitRemoteEntityId(MBeanServerConnection connection, Backoff backoff) {
     while (true) {
       Optional<String> optGuid;
       try {
@@ -104,10 +80,11 @@ public class RemoteEntityBridge {
     LinkingMetadataMBean linkingMetadataMBean =
         JMX.newMBeanProxy(connection, name, LinkingMetadataMBean.class);
     Map<String, String> metadata = linkingMetadataMBean.readLinkingMetadata();
-    return Optional.ofNullable(metadata.get("entity.guid"));
+    return Optional.ofNullable(metadata.get(AttributeNames.ENTITY_GUID));
   }
 
-  interface LinkingMetadataMBean {
+  // NOTE: this must be public or NotCompliantMBeanException will be thrown
+  public interface LinkingMetadataMBean {
     Map<String, String> readLinkingMetadata();
   }
 }

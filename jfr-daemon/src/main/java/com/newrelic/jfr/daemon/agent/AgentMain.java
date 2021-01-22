@@ -1,5 +1,6 @@
 package com.newrelic.jfr.daemon.agent;
 
+import com.newrelic.jfr.daemon.EventConverter;
 import com.newrelic.jfr.daemon.JfrController;
 import com.newrelic.jfr.daemon.SetupUtils;
 import java.lang.instrument.Instrumentation;
@@ -30,7 +31,8 @@ public class AgentMain {
   private void start() {
     var config = SetupUtils.buildConfig();
     var commonAttrs = SetupUtils.buildCommonAttributes();
-    var uploader = SetupUtils.buildUploader(config, commonAttrs);
+    var uploader = SetupUtils.buildUploader(config);
+    uploader.readyToSend(new EventConverter(commonAttrs));
     var recorderFactory = new FileJfrRecorderFactory(config.getHarvestInterval());
     var controller = new JfrController(recorderFactory, uploader, config.getHarvestInterval());
 

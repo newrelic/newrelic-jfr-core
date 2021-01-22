@@ -46,7 +46,8 @@ class JFRUploaderTest {
     when(bufferedTelemetry.createEventBatch()).thenReturn(expectedEventBatch);
     when(bufferedTelemetry.createMetricBatch()).thenReturn(expectedMetricBatch);
 
-    testClass = spy(new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter));
+    testClass = spy(new JFRUploader(telemetryClient, recordedEventBuffer));
+    testClass.readyToSend(eventConverter);
 
     doReturn(recordingFile).when(testClass).openRecordingFile(filePath);
     doNothing().when(testClass).deleteFile(any());

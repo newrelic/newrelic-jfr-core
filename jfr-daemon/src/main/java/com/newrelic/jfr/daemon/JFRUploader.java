@@ -20,15 +20,11 @@ public final class JFRUploader {
 
   private final TelemetryClient telemetryClient;
   private final RecordedEventBuffer eventBuffer;
-  private final EventConverter eventConverter;
+  private volatile EventConverter eventConverter;
 
-  public JFRUploader(
-      TelemetryClient telemetryClient,
-      RecordedEventBuffer eventBuffer,
-      EventConverter eventConverter) {
+  public JFRUploader(TelemetryClient telemetryClient, RecordedEventBuffer eventBuffer) {
     this.telemetryClient = telemetryClient;
     this.eventBuffer = eventBuffer;
-    this.eventConverter = eventConverter;
   }
 
   /**
@@ -40,13 +36,24 @@ public final class JFRUploader {
   public void handleFile(final Path dumpFile) {
     try {
       bufferFileData(dumpFile);
-      drainAndSend();
+      maybeDrainAndSend();
     } catch (Exception e) {
       logger.error("Error handling raw dump file", e);
     } finally {
       deleteFile(dumpFile);
       deleteFile(dumpFile.getParent());
     }
+  }
+
+  /**
+   * Mark the uploader as ready to send events. Until this is called, calls to {@link
+   * #handleFile(Path)} will result in JFR events being buffered, but not converted or sent.
+   *
+   * @param eventConverter the event convert
+   */
+  public void readyToSend(EventConverter eventConverter) {
+    logger.info("JFR Uploader is ready to send events.");
+    this.eventConverter = eventConverter;
   }
 
   private void bufferFileData(Path dumpFile) {
@@ -57,7 +64,11 @@ public final class JFRUploader {
     }
   }
 
-  private void drainAndSend() {
+  private void maybeDrainAndSend() {
+    if (eventConverter == null) {
+      logger.warn("Drain attempt skipped because JFRUploader is not yet rady to send.");
+      return;
+    }
     BufferedTelemetry telemetry = eventConverter.convert(eventBuffer);
     sendMetrics(telemetry);
     sendEvents(telemetry);

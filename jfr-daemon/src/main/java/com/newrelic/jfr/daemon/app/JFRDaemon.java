@@ -7,6 +7,12 @@
 
 package com.newrelic.jfr.daemon.app;
 
+import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
+import static com.newrelic.jfr.daemon.AttributeNames.ENTITY_GUID;
+import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
+import static com.newrelic.jfr.daemon.app.MBeanConnectionFactory.waitForeverBackoff;
+
+import com.newrelic.jfr.daemon.EventConverter;
 import com.newrelic.jfr.daemon.JfrController;
 import com.newrelic.jfr.daemon.SetupUtils;
 import org.slf4j.Logger;
@@ -20,11 +26,28 @@ public class JFRDaemon {
       var config = SetupUtils.buildConfig();
       var connectionFactory = new MBeanConnectionFactory(config.getJmxHost(), config.getJmxPort());
       var commonAttrs = SetupUtils.buildCommonAttributes();
-      new RemoteEntityBridge(connectionFactory)
-          .connectAndAppendRemoteAttributes(commonAttrs, config.getMonitoredAppName());
-      var uploader = SetupUtils.buildUploader(config, commonAttrs);
-      var recorderFactory = new JmxJfrRecorderFactory(config, connectionFactory);
+      var uploader = SetupUtils.buildUploader(config);
 
+      // Await initial connection to remote MBean Server.
+      var connection = connectionFactory.awaitConnection(waitForeverBackoff());
+
+      // Asynchronously fetch the remote entity id, and upon completion, mark the uploader as
+      // readyToSend. This allows the JFR data to start being recorded while awaiting the
+      // entity id to become available.
+      new RemoteEntityBridge()
+          .fetchRemoteEntityIdAsync(connection)
+          .thenAccept(
+              optGuid -> {
+                if (optGuid.isPresent()) {
+                  commonAttrs.put(ENTITY_GUID, optGuid.get());
+                } else {
+                  commonAttrs.put(APP_NAME, config.getMonitoredAppName());
+                  commonAttrs.put(SERVICE_NAME, config.getMonitoredAppName());
+                }
+                uploader.readyToSend(new EventConverter(commonAttrs));
+              });
+
+      var recorderFactory = new JmxJfrRecorderFactory(config, connectionFactory);
       var controller = new JfrController(recorderFactory, uploader, config.getHarvestInterval());
       controller.loop();
     } catch (Throwable e) {

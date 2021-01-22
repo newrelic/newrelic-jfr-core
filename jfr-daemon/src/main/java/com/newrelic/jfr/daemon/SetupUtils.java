@@ -71,18 +71,16 @@ public class SetupUtils {
   }
 
   /**
-   * Build a {@link JFRUploader} for the {@code config} and {@code commonAttributes}.
+   * Build a {@link JFRUploader} with the {@code config}.
    *
    * @param config the config
-   * @param commonAttributes the common attributes
    * @return the uploader
    */
-  public static JFRUploader buildUploader(DaemonConfig config, Attributes commonAttributes) {
+  public static JFRUploader buildUploader(DaemonConfig config) {
     var telemetryClient = buildTelemetryClient(config);
     var queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
     var recordedEventBuffer = new RecordedEventBuffer(queue);
-    var eventConverter = new EventConverter(commonAttributes);
-    return new JFRUploader(telemetryClient, recordedEventBuffer, eventConverter);
+    return new JFRUploader(telemetryClient, recordedEventBuffer);
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
