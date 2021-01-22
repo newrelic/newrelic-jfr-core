@@ -39,8 +39,8 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.newrelic.jfr.daemon.JFRDaemon")
-    mainModule.set("com.newrelic.jfr.daemon")
+    mainClass.set("com.newrelic.jfr.daemon.app.JFRDaemon")
+    mainModule.set("com.newrelic.jfr.daemon.app")
 }
 
 jlink {

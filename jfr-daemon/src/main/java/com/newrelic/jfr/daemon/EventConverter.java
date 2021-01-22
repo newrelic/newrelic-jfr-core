@@ -15,7 +15,6 @@ import com.newrelic.telemetry.Attributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +28,34 @@ public class EventConverter {
   private final ToSummaryRegistry toSummaryRegistry;
   private final ToEventRegistry toEventRegistry;
 
-  private final Map<String, AtomicInteger> eventCount = new HashMap<>();
+  private final Map<String, Integer> eventCount = new HashMap<>();
 
-  public EventConverter(Builder builder) {
-    this.commonAttributes = builder.commonAttributes;
-    this.toMetricRegistry = builder.toMetricRegistry;
-    this.toSummaryRegistry = builder.toSummaryRegistry;
-    this.toEventRegistry = builder.toEventRegistry;
+  public EventConverter(Attributes commonAttributes) {
+    this(
+        commonAttributes,
+        ToMetricRegistry.createDefault(),
+        ToSummaryRegistry.createDefault(),
+        ToEventRegistry.createDefault());
   }
 
+  EventConverter(
+      Attributes commonAttributes,
+      ToMetricRegistry toMetricRegistry,
+      ToSummaryRegistry toSummaryRegistry,
+      ToEventRegistry toEventRegistry) {
+    this.commonAttributes = commonAttributes;
+    this.toMetricRegistry = toMetricRegistry;
+    this.toSummaryRegistry = toSummaryRegistry;
+    this.toEventRegistry = toEventRegistry;
+  }
+
+  /**
+   * Drain the events from the {@code buffer}, and convert them according to the configured metric,
+   * event, and summary registries.
+   *
+   * @param buffer the buffer
+   * @return a buffered telemetry containing the converted events
+   */
   public BufferedTelemetry convert(RecordedEventBuffer buffer) {
     var batches = BufferedTelemetry.create(commonAttributes);
 
@@ -56,16 +74,9 @@ public class EventConverter {
     return batches;
   }
 
-  private void updateStatistics(RecordedEvent event) {
-    var name = event.getEventType().getName();
-    if (eventCount.get(name) == null) {
-      eventCount.put(name, new AtomicInteger(0));
-    }
-    eventCount.get(name).incrementAndGet();
-  }
-
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
-    updateStatistics(event);
+    var name = event.getEventType().getName();
+    eventCount.compute(name, (key, value) -> value == null ? 1 : value + 1);
 
     try {
       toMetricRegistry
@@ -90,44 +101,6 @@ public class EventConverter {
               + event.getEventType().getDescription()
               + " due to error",
           e);
-    }
-  }
-
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  public static class Builder {
-    private Attributes commonAttributes;
-    private ToMetricRegistry toMetricRegistry;
-    private ToSummaryRegistry toSummaryRegistry;
-    private ToEventRegistry toEventRegistry;
-
-    public Builder commonAttributes(Attributes commonAttributes) {
-      this.commonAttributes = commonAttributes;
-      return this;
-    }
-
-    public Builder metricMappers(ToMetricRegistry registry) {
-      this.toMetricRegistry = registry;
-      return this;
-    }
-
-    public Builder summaryMappers(ToSummaryRegistry registry) {
-      this.toSummaryRegistry = registry;
-      return this;
-    }
-
-    public Builder eventMapper(ToEventRegistry registry) {
-      this.toEventRegistry = registry;
-      return this;
-    }
-
-    public EventConverter build() {
-      if (commonAttributes == null) {
-        throw new IllegalStateException("Common attributes are required");
-      }
-      return new EventConverter(this);
     }
   }
 }

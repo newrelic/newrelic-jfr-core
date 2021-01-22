@@ -33,6 +33,15 @@ public class RecordedEventBuffer {
     this.queue = queue;
   }
 
+  /**
+   * Buffer the events of the {@code file} to the {@link #queue}. Iterate through the events of the
+   * JFR {@code file}, filtering events older than the last seen watermark, and add to the queue
+   * until there are no more events or the queue is full.
+   *
+   * @param dumpFile the path of the {@code file}
+   * @param file the JFR file
+   * @throws IOException if an error occurs reading the file
+   */
   public void bufferEvents(Path dumpFile, RecordingFile file) throws IOException {
     ctx.resetForNewFile();
     logger.debug("Looking in " + dumpFile + " for events after: " + ctx.getLastSeen());

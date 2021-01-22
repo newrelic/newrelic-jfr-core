@@ -14,9 +14,16 @@ import java.util.jar.Manifest;
 
 public class VersionFinder {
 
-  public static final String UNKNOWN_VERSION = "UNKNOWN-VERSION";
+  private static final String UNKNOWN_VERSION = "UNKNOWN-VERSION";
 
-  public String get() {
+  private VersionFinder() {}
+
+  /**
+   * Retrieve the version of the daemon running.
+   *
+   * @return the version string
+   */
+  public static String getVersion() {
     var classLoader = VersionFinder.class.getClassLoader();
     if (!(classLoader instanceof URLClassLoader)) {
       return UNKNOWN_VERSION;
@@ -30,7 +37,7 @@ public class VersionFinder {
     return result == null ? UNKNOWN_VERSION : result;
   }
 
-  private String readManifest(URL url) {
+  private static String readManifest(URL url) {
     try {
       var manifest = new Manifest(url.openStream());
       var attributes = manifest.getMainAttributes();

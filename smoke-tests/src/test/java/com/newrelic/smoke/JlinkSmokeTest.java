@@ -28,6 +28,8 @@ class JlinkSmokeTest extends SmokeTestBase {
 
     var appContainer = buildAppContainer();
     var jfrContainer = buildJfrJlinkContainer(appContainer);
+    cleanupContainer(appContainer);
+    cleanupContainer(jfrContainer);
     appContainer.start();
     jfrContainer.start();
 
