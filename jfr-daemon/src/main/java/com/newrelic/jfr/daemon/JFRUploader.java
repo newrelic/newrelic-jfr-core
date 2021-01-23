@@ -8,6 +8,8 @@
 package com.newrelic.jfr.daemon;
 
 import com.newrelic.telemetry.TelemetryClient;
+import com.newrelic.telemetry.events.EventBatch;
+import com.newrelic.telemetry.metrics.MetricBatch;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,7 +59,7 @@ public final class JFRUploader {
   }
 
   private void bufferFileData(Path dumpFile) {
-    try (var recordingFile = openRecordingFile(dumpFile)) {
+    try (RecordingFile recordingFile = openRecordingFile(dumpFile)) {
       eventBuffer.bufferEvents(dumpFile, recordingFile);
     } catch (Throwable t) {
       logger.error("Error processing file " + dumpFile, t);
@@ -75,7 +77,7 @@ public final class JFRUploader {
   }
 
   private void sendMetrics(BufferedTelemetry bufferedMetrics) {
-    var metricBatch = bufferedMetrics.createMetricBatch();
+    MetricBatch metricBatch = bufferedMetrics.createMetricBatch();
     if (!metricBatch.isEmpty()) {
       logger.info(String.format("Sending metric batch of size %s", metricBatch.size()));
       telemetryClient.sendBatch(metricBatch);
@@ -83,7 +85,7 @@ public final class JFRUploader {
   }
 
   private void sendEvents(BufferedTelemetry bufferedMetrics) {
-    var eventBatch = bufferedMetrics.createEventBatch();
+    EventBatch eventBatch = bufferedMetrics.createEventBatch();
     if (!eventBatch.isEmpty()) {
       logger.info(String.format("Sending events batch of size %s", eventBatch.size()));
       telemetryClient.sendBatch(eventBatch);

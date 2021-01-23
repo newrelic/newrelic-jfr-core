@@ -4,9 +4,11 @@ import static com.newrelic.jfr.daemon.app.JmxJfrRecorderFactory.makeFlightRecord
 import static com.newrelic.jfr.daemon.app.JmxJfrRecorderFactory.makeOpenData;
 
 import com.newrelic.jfr.daemon.JfrRecorder;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
@@ -37,7 +39,7 @@ public class JmxJfrRecorder implements JfrRecorder {
 
   Path streamRecordingToFile() throws Exception {
     ObjectName objectName = makeFlightRecorderObjectName();
-    var oClone =
+    Object oClone =
         connection.invoke(
             objectName,
             "cloneRecording",
@@ -46,28 +48,28 @@ public class JmxJfrRecorder implements JfrRecorder {
     if (!(oClone instanceof Long)) {
       throw new RuntimeException("JMX returned something that wasn't a Long: " + oClone);
     }
-    var cloneId = (Long) oClone;
+    Long cloneId = (Long) oClone;
 
-    var streamOptions = new HashMap<String, String>();
+    Map<String, String> streamOptions = new HashMap<String, String>();
     streamOptions.put("blockSize", "" + MAX_BYTES_READ);
 
-    var sig = new String[] {"long", "javax.management.openmbean.TabularData"};
+    String[] sig = new String[] {"long", "javax.management.openmbean.TabularData"};
     Object[] args = new Object[] {cloneId, makeOpenData(streamOptions)};
 
-    var oStream = connection.invoke(objectName, "openStream", args, sig);
+    Object oStream = connection.invoke(objectName, "openStream", args, sig);
     if (!(oStream instanceof Long)) {
       throw new RuntimeException("JMX returned something that wasn't a Long: " + oStream);
     }
-    var streamId = (Long) oStream;
-    var moreToRead = true;
+    Long streamId = (Long) oStream;
+    boolean moreToRead = true;
 
-    var dir = Files.createTempDirectory("nr-jfr");
-    var file = Files.createTempFile(dir, "stream-" + System.currentTimeMillis(), null);
+    Path dir = Files.createTempDirectory("nr-jfr");
+    Path file = Files.createTempFile(dir, "stream-" + System.currentTimeMillis(), null);
 
-    try (var outputStream = Files.newOutputStream(file)) {
+    try (OutputStream outputStream = Files.newOutputStream(file)) {
       logger.debug("Opening stream from target process");
       while (moreToRead) {
-        var oBytes =
+        Object oBytes =
             connection.invoke(
                 objectName, "readStream", new Object[] {streamId}, new String[] {"long"});
         if (oBytes == null) {
@@ -76,7 +78,7 @@ public class JmxJfrRecorder implements JfrRecorder {
         if (!(oBytes instanceof byte[])) {
           throw new RuntimeException("JMX returned something that wasn't a byte array: " + oBytes);
         }
-        var bytesRead = (byte[]) oBytes;
+        byte[] bytesRead = (byte[]) oBytes;
         logger.debug("Reading bytes from stream: " + bytesRead.length);
         if (bytesRead.length < MAX_BYTES_READ) {
           moreToRead = false;
@@ -96,7 +98,7 @@ public class JmxJfrRecorder implements JfrRecorder {
   Path copyRecordingToFile() throws Exception {
     ObjectName objectName = makeFlightRecorderObjectName();
 
-    var oClone =
+    Object oClone =
         connection.invoke(
             objectName,
             "cloneRecording",
@@ -105,10 +107,10 @@ public class JmxJfrRecorder implements JfrRecorder {
     if (!(oClone instanceof Long)) {
       throw new RuntimeException("JMX returned something that wasn't a Long: " + oClone);
     }
-    var cloneId = (Long) oClone;
+    Long cloneId = (Long) oClone;
 
-    var dir = Files.createTempDirectory("nr-jfr");
-    var file = Files.createTempFile(dir, "stream-" + System.currentTimeMillis(), null);
+    Path dir = Files.createTempDirectory("nr-jfr");
+    Path file = Files.createTempFile(dir, "stream-" + System.currentTimeMillis(), null);
 
     connection.invoke(
         objectName,

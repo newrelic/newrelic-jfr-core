@@ -7,6 +7,7 @@ import com.newrelic.jfr.daemon.SafeSleep;
 import com.newrelic.telemetry.Backoff;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.JMException;
@@ -71,7 +72,7 @@ public class JmxJfrRecorderFactory implements JfrRecorderFactory {
     logger.debug("In startRecording()");
 
     ObjectName objectName = makeFlightRecorderObjectName();
-    var o = connection.invoke(objectName, "newRecording", new Object[] {}, new String[] {});
+    Object o = connection.invoke(objectName, "newRecording", new Object[] {}, new String[] {});
     if (!(o instanceof Long)) {
       throw new RuntimeException("JMX returned something that wasn't a Long: " + o);
     }
@@ -79,15 +80,15 @@ public class JmxJfrRecorderFactory implements JfrRecorderFactory {
 
     configureDefaultProfile(connection, recordingId);
 
-    var maxAge = (harvestInterval.toSeconds() + 10) + "s";
+    String maxAge = (harvestInterval.get(ChronoUnit.SECONDS) + 10) + "s";
     Map<String, String> options = new HashMap<>();
     options.put("name", "New Relic JFR Recording");
     options.put("disk", "true");
     options.put("maxAge", maxAge);
 
     // Have to pass this as actual open data, not as a Map
-    var sig = new String[] {"long", "javax.management.openmbean.TabularData"};
-    var args = new Object[] {recordingId, makeOpenData(options)};
+    String[] sig = new String[] {"long", "javax.management.openmbean.TabularData"};
+    Object[] args = new Object[] {recordingId, makeOpenData(options)};
     connection.invoke(objectName, "setRecordingOptions", args, sig);
 
     // Now start the recording
@@ -107,14 +108,14 @@ public class JmxJfrRecorderFactory implements JfrRecorderFactory {
   }
 
   static TabularDataSupport makeOpenData(Map<String, String> options) throws OpenDataException {
-    var typeName = "java.util.Map<java.lang.String, java.lang.String>";
-    var itemNames = new String[] {"key", "value"};
-    var openTypes = new OpenType[] {SimpleType.STRING, SimpleType.STRING};
-    var rowType = new CompositeType(typeName, typeName, itemNames, itemNames, openTypes);
-    var tabularType = new TabularType(typeName, typeName, rowType, new String[] {"key"});
-    var table = new TabularDataSupport(tabularType);
+    String typeName = "java.util.Map<java.lang.String, java.lang.String>";
+    String[] itemNames = new String[] {"key", "value"};
+    OpenType<?>[] openTypes = new OpenType[] {SimpleType.STRING, SimpleType.STRING};
+    CompositeType rowType = new CompositeType(typeName, typeName, itemNames, itemNames, openTypes);
+    TabularType tabularType = new TabularType(typeName, typeName, rowType, new String[] {"key"});
+    TabularDataSupport table = new TabularDataSupport(tabularType);
 
-    for (var entry : options.entrySet()) {
+    for (Map.Entry<String, String> entry : options.entrySet()) {
       Object[] itemValues = {entry.getKey(), entry.getValue()};
       CompositeData element = new CompositeDataSupport(rowType, itemNames, itemValues);
       table.put(element);

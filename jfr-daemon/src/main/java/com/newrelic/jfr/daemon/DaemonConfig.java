@@ -171,9 +171,9 @@ public class DaemonConfig {
         String envKey,
         Function<String, T> mapper,
         Function<T, DaemonConfig.Builder> builderMethod) {
-      var envValue = getEnv(envKey);
+      String envValue = getEnv(envKey);
       if (envValue != null) {
-        var value = mapper.apply(envValue);
+        T value = mapper.apply(envValue);
         return builderMethod.apply(value);
       }
       return this;

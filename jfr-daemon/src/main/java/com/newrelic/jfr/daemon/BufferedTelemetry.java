@@ -25,8 +25,8 @@ public class BufferedTelemetry {
   }
 
   public static BufferedTelemetry create(Attributes attributes) {
-    var metrics = new MetricBuffer(attributes);
-    var events = new EventBuffer(attributes);
+    MetricBuffer metrics = new MetricBuffer(attributes);
+    EventBuffer events = new EventBuffer(attributes);
     return new BufferedTelemetry(metrics, events);
   }
 

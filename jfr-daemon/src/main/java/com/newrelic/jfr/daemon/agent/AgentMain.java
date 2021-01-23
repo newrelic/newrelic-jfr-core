@@ -1,9 +1,13 @@
 package com.newrelic.jfr.daemon.agent;
 
+import com.newrelic.jfr.daemon.DaemonConfig;
 import com.newrelic.jfr.daemon.EventConverter;
+import com.newrelic.jfr.daemon.JFRUploader;
 import com.newrelic.jfr.daemon.JfrController;
 import com.newrelic.jfr.daemon.SetupUtils;
+import com.newrelic.telemetry.Attributes;
 import java.lang.instrument.Instrumentation;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +33,16 @@ public class AgentMain {
   }
 
   private void start() {
-    var config = SetupUtils.buildConfig();
-    var commonAttrs = SetupUtils.buildCommonAttributes();
-    var uploader = SetupUtils.buildUploader(config);
+    DaemonConfig config = SetupUtils.buildConfig();
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+    JFRUploader uploader = SetupUtils.buildUploader(config);
     uploader.readyToSend(new EventConverter(commonAttrs));
-    var recorderFactory = new FileJfrRecorderFactory(config.getHarvestInterval());
-    var controller = new JfrController(recorderFactory, uploader, config.getHarvestInterval());
+    FileJfrRecorderFactory recorderFactory =
+        new FileJfrRecorderFactory(config.getHarvestInterval());
+    JfrController controller =
+        new JfrController(recorderFactory, uploader, config.getHarvestInterval());
 
-    var executorService = Executors.newSingleThreadExecutor();
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
     executorService.submit(
         () -> {
           try {
