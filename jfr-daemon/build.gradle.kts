@@ -1,5 +1,4 @@
 val gsonVersion: String by project
-val mockitoVersion: String by project
 val newRelicTelemetryVersion: String by project
 val slf4jVersion: String by project
 
@@ -14,10 +13,11 @@ java {
 }
 
 dependencies {
-    implementation(project(":jfr-mappers"))
-    implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
+    api(project(":jfr-mappers"))
+    api("com.newrelic.telemetry:telemetry:${newRelicTelemetryVersion}")
     implementation("com.newrelic.telemetry:telemetry-http-java11:${newRelicTelemetryVersion}")
-    implementation("com.newrelic.telemetry:telemetry:${newRelicTelemetryVersion}")
+    implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}");
     implementation("com.google.code.gson:gson:${gsonVersion}")
 }
 

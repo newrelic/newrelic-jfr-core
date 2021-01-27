@@ -30,6 +30,8 @@ class DaemonSmokeTest extends SmokeTestBase {
     jfrContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);
+    appContainer.stop();
+    jfrContainer.stop();
   }
 
   private GenericContainer<?> buildDaemonContainer(GenericContainer<?> appContainer) {
