@@ -15,6 +15,10 @@ import org.slf4j.LoggerFactory;
 public class AgentMain {
   private static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 
+  public static void agentmain(String agentArgs, Instrumentation inst) {
+    premain(agentArgs, inst);
+  }
+
   public static void premain(String agentArgs, Instrumentation inst) {
     try {
       Class.forName("jdk.jfr.Recording");

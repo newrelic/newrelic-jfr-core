@@ -31,6 +31,7 @@ tasks.shadowJar {
 
     manifest {
         attributes(
+                "Agent-Class" to "com.newrelic.jfr.agent.AgentMain",
                 "Premain-Class" to "com.newrelic.jfr.agent.AgentMain",
                 "Main-Class" to "com.newrelic.jfr.daemon.JFRDaemon",
                 "Implementation-Version" to project.version
