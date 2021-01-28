@@ -18,6 +18,7 @@ import com.newrelic.jfr.daemon.lifecycle.RemoteEntityGuidCheck;
 import com.newrelic.telemetry.Attributes;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,6 +56,22 @@ public class JFRDaemon {
       logger.error("JFR Daemon is crashing!", e);
       throw new RuntimeException(e);
     }
+  }
+
+  public static DaemonConfig buildConfigFromArgs(String agentArgs) {
+    var daemonVersion = new VersionFinder().get();
+    var mandatoryArgs = agentArgs.split("\\|");
+
+    var builder = DaemonConfig.builder().apiKey(mandatoryArgs[0]).daemonVersion(daemonVersion);
+    try {
+      builder.monitoredAppName(mandatoryArgs[1]);
+      builder.metricsUri(new URI(mandatoryArgs[2]));
+      builder.eventsUri(new URI(mandatoryArgs[3]));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
+    return builder.build();
   }
 
   public static DaemonConfig buildConfig() {

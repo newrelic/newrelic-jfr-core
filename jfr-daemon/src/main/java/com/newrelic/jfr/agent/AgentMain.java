@@ -16,10 +16,15 @@ public class AgentMain {
   private static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 
   public static void agentmain(String agentArgs, Instrumentation inst) {
-    premain(agentArgs, inst);
+    DaemonConfig config = buildConfigFromArgs(agentArgs);
+    actualmain(config);
   }
 
   public static void premain(String agentArgs, Instrumentation inst) {
+    actualmain(buildConfig());
+  }
+
+  public static void actualmain(DaemonConfig config) {
     try {
       Class.forName("jdk.jfr.Recording");
       Class.forName("jdk.jfr.FlightRecorder");
@@ -30,14 +35,13 @@ public class AgentMain {
 
     try {
       logger.info("Attaching JFR Monitor");
-      new AgentMain().start();
+      new AgentMain().start(config);
     } catch (Throwable t) {
       logger.error("Unable to attach JFR Monitor", t);
     }
   }
 
-  private void start() throws IOException {
-    var config = buildConfig();
+  private void start(DaemonConfig config) throws IOException {
     var attr = new JFRCommonAttributes(config).build(Optional.empty());
     var eventConverter = buildEventConverter(attr);
     var eventConverterReference = new AtomicReference<>(eventConverter);
