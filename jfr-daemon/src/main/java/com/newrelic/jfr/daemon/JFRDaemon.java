@@ -61,12 +61,19 @@ public class JFRDaemon {
   public static DaemonConfig buildConfigFromArgs(String agentArgs) {
     var daemonVersion = new VersionFinder().get();
     var mandatoryArgs = agentArgs.split("\\|");
+    if (mandatoryArgs.length < 2) {
+      throw new RuntimeException("Agent startup needs at least an API key and an app name");
+    }
 
     var builder = DaemonConfig.builder().apiKey(mandatoryArgs[0]).daemonVersion(daemonVersion);
+    builder.monitoredAppName(mandatoryArgs[1]);
     try {
-      builder.monitoredAppName(mandatoryArgs[1]);
-      builder.metricsUri(new URI(mandatoryArgs[2]));
-      builder.eventsUri(new URI(mandatoryArgs[3]));
+      if (mandatoryArgs.length > 2) {
+        builder.metricsUri(new URI(mandatoryArgs[2]));
+      }
+      if (mandatoryArgs.length > 3) {
+        builder.eventsUri(new URI(mandatoryArgs[3]));
+      }
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
