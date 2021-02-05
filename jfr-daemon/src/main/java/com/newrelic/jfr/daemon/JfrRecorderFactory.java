@@ -15,7 +15,8 @@ public interface JfrRecorderFactory {
    * Obtain an instance of a {@link JfrRecorder}.
    *
    * @return the recorder
-   * @throws Exception if a fatal error occurs which prevents creation of additional recorders
+   * @throws JfrRecorderException if a fatal error occurs which prevents creation of additional
+   *     recorders
    */
-  JfrRecorder getRecorder() throws Exception;
+  JfrRecorder getRecorder() throws JfrRecorderException;
 }

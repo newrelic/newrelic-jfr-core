@@ -29,9 +29,9 @@ public class MBeanConnectionFactory {
    *
    * @param backoff the backoff policy
    * @return the connection
-   * @throws Exception if unable to obtain a connection after backing off
+   * @throws IOException if unable to obtain a connection after backing off
    */
-  public MBeanServerConnection awaitConnection(Backoff backoff) throws Exception {
+  public MBeanServerConnection awaitConnection(Backoff backoff) throws IOException {
     String urlPath = String.format("/jndi/rmi://%s:%s/jmxrmi", jmxHost, jmxPort);
     JMXServiceURL url = new JMXServiceURL("rmi", "", 0, urlPath);
     while (true) {
@@ -43,7 +43,7 @@ public class MBeanConnectionFactory {
       } catch (IOException e) {
         long backoffMillis = backoff.nextWaitMs();
         if (backoffMillis == -1) {
-          throw new Exception(
+          throw new IOException(
               "Failed to connect to remote MBean Sever after completing backoff.", e);
         } else {
           logger.info(

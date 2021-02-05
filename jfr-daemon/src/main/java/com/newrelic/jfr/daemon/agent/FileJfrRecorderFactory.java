@@ -1,6 +1,7 @@
 package com.newrelic.jfr.daemon.agent;
 
 import com.newrelic.jfr.daemon.JfrRecorder;
+import com.newrelic.jfr.daemon.JfrRecorderException;
 import com.newrelic.jfr.daemon.JfrRecorderFactory;
 import java.io.IOException;
 import java.text.ParseException;
@@ -18,13 +19,13 @@ public class FileJfrRecorderFactory implements JfrRecorderFactory {
   }
 
   @Override
-  public JfrRecorder getRecorder() throws Exception {
+  public JfrRecorder getRecorder() throws JfrRecorderException {
     Configuration jfrConfig;
     try {
       jfrConfig = Configuration.getConfiguration("profile");
     } catch (IOException | ParseException e) {
       // This should never happen
-      throw new Exception("An error occurred getting configuration.", e);
+      throw new JfrRecorderException("An error occurred getting configuration.", e);
     }
     Recording recording = new Recording(jfrConfig);
     recording.setMaxAge(harvestInterval.plus(10, ChronoUnit.SECONDS));

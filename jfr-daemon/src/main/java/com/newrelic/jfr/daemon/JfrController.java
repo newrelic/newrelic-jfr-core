@@ -47,7 +47,7 @@ public class JfrController {
   /**
    * Loop until {@link #shutdown()}, recording and handling JFR data each iteration.
    *
-   * @throws Exception if a fatal error occurs obtaining a {@link JfrRecorder}
+   * @throws Exception if a fatal error occurs preventing JFR recording / handling from continuing
    */
   public void loop() throws Exception {
     logger.info("Starting JfrController.");
@@ -62,9 +62,11 @@ public class JfrController {
       try {
         Path pathToFile = jfrRecorder.recordToFile();
         executorService.submit(() -> uploader.handleFile(pathToFile));
-      } catch (Exception e) {
+      } catch (JfrRecorderException e) {
         // If an error occurs, recording to file, attempt to reset the recorder. If
         // resetting fails allow the exception to propagate.
+        logger.warn(
+            "An error occurred recording JFR to file, resetting recorder: {}", e.getMessage());
         resetJfrRecorder();
       }
     }
@@ -75,7 +77,7 @@ public class JfrController {
   private void resetJfrRecorder() throws Exception {
     try {
       jfrRecorder = recorderFactory.getRecorder();
-    } catch (Exception e) {
+    } catch (JfrRecorderException e) {
       shutdown();
       throw new Exception(
           "An error occurred obtaining JfrRecorder. Shutting down JfrController.", e);

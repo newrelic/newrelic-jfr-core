@@ -25,8 +25,8 @@ class DaemonAppSmokeTest extends SmokeTestBase {
     assertEdgeIsReset();
 
     var appContainer = buildAppContainer();
-    var jfrContainer = buildDaemonContainer(appContainer);
     cleanupContainer(appContainer);
+    var jfrContainer = buildDaemonContainer(appContainer);
     cleanupContainer(jfrContainer);
     appContainer.start();
     jfrContainer.start();

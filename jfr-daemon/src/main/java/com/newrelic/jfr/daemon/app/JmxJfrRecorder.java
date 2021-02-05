@@ -4,6 +4,7 @@ import static com.newrelic.jfr.daemon.app.JmxJfrRecorderFactory.makeFlightRecord
 import static com.newrelic.jfr.daemon.app.JmxJfrRecorderFactory.makeOpenData;
 
 import com.newrelic.jfr.daemon.JfrRecorder;
+import com.newrelic.jfr.daemon.JfrRecorderException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,8 +34,12 @@ public class JmxJfrRecorder implements JfrRecorder {
   }
 
   @Override
-  public Path recordToFile() throws Exception {
-    return streamFromJmx ? streamRecordingToFile() : copyRecordingToFile();
+  public Path recordToFile() throws JfrRecorderException {
+    try {
+      return streamFromJmx ? streamRecordingToFile() : copyRecordingToFile();
+    } catch (Exception e) {
+      throw new JfrRecorderException("Failed to record JFR data to file.", e);
+    }
   }
 
   Path streamRecordingToFile() throws Exception {

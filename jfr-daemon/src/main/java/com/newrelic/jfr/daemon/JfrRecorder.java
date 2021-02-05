@@ -17,7 +17,8 @@ public interface JfrRecorder {
    * Record JFR data and return the path its recorded to.
    *
    * @return the path JFR data has been recorded
-   * @throws Exception if a fatal error occur that prevents this recorder from functioning
+   * @throws JfrRecorderException if a fatal error occur that prevents this recorder from
+   *     functioning
    */
-  Path recordToFile() throws Exception;
+  Path recordToFile() throws JfrRecorderException;
 }

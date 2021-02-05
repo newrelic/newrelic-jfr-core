@@ -2,6 +2,7 @@ package com.newrelic.jfr.daemon.app;
 
 import com.newrelic.jfr.daemon.DaemonConfig;
 import com.newrelic.jfr.daemon.JfrRecorder;
+import com.newrelic.jfr.daemon.JfrRecorderException;
 import com.newrelic.jfr.daemon.JfrRecorderFactory;
 import com.newrelic.jfr.daemon.SafeSleep;
 import com.newrelic.telemetry.Backoff;
@@ -45,10 +46,15 @@ public class JmxJfrRecorderFactory implements JfrRecorderFactory {
   }
 
   @Override
-  public JfrRecorder getRecorder() throws Exception {
-    MBeanServerConnection connection = connectionFactory.awaitConnection(Backoff.defaultBackoff());
-    long recordingId = startRecordingWithBackoff(connection);
-    return new JmxJfrRecorder(connection, streamFromJmx, recordingId);
+  public JfrRecorder getRecorder() throws JfrRecorderException {
+    try {
+      MBeanServerConnection connection =
+          connectionFactory.awaitConnection(Backoff.defaultBackoff());
+      long recordingId = startRecordingWithBackoff(connection);
+      return new JmxJfrRecorder(connection, streamFromJmx, recordingId);
+    } catch (Exception e) {
+      throw new JfrRecorderException("Failed to obtain JfrRecorder.", e);
+    }
   }
 
   private long startRecordingWithBackoff(MBeanServerConnection connection) throws Exception {
