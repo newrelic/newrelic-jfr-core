@@ -24,7 +24,7 @@ tasks.named<JavaCompile>("compileTestJava") {
 dependencies {
     api(project(":jfr-mappers"))
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
-    implementation("com.newrelic.telemetry:telemetry-core:0.11.0")
+    api("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
 }

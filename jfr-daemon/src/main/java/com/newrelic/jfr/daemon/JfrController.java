@@ -47,7 +47,8 @@ public class JfrController {
   /**
    * Loop until {@link #shutdown()}, recording and handling JFR data each iteration.
    *
-   * @throws Exception if a fatal error occurs preventing JFR recording / handling from continuing
+   * @throws JfrRecorderException if a fatal error occurs preventing JFR recording / handling from
+   *     continuing
    */
   public void loop() throws JfrRecorderException {
     logger.info("Starting JfrController.");
