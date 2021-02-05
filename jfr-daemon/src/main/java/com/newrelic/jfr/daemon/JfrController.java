@@ -49,7 +49,7 @@ public class JfrController {
    *
    * @throws Exception if a fatal error occurs preventing JFR recording / handling from continuing
    */
-  public void loop() throws Exception {
+  public void loop() throws JfrRecorderException {
     logger.info("Starting JfrController.");
     while (!shutdown) {
       SafeSleep.sleep(harvestInterval);
@@ -74,13 +74,7 @@ public class JfrController {
     executorService.shutdown();
   }
 
-  private void resetJfrRecorder() throws Exception {
-    try {
-      jfrRecorder = recorderFactory.getRecorder();
-    } catch (JfrRecorderException e) {
-      shutdown();
-      throw new Exception(
-          "An error occurred obtaining JfrRecorder. Shutting down JfrController.", e);
-    }
+  private void resetJfrRecorder() throws JfrRecorderException {
+    jfrRecorder = recorderFactory.getRecorder();
   }
 }

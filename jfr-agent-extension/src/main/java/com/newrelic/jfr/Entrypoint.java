@@ -1,20 +1,17 @@
 package com.newrelic.jfr;
 
-import com.newrelic.api.agent.Agent;
-import com.newrelic.api.agent.NewRelic;
-import com.newrelic.jfr.daemon.JfrController;
-import java.io.IOException;
-import java.lang.instrument.Instrumentation;
-import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.newrelic.jfr.daemon.SetupUtils;
-import org.slf4j.LoggerFactory;
-
 import static com.newrelic.jfr.daemon.SetupUtils.buildConfig;
 import static com.newrelic.jfr.daemon.SetupUtils.buildUploader;
+
+import com.newrelic.api.agent.Agent;
+import com.newrelic.api.agent.Config;
+import com.newrelic.api.agent.NewRelic;
+import com.newrelic.jfr.daemon.*;
+import com.newrelic.telemetry.Attributes;
+import java.lang.instrument.Instrumentation;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.slf4j.LoggerFactory;
 
 public class Entrypoint {
 
@@ -32,7 +29,7 @@ public class Entrypoint {
     }
 
     Agent agent = NewRelic.getAgent();
-    var agentConfig = agent.getConfig();
+    Config agentConfig = agent.getConfig();
 
     if (isJfrDisabled(agentConfig)) {
       logger.info(
@@ -49,21 +46,22 @@ public class Entrypoint {
     }
   }
 
-  private void start() throws IOException {
+  private void start() {
+    DaemonConfig config = buildConfig();
+    Attributes attr = SetupUtils.buildCommonAttributes();
+    //    var eventConverterReference = new AtomicReference<>(eventConverter);
+    //    var readinessCheck = new AtomicBoolean(true);
+    JFRUploader uploader = buildUploader(config);
+    uploader.readyToSend(new EventConverter(attr));
 
-    var config = buildConfig();
-    var attr = SetupUtils.buildCommonAttributes();
-    var eventConverter = buildEventConverter(attr);
-    var eventConverterReference = new AtomicReference<>(eventConverter);
-    var readinessCheck = new AtomicBoolean(true);
-    var uploader = buildUploader(config); // , readinessCheck, eventConverterReference
-    var jfrController = new JfrController(uploader, config);
-    var jfrMonitorService = Executors.newSingleThreadExecutor();
+    JfrRecorderFactory factory = null;
+    JfrController jfrController = new JfrController(factory, uploader, config.getHarvestInterval());
+    ExecutorService jfrMonitorService = Executors.newSingleThreadExecutor();
     jfrMonitorService.submit(
         () -> {
           try {
             jfrController.loop();
-          } catch (IOException e) {
+          } catch (JfrRecorderException e) {
             logger.info("Error in agent, shutting down", e);
           }
         });
