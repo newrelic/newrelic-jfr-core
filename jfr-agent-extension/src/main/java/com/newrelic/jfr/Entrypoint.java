@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.newrelic.jfr.daemon.SetupUtils;
 import org.slf4j.LoggerFactory;
 
 import static com.newrelic.jfr.daemon.SetupUtils.buildConfig;
@@ -50,7 +52,7 @@ public class Entrypoint {
   private void start() throws IOException {
 
     var config = buildConfig();
-    var attr = new JFRCommonAttributes(config).build(Optional.empty());
+    var attr = SetupUtils.buildCommonAttributes();
     var eventConverter = buildEventConverter(attr);
     var eventConverterReference = new AtomicReference<>(eventConverter);
     var readinessCheck = new AtomicBoolean(true);
