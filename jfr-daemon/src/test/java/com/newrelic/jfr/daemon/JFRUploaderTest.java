@@ -1,12 +1,13 @@
 package com.newrelic.jfr.daemon;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -14,85 +15,66 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatch;
 import com.newrelic.telemetry.metrics.MetricBatch;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class JFRUploaderTest {
 
-  private Instant now;;
   private Path filePath;
   private TelemetryClient telemetryClient;
   private MetricBatch expectedMetricBatch;
   private EventBatch expectedEventBatch;
   private RecordingFile recordingFile;
-  private BufferedTelemetry bufferedTelemetry;
-  private Consumer<Path> deleter;
   private EventConverter eventConverter;
   private RecordedEventBuffer recordedEventBuffer;
 
-  @SuppressWarnings("unchecked")
+  private JFRUploader testClass;
+
   @BeforeEach
-  void setup() throws Exception {
-    now = Instant.now();
+  void setup() {
     filePath = Path.of("/foo", "bar", "baz");
     telemetryClient = mock(TelemetryClient.class);
     recordedEventBuffer = mock(RecordedEventBuffer.class);
     expectedMetricBatch = mock(MetricBatch.class);
     expectedEventBatch = mock(EventBatch.class);
     recordingFile = mock(RecordingFile.class);
-    bufferedTelemetry = mock(BufferedTelemetry.class);
     eventConverter = mock(EventConverter.class);
-    deleter = mock(Consumer.class);
+    var bufferedTelemetry = mock(BufferedTelemetry.class);
 
     when(eventConverter.convert(recordedEventBuffer)).thenReturn(bufferedTelemetry);
-
     when(bufferedTelemetry.createEventBatch()).thenReturn(expectedEventBatch);
     when(bufferedTelemetry.createMetricBatch()).thenReturn(expectedMetricBatch);
+
+    testClass = spy(new JFRUploader(telemetryClient, recordedEventBuffer));
+    testClass.readyToSend(eventConverter);
+
+    doReturn(recordingFile).when(testClass).openRecordingFile(filePath);
+    doNothing().when(testClass).deleteFile(any());
   }
 
   @Test
-  @Disabled
   void testUploads() {
-
-    JFRUploader testClass = buildTestClass();
-
     testClass.handleFile(filePath);
 
     verify(telemetryClient).sendBatch(expectedMetricBatch);
     verify(telemetryClient).sendBatch(expectedEventBatch);
-    verify(deleter).accept(filePath);
+    verify(testClass).deleteFile(filePath);
   }
 
   @Test
   void testDeleteFails() {
-    var deleterCalled = new AtomicBoolean(false);
-    deleter =
-        o -> {
-          deleterCalled.set(true);
-          throw new RuntimeException("KABOOM!");
-        };
-    JFRUploader testClass = buildTestClass();
+    doThrow(new RuntimeException("KABOOM!")).when(testClass).deleteFile(filePath);
 
     assertThrows(RuntimeException.class, () -> testClass.handleFile(filePath));
-    assertTrue(deleterCalled.get());
+    verify(testClass).deleteFile(filePath);
   }
 
   @Test
-  public void testParentAlsoDeleted() throws Exception {
-    var expected = List.of(filePath, filePath.getParent());
-    var deletedPaths = new ArrayList<Path>();
-    deleter = deletedPaths::add;
-    JFRUploader testClass = buildTestClass();
+  public void testParentAlsoDeleted() {
     testClass.handleFile(filePath);
-    assertEquals(expected, deletedPaths);
+    verify(testClass).deleteFile(filePath);
+    verify(testClass).deleteFile(filePath.getParent());
   }
 
   @Test
@@ -101,8 +83,6 @@ class JFRUploaderTest {
         .when(recordedEventBuffer)
         .bufferEvents(filePath, recordingFile);
 
-    JFRUploader testClass = buildTestClass();
-
     testClass.handleFile(filePath);
     // no exception, but we still try and send
     verify(telemetryClient).sendBatch(expectedMetricBatch);
@@ -110,36 +90,11 @@ class JFRUploaderTest {
   }
 
   @Test
-  void testSkipsIfNotReady() {
-    JFRUploader testClass = buildTestClass(false);
-    testClass.handleFile(filePath);
-    verifyNoInteractions(eventConverter);
-    verifyNoInteractions(telemetryClient);
-  }
-
-  @Test
-  public void testConvertThrowsExceptionIsHandled() throws Exception {
+  public void testConvertThrowsExceptionIsHandled() {
     doThrow(new RuntimeException("kaboom!")).when(eventConverter).convert(recordedEventBuffer);
-
-    var testClass = buildTestClass();
 
     testClass.handleFile(filePath);
     // no exception, and since we can't convert don't try sending
     verifyNoMoreInteractions(telemetryClient);
-  }
-
-  private JFRUploader buildTestClass() {
-    return buildTestClass(true);
-  }
-
-  private JFRUploader buildTestClass(boolean ready) {
-    return JFRUploader.builder()
-        .telemetryClient(telemetryClient)
-        .recordedEventBuffer(recordedEventBuffer)
-        .eventConverter(new AtomicReference<>(eventConverter))
-        .recordingFileOpener(x -> recordingFile)
-        .fileDeleter(deleter)
-        .readinessCheck(new AtomicBoolean(ready))
-        .build();
   }
 }

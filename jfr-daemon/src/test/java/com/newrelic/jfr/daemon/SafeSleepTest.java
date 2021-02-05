@@ -1,7 +1,8 @@
-package com.newrelic.jfr.daemon.lifecycle;
+package com.newrelic.jfr.daemon;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
@@ -11,9 +12,9 @@ class SafeSleepTest {
   @Test
   void testEasy() {
     long pre = System.nanoTime();
-    SafeSleep.nanos(120);
+    SafeSleep.sleep(Duration.ofNanos(120));
     long post = System.nanoTime();
-    assertNotEquals(pre, post); // admittedly a silly test
+    assertTrue(post > pre);
   }
 
   @Test
@@ -22,7 +23,7 @@ class SafeSleepTest {
     Thread thread =
         new Thread(
             () -> {
-              SafeSleep.nanos(TimeUnit.SECONDS.toNanos(15));
+              SafeSleep.sleep(Duration.ofSeconds(15));
               assertTrue(Thread.currentThread().isInterrupted());
               latch.countDown();
             });

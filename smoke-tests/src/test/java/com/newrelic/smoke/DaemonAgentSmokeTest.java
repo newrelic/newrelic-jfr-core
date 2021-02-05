@@ -15,15 +15,16 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
  * dummy edge application for jfr to report data to. The tests ensure that jfr daemon agent starts
  * running and reports data to the dummy edge application.
  */
-class AgentSmokeTest extends SmokeTestBase {
+class DaemonAgentSmokeTest extends SmokeTestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(AgentSmokeTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(DaemonAgentSmokeTest.class);
 
   @Test
   void test() throws InterruptedException {
     assertEdgeIsReset();
 
     var appContainer = buildAppWithAgentContainer();
+    cleanupContainer(appContainer);
     appContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);

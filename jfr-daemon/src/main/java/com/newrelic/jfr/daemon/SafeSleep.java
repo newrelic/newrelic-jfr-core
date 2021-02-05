@@ -5,8 +5,9 @@
  *
  */
 
-package com.newrelic.jfr.daemon.lifecycle;
+package com.newrelic.jfr.daemon;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,9 @@ public class SafeSleep {
 
   private static final Logger logger = LoggerFactory.getLogger(SafeSleep.class);
 
-  public static void nanos(long nanos) {
+  public static void sleep(Duration duration) {
     try {
-      TimeUnit.NANOSECONDS.sleep(nanos);
+      TimeUnit.NANOSECONDS.sleep(duration.toNanos());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       logger.warn("Interrupted while sleeping", e);

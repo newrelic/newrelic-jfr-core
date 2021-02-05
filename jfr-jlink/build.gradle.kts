@@ -1,10 +1,11 @@
 val gsonVersion: String by project
 val newRelicTelemetryVersion: String by project
+val okhttpVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
-    id("org.beryx.jlink") version("2.22.3")
-    id( "org.ysb33r.java.modulehelper") version("0.10.0")
+    id("org.javamodularity.moduleplugin") version("1.7.0")
+    id("org.beryx.jlink") version("2.23.2")
 }
 
 java {
@@ -26,21 +27,16 @@ sourceSets {
     }
 }
 
-jpmsExtraModules {
-    module("gson-${gsonVersion}.jar", "com.google.code.gson", gsonVersion) {
-        exports("com.google.gson")
-    }
-}
-
 dependencies {
     implementation("com.google.code.gson:gson:${gsonVersion}")
     implementation("com.newrelic.telemetry:telemetry-all:${newRelicTelemetryVersion}")
+    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
 }
 
 application {
-    mainClass.set("com.newrelic.jfr.daemon.JFRDaemon")
-    mainModule.set("com.newrelic.jfr.daemon")
+    mainClass.set("com.newrelic.jfr.daemon.app.JFRDaemon")
+    mainModule.set("com.newrelic.jfr.daemon.app")
 }
 
 jlink {
