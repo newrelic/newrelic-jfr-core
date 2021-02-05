@@ -26,13 +26,16 @@ public class JFRDaemon {
   private static final Logger logger = LoggerFactory.getLogger(JFRDaemon.class);
 
   public static void main(String[] args) {
-    try {
-      DaemonConfig config = SetupUtils.buildConfig();
-      MBeanConnectionFactory connectionFactory =
-          new MBeanConnectionFactory(config.getJmxHost(), config.getJmxPort());
-      Attributes commonAttrs = SetupUtils.buildCommonAttributes();
-      JFRUploader uploader = SetupUtils.buildUploader(config);
+    DaemonConfig config = SetupUtils.buildConfig();
+    MBeanConnectionFactory connectionFactory =
+        new MBeanConnectionFactory(config.getJmxHost(), config.getJmxPort());
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+    JFRUploader uploader = SetupUtils.buildUploader(config);
+    JmxJfrRecorderFactory recorderFactory = new JmxJfrRecorderFactory(config, connectionFactory);
+    JfrController controller =
+        new JfrController(recorderFactory, uploader, config.getHarvestInterval());
 
+    try {
       // Await initial connection to remote MBean Server.
       MBeanServerConnection connection = connectionFactory.awaitConnection(waitForeverBackoff());
 
@@ -52,12 +55,10 @@ public class JFRDaemon {
                 uploader.readyToSend(new EventConverter(commonAttrs));
               });
 
-      JmxJfrRecorderFactory recorderFactory = new JmxJfrRecorderFactory(config, connectionFactory);
-      JfrController controller =
-          new JfrController(recorderFactory, uploader, config.getHarvestInterval());
       controller.loop();
     } catch (Throwable e) {
       logger.error("JFR Daemon is crashing!", e);
+      controller.shutdown();
       throw new RuntimeException(e);
     }
   }

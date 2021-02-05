@@ -7,6 +7,7 @@ import com.newrelic.api.agent.Agent;
 import com.newrelic.api.agent.Config;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.jfr.daemon.*;
+import com.newrelic.jfr.daemon.agent.FileJfrRecorderFactory;
 import com.newrelic.telemetry.Attributes;
 import java.lang.instrument.Instrumentation;
 import java.util.concurrent.ExecutorService;
@@ -49,13 +50,13 @@ public class Entrypoint {
   private void start() {
     DaemonConfig config = buildConfig();
     Attributes attr = SetupUtils.buildCommonAttributes();
-    //    var eventConverterReference = new AtomicReference<>(eventConverter);
-    //    var readinessCheck = new AtomicBoolean(true);
     JFRUploader uploader = buildUploader(config);
     uploader.readyToSend(new EventConverter(attr));
+    FileJfrRecorderFactory recorderFactory =
+        new FileJfrRecorderFactory(config.getHarvestInterval());
+    JfrController jfrController =
+        new JfrController(recorderFactory, uploader, config.getHarvestInterval());
 
-    JfrRecorderFactory factory = null;
-    JfrController jfrController = new JfrController(factory, uploader, config.getHarvestInterval());
     ExecutorService jfrMonitorService = Executors.newSingleThreadExecutor();
     jfrMonitorService.submit(
         () -> {
@@ -63,6 +64,7 @@ public class Entrypoint {
             jfrController.loop();
           } catch (JfrRecorderException e) {
             logger.info("Error in agent, shutting down", e);
+            jfrController.shutdown();
           }
         });
   }

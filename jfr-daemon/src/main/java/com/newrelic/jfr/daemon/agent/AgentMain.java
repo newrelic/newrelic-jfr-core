@@ -49,6 +49,7 @@ public class AgentMain {
             controller.loop();
           } catch (Exception e) {
             logger.error("Error in agent, shutting down.", e);
+            controller.shutdown();
           }
         });
   }
