@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
@@ -46,7 +47,7 @@ public class RecordedEventBuffer {
     ctx.resetForNewFile();
     logger.debug("Looking in " + dumpFile + " for events after: " + ctx.getLastSeen());
     while (file.hasMoreEvents()) {
-      var event = file.readEvent();
+      RecordedEvent event = file.readEvent();
       if (!handleEvent(event)) {
         logger.warn("Ignoring remaining events in this file due to full queue!");
         break;
@@ -81,7 +82,7 @@ public class RecordedEventBuffer {
   }
 
   public Stream<RecordedEvent> drainToStream() {
-    var list = new ArrayList<RecordedEvent>(queue.size());
+    List<RecordedEvent> list = new ArrayList<>(queue.size());
     queue.drainTo(list);
     return list.stream();
   }

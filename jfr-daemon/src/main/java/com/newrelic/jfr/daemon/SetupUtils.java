@@ -4,8 +4,8 @@ import static java.util.function.Function.identity;
 
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.EventBatchSenderFactory;
-import com.newrelic.telemetry.Java11HttpPoster;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
+import com.newrelic.telemetry.SenderConfiguration.SenderConfigurationBuilder;
 import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
@@ -16,6 +16,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
@@ -51,9 +52,9 @@ public class SetupUtils {
    * @return the config
    */
   public static DaemonConfig buildConfig() {
-    var daemonVersion = VersionFinder.getVersion();
+    String daemonVersion = VersionFinder.getVersion();
 
-    var builder =
+    DaemonConfig.Builder builder =
         DaemonConfig.builder()
             .apiKey(System.getenv(EnvironmentVars.INSERT_API_KEY))
             .daemonVersion(daemonVersion);
@@ -77,23 +78,23 @@ public class SetupUtils {
    * @return the uploader
    */
   public static JFRUploader buildUploader(DaemonConfig config) {
-    var telemetryClient = buildTelemetryClient(config);
-    var queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
-    var recordedEventBuffer = new RecordedEventBuffer(queue);
+    TelemetryClient telemetryClient = buildTelemetryClient(config);
+    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
+    RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(telemetryClient, recordedEventBuffer);
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
     Supplier<HttpPoster> httpPosterCreator =
-        () -> new Java11HttpPoster(Duration.of(10, ChronoUnit.SECONDS));
-    var metricBatchSender = buildMetricBatchSender(config, httpPosterCreator);
-    var eventBatchSender = buildEventBatchSender(config, httpPosterCreator);
+        () -> new OkHttpPoster(Duration.of(10, ChronoUnit.SECONDS));
+    MetricBatchSender metricBatchSender = buildMetricBatchSender(config, httpPosterCreator);
+    EventBatchSender eventBatchSender = buildEventBatchSender(config, httpPosterCreator);
     return new TelemetryClient(metricBatchSender, null, eventBatchSender, null);
   }
 
   private static EventBatchSender buildEventBatchSender(
       DaemonConfig config, Supplier<HttpPoster> httpPosterCreator) {
-    var eventsConfig =
+    SenderConfigurationBuilder eventsConfig =
         EventBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .auditLoggingEnabled(config.auditLogging())
@@ -106,7 +107,7 @@ public class SetupUtils {
 
   private static MetricBatchSender buildMetricBatchSender(
       DaemonConfig config, Supplier<HttpPoster> httpPosterCreator) {
-    var metricConfig =
+    SenderConfigurationBuilder metricConfig =
         MetricBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .secondaryUserAgent(makeUserAgent(config))

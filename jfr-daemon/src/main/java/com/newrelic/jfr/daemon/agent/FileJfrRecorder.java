@@ -15,7 +15,7 @@ public class FileJfrRecorder implements JfrRecorder {
 
   @Override
   public Path recordToFile() throws Exception {
-    var output = Files.createTempFile("local-recording", ".jfr");
+    Path output = Files.createTempFile("local-recording", ".jfr");
     recording.copy(false);
     recording.dump(output);
     return output;

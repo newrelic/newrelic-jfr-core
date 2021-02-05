@@ -26,7 +26,7 @@ public class FileJfrRecorderFactory implements JfrRecorderFactory {
       // This should never happen
       throw new Exception("An error occurred getting configuration.", e);
     }
-    var recording = new Recording(jfrConfig);
+    Recording recording = new Recording(jfrConfig);
     recording.setMaxAge(harvestInterval.plus(10, ChronoUnit.SECONDS));
     recording.setToDisk(true);
     recording.setName("New Relic JFR Agent Recording");

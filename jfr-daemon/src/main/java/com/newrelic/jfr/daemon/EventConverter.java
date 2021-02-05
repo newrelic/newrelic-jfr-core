@@ -57,7 +57,7 @@ public class EventConverter {
    * @return a buffered telemetry containing the converted events
    */
   public BufferedTelemetry convert(RecordedEventBuffer buffer) {
-    var batches = BufferedTelemetry.create(commonAttributes);
+    BufferedTelemetry batches = BufferedTelemetry.create(commonAttributes);
 
     buffer
         .drainToStream()
@@ -75,7 +75,7 @@ public class EventConverter {
   }
 
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
-    var name = event.getEventType().getName();
+    String name = event.getEventType().getName();
     eventCount.compute(name, (key, value) -> value == null ? 1 : value + 1);
 
     try {
