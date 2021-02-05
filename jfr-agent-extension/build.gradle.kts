@@ -1,41 +1,37 @@
-private object Versions {
-    const val slf4j = "1.7.30"
-    const val log4j = "2.13.3"
-    const val newRelicTelemetry = "0.9.0"
-    const val newRelicAgent = "6.1.0"
-}
+val gsonVersion: String by project
+val newRelicAgentVersion: String by project
+val slf4jVersion: String by project
 
 plugins {
     id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    disableAutoTargetJvm()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 }
 
 dependencies {
-    api(project(":jfr-mappers"))
-    implementation(project(":jfr-daemon"))
-    api("org.slf4j:slf4j-api:${Versions.slf4j}")
-    api("org.apache.logging.log4j:log4j-slf4j-impl:${Versions.log4j}")
-    api("org.apache.logging.log4j:log4j-core:${Versions.log4j}")
-    api("com.newrelic.telemetry:telemetry-http-java11:${Versions.newRelicTelemetry}")
-    api("com.newrelic.agent.java:newrelic-api:${Versions.newRelicAgent}")
+    api(project(":jfr-daemon"))
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}");
+    implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentVersion}")
 }
 
 tasks.shadowJar {
     archiveClassifier.set("")
     manifest {
         attributes(
-                "Premain-Class" to "com.newrelic.jfr.agent.AgentMain",
-                "Implementation-Version" to project.version
+                "Premain-Class" to "com.newrelic.jfr.Entrypoint",
+                "Implementation-Version" to project.version,
+                "Implementation-Vendor" to "New Relic, Inc."
         )
     }
 }
 
-tasks.named("build") { dependsOn("shadowJar") }
+tasks.named("build") {
+    dependsOn("shadowJar")
+}
 
 publishing {
     publications {
