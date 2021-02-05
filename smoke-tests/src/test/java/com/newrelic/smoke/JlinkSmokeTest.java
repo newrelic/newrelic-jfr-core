@@ -27,7 +27,9 @@ class JlinkSmokeTest extends SmokeTestBase {
     assertEdgeIsReset();
 
     var appContainer = buildAppContainer();
+    cleanupContainer(appContainer);
     var jfrContainer = buildJfrJlinkContainer(appContainer);
+    cleanupContainer(jfrContainer);
     appContainer.start();
     jfrContainer.start();
 

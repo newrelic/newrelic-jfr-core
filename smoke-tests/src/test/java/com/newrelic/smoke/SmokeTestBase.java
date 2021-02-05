@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
@@ -37,6 +40,8 @@ public abstract class SmokeTestBase {
   static GenericContainer<?> EDGE_CONTAINER;
   static SmokeTestAppClient EDGE_CLIENT;
 
+  List<GenericContainer<?>> containersToStop;
+
   @BeforeAll
   static void setupNetworkAndEdge() {
     PROJECT_ROOT_DIR = System.getProperty("PROJECT_ROOT_DIR");
@@ -52,9 +57,22 @@ public abstract class SmokeTestBase {
   }
 
   @BeforeEach
-  void resetEdgeClient() {
+  void setup() {
+    containersToStop = new ArrayList<>();
     EDGE_CLIENT.resetEvents();
     EDGE_CLIENT.resetMetrics();
+  }
+
+  @AfterEach
+  void stopContainers() {
+    containersToStop.forEach(
+        container -> {
+          try {
+            container.stop();
+          } catch (Exception e) {
+            logger.info("An error occurred stopping container.");
+          }
+        });
   }
 
   private static GenericContainer<?> buildEdgeContainer() {
@@ -76,6 +94,10 @@ public abstract class SmokeTestBase {
         .withExposedPorts(APP_PORT)
         .waitingFor(APP_IS_READY)
         .withLogConsumer(new Slf4jLogConsumer(logger));
+  }
+
+  void cleanupContainer(GenericContainer<?> container) {
+    containersToStop.add(container);
   }
 
   GenericContainer<?> buildAppContainer() {

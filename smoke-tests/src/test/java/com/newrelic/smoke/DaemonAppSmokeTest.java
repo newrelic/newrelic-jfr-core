@@ -16,16 +16,18 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
  * The tests ensure that jfr daemon process executable starts up, connects to the dummy application,
  * and reports data to the dummy edge application.
  */
-class DaemonSmokeTest extends SmokeTestBase {
+class DaemonAppSmokeTest extends SmokeTestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(DaemonSmokeTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(DaemonAppSmokeTest.class);
 
   @Test
   void test() throws InterruptedException {
     assertEdgeIsReset();
 
     var appContainer = buildAppContainer();
+    cleanupContainer(appContainer);
     var jfrContainer = buildDaemonContainer(appContainer);
+    cleanupContainer(jfrContainer);
     appContainer.start();
     jfrContainer.start();
 

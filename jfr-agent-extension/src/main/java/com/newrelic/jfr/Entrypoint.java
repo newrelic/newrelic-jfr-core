@@ -1,13 +1,8 @@
 package com.newrelic.jfr;
 
-import static com.newrelic.jfr.daemon.JFRDaemon.buildConfig;
-import static com.newrelic.jfr.daemon.JFRDaemon.buildEventConverter;
-import static com.newrelic.jfr.daemon.JFRDaemon.buildUploader;
-
 import com.newrelic.api.agent.Agent;
 import com.newrelic.api.agent.NewRelic;
-import com.newrelic.jfr.agent.AgentController;
-import com.newrelic.jfr.daemon.JFRCommonAttributes;
+import com.newrelic.jfr.daemon.JfrController;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.Optional;
@@ -15,6 +10,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.LoggerFactory;
+
+import static com.newrelic.jfr.daemon.SetupUtils.buildConfig;
+import static com.newrelic.jfr.daemon.SetupUtils.buildUploader;
 
 public class Entrypoint {
 
@@ -56,14 +54,13 @@ public class Entrypoint {
     var eventConverter = buildEventConverter(attr);
     var eventConverterReference = new AtomicReference<>(eventConverter);
     var readinessCheck = new AtomicBoolean(true);
-    var uploader = buildUploader(config, readinessCheck, eventConverterReference);
-    var jfrController = new AgentController(uploader, config);
-    jfrController.startRecording();
+    var uploader = buildUploader(config); // , readinessCheck, eventConverterReference
+    var jfrController = new JfrController(uploader, config);
     var jfrMonitorService = Executors.newSingleThreadExecutor();
     jfrMonitorService.submit(
         () -> {
           try {
-            jfrController.loop(config.getHarvestInterval());
+            jfrController.loop();
           } catch (IOException e) {
             logger.info("Error in agent, shutting down", e);
           }
