@@ -191,4 +191,34 @@ public class DaemonConfig {
       return new DaemonConfig(this);
     }
   }
+
+  @Override
+  public String toString() {
+    return "DaemonConfig{"
+        + "apiKey='"
+        + apiKey
+        + '\''
+        + ", metricsUri="
+        + metricsUri
+        + ", eventsUri="
+        + eventsUri
+        + ", jmxHost='"
+        + jmxHost
+        + '\''
+        + ", jmxPort="
+        + jmxPort
+        + ", useSharedFilesystem="
+        + useSharedFilesystem
+        + ", harvestInterval="
+        + harvestInterval
+        + ", daemonVersion='"
+        + daemonVersion
+        + '\''
+        + ", monitoredAppName='"
+        + monitoredAppName
+        + '\''
+        + ", auditLogging="
+        + auditLogging
+        + '}';
+  }
 }

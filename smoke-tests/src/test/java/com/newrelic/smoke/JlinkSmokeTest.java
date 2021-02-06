@@ -34,6 +34,8 @@ class JlinkSmokeTest extends SmokeTestBase {
     jfrContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);
+    appContainer.stop();
+    jfrContainer.stop();
   }
 
   private GenericContainer<?> buildJfrJlinkContainer(GenericContainer<?> appContainer) {

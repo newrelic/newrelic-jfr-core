@@ -1,48 +1,30 @@
 val gsonVersion: String by project
-val newRelicTelemetryVersion: String by project
-val okhttpVersion: String by project
+val newRelicAgentVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
-    id("com.github.johnrengelman.shadow") version ("5.2.0")
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
-// Main source set compiles against java 8
-tasks.withType<JavaCompile>().configureEach {
-    javaCompiler.set(javaToolchains.compilerFor {
+java {
+    toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
-    })
-}
-
-// Test source set compiles against java 11
-tasks.named<JavaCompile>("compileTestJava") {
-    javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    })
+    }
 }
 
 dependencies {
-    api(project(":jfr-mappers"))
-    implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
-    api("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
-    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
-    implementation("com.google.code.gson:gson:${gsonVersion}")
-}
-
-tasks.jar {
-    // Create shadowJar instead of jar
-    enabled = false
+    api(project(":jfr-daemon"))
+    implementation("org.slf4j:slf4j-api:${slf4jVersion}");
+    implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentVersion}")
 }
 
 tasks.shadowJar {
     archiveClassifier.set("")
-
     manifest {
         attributes(
-                // Agent-Class ?
-                "Premain-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
-                "Main-Class" to "com.newrelic.jfr.daemon.app.JFRDaemon",
-                "Implementation-Version" to project.version
+                "Premain-Class" to "com.newrelic.jfr.Entrypoint",
+                "Implementation-Version" to project.version,
+                "Implementation-Vendor" to "New Relic, Inc."
         )
     }
 }
@@ -55,12 +37,12 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "com.newrelic"
-            artifactId = "jfr-daemon"
+            artifactId = "jfr-agent"
             version = version
-            project.shadow.component(this)
+            from(components["java"])
             pom {
                 name.set(project.name)
-                description.set("JFR Daemon")
+                description.set("JFR Agent")
                 url.set("https://github.com/newrelic/newrelic-jfr-core")
                 licenses {
                     license {
@@ -92,5 +74,3 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
 }
-
-

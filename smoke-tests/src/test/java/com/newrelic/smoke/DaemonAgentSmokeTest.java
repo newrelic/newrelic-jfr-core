@@ -28,6 +28,7 @@ class DaemonAgentSmokeTest extends SmokeTestBase {
     appContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);
+    appContainer.stop();
   }
 
   private GenericContainer<?> buildAppWithAgentContainer() {
