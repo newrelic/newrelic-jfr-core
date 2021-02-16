@@ -19,6 +19,7 @@ public class DaemonConfig {
 
   private static final String DEFAULT_JMX_HOST = "localhost";
   private static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
+  private static final boolean DEFAULT_USE_LICENSE_KEY = false;
   private static final boolean DEFAULT_AUDIT_LOGGING = false;
   private static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
   private static final String DEFAULT_MONITORED_APP_NAME = "My Application";
@@ -29,6 +30,7 @@ public class DaemonConfig {
   private final String jmxHost;
   private final Integer jmxPort;
   private final boolean useSharedFilesystem;
+  private final boolean useLicenseKey;
   private final Duration harvestInterval;
   private final String daemonVersion;
   private final String monitoredAppName;
@@ -42,6 +44,7 @@ public class DaemonConfig {
     this.jmxHost = builder.jmxHost;
     this.jmxPort = builder.jmxPort;
     this.useSharedFilesystem = builder.useSharedFilesystem;
+    this.useLicenseKey = builder.useLicenseKey;
     this.harvestInterval = builder.harvestInterval;
     this.daemonVersion = builder.daemonVersion;
     this.monitoredAppName = builder.monitoredAppName;
@@ -75,6 +78,10 @@ public class DaemonConfig {
     return useSharedFilesystem;
   }
 
+  public boolean useLicenseKey() {
+    return useLicenseKey;
+  }
+
   public boolean streamFromJmx() {
     return !useSharedFilesystem;
   }
@@ -103,6 +110,7 @@ public class DaemonConfig {
     private String jmxHost = DEFAULT_JMX_HOST;
     private Integer jmxPort = DEFAULT_JMX_PORT;
     private boolean useSharedFilesystem = DEFAULT_USE_SHARED_FILESYSTEM;
+    private boolean useLicenseKey = DEFAULT_USE_LICENSE_KEY;
     private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
     public String daemonVersion = "UNKNOWN-VERSION";
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
@@ -139,6 +147,11 @@ public class DaemonConfig {
 
     public Builder useSharedFilesystem(boolean useSharedFilesystem) {
       this.useSharedFilesystem = useSharedFilesystem;
+      return this;
+    }
+
+    public Builder useLicenseKey(boolean useLicenseKey) {
+      this.useLicenseKey = useLicenseKey;
       return this;
     }
 
@@ -209,6 +222,8 @@ public class DaemonConfig {
         + jmxPort
         + ", useSharedFilesystem="
         + useSharedFilesystem
+        + ", useLicenseKey="
+        + useLicenseKey
         + ", harvestInterval="
         + harvestInterval
         + ", daemonVersion='"

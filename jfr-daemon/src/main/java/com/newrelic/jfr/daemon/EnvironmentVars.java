@@ -16,6 +16,7 @@ public class EnvironmentVars {
   public static final String REMOTE_JMX_HOST = "REMOTE_JMX_HOST";
   public static final String REMOTE_JMX_PORT = "REMOTE_JMX_PORT";
   public static final String JFR_SHARED_FILESYSTEM = "JFR_SHARED_FILESYSTEM";
+  public static final String JFR_USE_LICENSE_KEY = "JFR_USE_LICENSE_KEY";
   public static final String AUDIT_LOGGING = "AUDIT_LOGGING";
 
   private EnvironmentVars() {}

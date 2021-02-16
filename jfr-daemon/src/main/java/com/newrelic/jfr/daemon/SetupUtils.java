@@ -66,6 +66,9 @@ public class SetupUtils {
     builder.maybeEnv(EnvironmentVars.EVENTS_INGEST_URI, URI::create, builder::eventsUri);
     builder.maybeEnv(
         EnvironmentVars.JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
+    builder.maybeEnv(
+        EnvironmentVars.JFR_USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
+
     builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
 
     return builder.build();
@@ -85,6 +88,7 @@ public class SetupUtils {
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
+    System.out.println(config.toString());
     Supplier<HttpPoster> httpPosterCreator =
         () -> new OkHttpPoster(Duration.of(10, ChronoUnit.SECONDS));
     MetricBatchSender metricBatchSender = buildMetricBatchSender(config, httpPosterCreator);
@@ -98,7 +102,8 @@ public class SetupUtils {
         EventBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .auditLoggingEnabled(config.auditLogging())
-            .secondaryUserAgent(makeUserAgent(config));
+            .secondaryUserAgent(makeUserAgent(config))
+            .useLicenseKey(config.useLicenseKey());
     if (config.getEventsUri() != null) {
       eventsConfig = eventsConfig.endpoint(toURL(config.getEventsUri()));
     }
@@ -111,7 +116,8 @@ public class SetupUtils {
         MetricBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .secondaryUserAgent(makeUserAgent(config))
-            .auditLoggingEnabled(config.auditLogging());
+            .auditLoggingEnabled(config.auditLogging())
+            .useLicenseKey(config.useLicenseKey());
     if (config.getMetricsUri() != null) {
       metricConfig = metricConfig.endpoint(toURL(config.getMetricsUri()));
     }
