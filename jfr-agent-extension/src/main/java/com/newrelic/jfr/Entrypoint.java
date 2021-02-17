@@ -1,6 +1,7 @@
 package com.newrelic.jfr;
 
 import static com.newrelic.jfr.daemon.AttributeNames.ENTITY_GUID;
+import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
 import static com.newrelic.jfr.daemon.SetupUtils.buildUploader;
 
 import com.newrelic.api.agent.Agent;
@@ -9,12 +10,17 @@ import com.newrelic.api.agent.NewRelic;
 import com.newrelic.jfr.daemon.*;
 import com.newrelic.jfr.daemon.agent.FileJfrRecorderFactory;
 import com.newrelic.telemetry.Attributes;
+import com.newrelic.telemetry.Backoff;
 import java.lang.instrument.Instrumentation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.LoggerFactory;
 
 public class Entrypoint {
@@ -47,19 +53,26 @@ public class Entrypoint {
     logger.info("Attaching New Relic JFR Monitor");
     try {
       DaemonConfig config = buildConfig(agentConfig);
-      new Entrypoint().start(config, agent.getLinkingMetadata().get(ENTITY_GUID));
+      new Entrypoint().start(config, agent);
     } catch (Throwable t) {
       logger.error("Unable to attach JFR Monitor", t);
     }
   }
 
-  private void start(DaemonConfig config, String entityGuid) {
-    Attributes attr = SetupUtils.buildCommonAttributes();
-    attr.put(ENTITY_GUID, entityGuid);
-    //    var eventConverterReference = new AtomicReference<>(eventConverter);
-    //    var readinessCheck = new AtomicBoolean(true);
+  private void start(DaemonConfig config, Agent agent) {
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
     JFRUploader uploader = buildUploader(config);
-    uploader.readyToSend(new EventConverter(attr));
+    fetchRemoteEntityIdAsync(agent)
+        .thenAccept(
+            optGuid -> {
+              if (optGuid.isPresent()) {
+                commonAttrs.put(ENTITY_GUID, optGuid.get());
+              } else {
+                commonAttrs.put(APP_NAME, config.getMonitoredAppName());
+                commonAttrs.put(SERVICE_NAME, config.getMonitoredAppName());
+              }
+              uploader.readyToSend(new EventConverter(commonAttrs));
+            });
 
     JfrRecorderFactory factory = new FileJfrRecorderFactory(Duration.ofSeconds(10));
     JfrController jfrController = new JfrController(factory, uploader, config.getHarvestInterval());
@@ -100,5 +113,50 @@ public class Entrypoint {
     // builder::auditLogging);
 
     return builder.build();
+  }
+
+  CompletableFuture<Optional<String>> fetchRemoteEntityIdAsync(Agent agent) {
+    return CompletableFuture.supplyAsync(
+        () ->
+            awaitRemoteEntityId(
+                agent,
+                Backoff.builder()
+                    .maxBackoff(15, TimeUnit.SECONDS)
+                    .backoffFactor(1, TimeUnit.SECONDS)
+                    .maxRetries(Integer.MAX_VALUE)
+                    .build()));
+  }
+
+  Optional<String> awaitRemoteEntityId(Agent agent, Backoff backoff) {
+    while (true) {
+      long backoffMillis = backoff.nextWaitMs();
+      if (backoffMillis == -1) {
+        logger.info("Unable to obtain entity guid after backing off. Not setting entity guid.");
+        return Optional.empty();
+      }
+
+      Map<String, String> linkingMetadata;
+      try {
+        linkingMetadata = agent.getLinkingMetadata();
+      } catch (Exception e) {
+        // Exceptions can be thrown when agent initialization is not yet complete
+        logger.info(
+            "Unable to obtain entity guid because linking metadata is unavailable. Backing off {} millis. ",
+            backoffMillis);
+        SafeSleep.sleep(Duration.ofMillis(backoffMillis));
+        continue;
+      }
+
+      Optional<String> optEntityId =
+          Optional.ofNullable(linkingMetadata).map(metadata -> metadata.get("entity.guid"));
+      if (optEntityId.isPresent()) {
+        logger.info("Obtained entity guid: {}", optEntityId.get());
+        return optEntityId;
+      }
+      logger.info(
+          "Linking metadata is available but entity guid not yet available. Backing off {} millis.",
+          backoffMillis);
+      SafeSleep.sleep(Duration.ofMillis(backoffMillis));
+    }
   }
 }

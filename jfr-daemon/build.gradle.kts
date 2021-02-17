@@ -30,8 +30,9 @@ dependencies {
 }
 
 tasks.jar {
-    // Create shadowJar instead of jar
-    enabled = false
+    // Create a standard jar as well as a shadowJar, add a classifier to differentiate
+    enabled = true
+    archiveClassifier.set("regular")
 }
 
 tasks.shadowJar {
