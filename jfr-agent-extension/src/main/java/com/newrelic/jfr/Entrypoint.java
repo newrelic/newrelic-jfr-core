@@ -1,5 +1,6 @@
 package com.newrelic.jfr;
 
+import static com.newrelic.jfr.daemon.AttributeNames.ENTITY_GUID;
 import static com.newrelic.jfr.daemon.SetupUtils.buildUploader;
 
 import com.newrelic.api.agent.Agent;
@@ -46,14 +47,15 @@ public class Entrypoint {
     logger.info("Attaching New Relic JFR Monitor");
     try {
       DaemonConfig config = buildConfig(agentConfig);
-      new Entrypoint().start(config);
+      new Entrypoint().start(config, agent.getLinkingMetadata().get(ENTITY_GUID));
     } catch (Throwable t) {
       logger.error("Unable to attach JFR Monitor", t);
     }
   }
 
-  private void start(DaemonConfig config) {
+  private void start(DaemonConfig config, String entityGuid) {
     Attributes attr = SetupUtils.buildCommonAttributes();
+    attr.put(ENTITY_GUID, entityGuid);
     //    var eventConverterReference = new AtomicReference<>(eventConverter);
     //    var readinessCheck = new AtomicBoolean(true);
     JFRUploader uploader = buildUploader(config);
