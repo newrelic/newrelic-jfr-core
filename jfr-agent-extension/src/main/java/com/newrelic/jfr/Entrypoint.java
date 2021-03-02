@@ -3,7 +3,6 @@ package com.newrelic.jfr;
 import static com.newrelic.jfr.daemon.SetupUtils.buildConfig;
 import static com.newrelic.jfr.daemon.SetupUtils.buildUploader;
 
-import com.newrelic.api.agent.Agent;
 import com.newrelic.api.agent.Config;
 import com.newrelic.api.agent.NewRelic;
 import com.newrelic.jfr.daemon.*;
@@ -29,8 +28,7 @@ public class Entrypoint {
       return;
     }
 
-    Agent agent = NewRelic.getAgent();
-    Config agentConfig = agent.getConfig();
+    Config agentConfig = NewRelic.getAgent().getConfig();
 
     if (isJfrDisabled(agentConfig)) {
       logger.info(
@@ -41,17 +39,19 @@ public class Entrypoint {
     logger.info("Attaching New Relic JFR Monitor");
 
     try {
-      new Entrypoint().start();
+      new Entrypoint().start(agentConfig);
     } catch (Throwable t) {
       logger.error("Unable to attach JFR Monitor", t);
     }
   }
 
-  private void start() {
+  private void start(Config agentConfig) {
     DaemonConfig config = buildConfig();
     Attributes attr = SetupUtils.buildCommonAttributes();
     JFRUploader uploader = buildUploader(config);
-    uploader.readyToSend(new EventConverter(attr));
+    String threadNamePattern =
+        agentConfig.getValue("thread_sampler.name_pattern", ThreadNameNormalizer.DEFAULT_PATTERN);
+    uploader.readyToSend(new EventConverter(attr, threadNamePattern));
     FileJfrRecorderFactory recorderFactory =
         new FileJfrRecorderFactory(config.getHarvestInterval());
     JfrController jfrController =

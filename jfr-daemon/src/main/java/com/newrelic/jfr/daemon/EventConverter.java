@@ -7,6 +7,7 @@
 
 package com.newrelic.jfr.daemon;
 
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
@@ -35,6 +36,14 @@ public class EventConverter {
         commonAttributes,
         ToMetricRegistry.createDefault(),
         ToSummaryRegistry.createDefault(),
+        ToEventRegistry.createDefault());
+  }
+
+  public EventConverter(Attributes commonAttributes, String pattern) {
+    this(
+        commonAttributes,
+        ToMetricRegistry.createDefault(),
+        ToSummaryRegistry.create(new ThreadNameNormalizer(pattern)),
         ToEventRegistry.createDefault());
   }
 

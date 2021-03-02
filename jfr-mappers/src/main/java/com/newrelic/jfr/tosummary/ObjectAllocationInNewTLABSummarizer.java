@@ -7,6 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.Workarounds;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
@@ -18,6 +19,14 @@ import jdk.jfr.consumer.RecordedEvent;
 public final class ObjectAllocationInNewTLABSummarizer extends AbstractThreadDispatchingSummarizer {
 
   public static final String EVENT_NAME = "jdk.ObjectAllocationInNewTLAB";
+
+  public ObjectAllocationInNewTLABSummarizer(ThreadNameNormalizer nameNormalizer) {
+    super(nameNormalizer);
+  }
+
+  public ObjectAllocationInNewTLABSummarizer() {
+    super();
+  }
 
   @Override
   public String getEventName() {

@@ -7,6 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.Workarounds;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
@@ -31,6 +32,14 @@ import jdk.jfr.consumer.RecordedEvent;
 
 public class NetworkWriteSummarizer extends AbstractThreadDispatchingSummarizer {
   public static final String EVENT_NAME = "jdk.SocketWrite";
+
+  public NetworkWriteSummarizer(ThreadNameNormalizer nameNormalizer) {
+    super(nameNormalizer);
+  }
+
+  public NetworkWriteSummarizer() {
+    super();
+  }
 
   @Override
   public void accept(RecordedEvent ev) {

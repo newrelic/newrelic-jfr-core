@@ -24,14 +24,19 @@ import java.util.stream.Stream;
 
 public class ToSummaryRegistry {
 
-  private static final List<EventToSummary> ALL_MAPPERS =
-      Arrays.asList(
-          new G1GarbageCollectionSummarizer(),
-          new GCHeapSummarySummarizer(),
-          new NetworkReadSummarizer(),
-          new NetworkWriteSummarizer(),
-          new ObjectAllocationInNewTLABSummarizer(),
-          new ObjectAllocationOutsideTLABSummarizer());
+  private static final List<EventToSummary> allMappers() {
+    return allMappers(null);
+  }
+
+  private static final List<EventToSummary> allMappers(ThreadNameNormalizer nameNormalizer) {
+    return Arrays.asList(
+        new G1GarbageCollectionSummarizer(),
+        new GCHeapSummarySummarizer(),
+        new NetworkReadSummarizer(nameNormalizer),
+        new NetworkWriteSummarizer(nameNormalizer),
+        new ObjectAllocationInNewTLABSummarizer(nameNormalizer),
+        new ObjectAllocationOutsideTLABSummarizer(nameNormalizer));
+  }
 
   private final List<EventToSummary> mappers;
 
@@ -40,12 +45,16 @@ public class ToSummaryRegistry {
   }
 
   public static ToSummaryRegistry createDefault() {
-    return new ToSummaryRegistry(ALL_MAPPERS);
+    return new ToSummaryRegistry(allMappers());
+  }
+
+  public static ToSummaryRegistry create(ThreadNameNormalizer nameNormalizer) {
+    return new ToSummaryRegistry(allMappers(nameNormalizer));
   }
 
   public static ToSummaryRegistry create(Collection<String> eventNames) {
     List<EventToSummary> filtered =
-        ALL_MAPPERS
+        allMappers()
             .stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
             .collect(toList());
@@ -53,7 +62,7 @@ public class ToSummaryRegistry {
   }
 
   private static List<String> allEventNames() {
-    return ALL_MAPPERS.stream().map(EventToSummary::getEventName).collect(toList());
+    return allMappers().stream().map(EventToSummary::getEventName).collect(toList());
   }
 
   public Stream<EventToSummary> all() {

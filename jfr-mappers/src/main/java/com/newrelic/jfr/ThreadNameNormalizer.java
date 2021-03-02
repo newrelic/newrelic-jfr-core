@@ -21,7 +21,7 @@ public class ThreadNameNormalizer {
    * Pattern matches hex numbers at least 8 characters long surrounded by
    * word breaks, or a number of any length.  We use this to normalize thread names into groups.
    */
-  private static final String DEFAULT_PATTERN = "((?<=[\\W_]|^)([0-9a-fA-F]){4,}(?=[\\W_]|$))|\\d+";
+  public static final String DEFAULT_PATTERN = "((?<=[\\W_]|^)([0-9a-fA-F]){4,}(?=[\\W_]|$))|\\d+";
 
   private static final ReplacementRule[] regexps = {
     getConstantRegexReplacementRule(
@@ -54,24 +54,22 @@ public class ThreadNameNormalizer {
   List<ReplacementRule> REPLACEMENT_RULES = Collections.unmodifiableList(Arrays.asList(regexps));
 
   private final Pattern replacementPattern;
-  private final ThreadNames threadNames;
 
   //    public ThreadNameNormalizer(AgentConfig config, ThreadNames threadNames) {
   //        this(config.getValue("thread_sampler.name_pattern", DEFAULT_PATTERN), threadNames);
   //    }
 
   /** For testing. */
-  public ThreadNameNormalizer(ThreadNames threadNames) {
-    this(DEFAULT_PATTERN, threadNames);
+  public ThreadNameNormalizer() {
+    this(DEFAULT_PATTERN);
   }
 
-  private ThreadNameNormalizer(String pattern, ThreadNames threadNames) {
+  public ThreadNameNormalizer(String pattern) {
     replacementPattern = Pattern.compile(pattern);
-    this.threadNames = threadNames;
   }
 
   public String getNormalizedThreadName(BasicThreadInfo threadInfo) {
-    return getNormalizedThreadName(threadNames.getThreadName(threadInfo));
+    return getNormalizedThreadName(threadInfo.getName());
   }
 
   protected String getNormalizedThreadName(String name) {
