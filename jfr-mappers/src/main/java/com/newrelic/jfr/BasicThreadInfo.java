@@ -8,6 +8,7 @@
 package com.newrelic.jfr;
 
 import java.lang.management.ThreadInfo;
+import jdk.jfr.consumer.RecordedThread;
 
 public class BasicThreadInfo {
   private final long id;
@@ -15,6 +16,10 @@ public class BasicThreadInfo {
 
   public BasicThreadInfo(Thread thread) {
     this(thread.getId(), thread.getName());
+  }
+
+  public BasicThreadInfo(RecordedThread thread) {
+    this(thread.getJavaThreadId(), thread.getJavaName());
   }
 
   public BasicThreadInfo(ThreadInfo thread) {

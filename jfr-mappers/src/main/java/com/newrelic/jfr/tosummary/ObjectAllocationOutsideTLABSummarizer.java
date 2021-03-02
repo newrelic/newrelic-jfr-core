@@ -22,16 +22,17 @@ public final class ObjectAllocationOutsideTLABSummarizer
 
   @Override
   public void accept(RecordedEvent ev) {
-    Optional<String> threadName = Workarounds.getThreadName(ev);
-    threadName.ifPresent(
-        thread -> {
-          if (perThread.get(thread) == null) {
+    Optional<String> possibleThreadName = Workarounds.getThreadName(ev);
+    possibleThreadName.ifPresent(
+        threadName -> {
+          final String groupedThreadName = groupedName(ev, threadName);
+          if (perThread.get(groupedThreadName) == null) {
             perThread.put(
-                thread,
+                groupedThreadName,
                 new PerThreadObjectAllocationOutsideTLABSummarizer(
-                    thread, ev.getStartTime().toEpochMilli()));
+                    groupedThreadName, ev.getStartTime().toEpochMilli()));
           }
-          perThread.get(thread).accept(ev);
+          perThread.get(groupedThreadName).accept(ev);
         });
   }
 

@@ -37,12 +37,14 @@ public class NetworkWriteSummarizer extends AbstractThreadDispatchingSummarizer 
     Optional<String> possibleThreadName = Workarounds.getThreadName(ev);
     possibleThreadName.ifPresent(
         threadName -> {
-          if (perThread.get(threadName) == null) {
+          final String groupedThreadName = groupedName(ev, threadName);
+          if (perThread.get(groupedThreadName) == null) {
             perThread.put(
-                threadName,
-                new PerThreadNetworkWriteSummarizer(threadName, ev.getStartTime().toEpochMilli()));
+                groupedThreadName,
+                new PerThreadNetworkWriteSummarizer(
+                    groupedThreadName, ev.getStartTime().toEpochMilli()));
           }
-          perThread.get(threadName).accept(ev);
+          perThread.get(groupedThreadName).accept(ev);
         });
   }
 
