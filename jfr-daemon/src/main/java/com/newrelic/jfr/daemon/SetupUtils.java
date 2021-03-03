@@ -67,6 +67,10 @@ public class SetupUtils {
     builder.maybeEnv(
         EnvironmentVars.JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
     builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
+    builder.maybeEnv(
+        EnvironmentVars.USE_LICENSE_KEY,
+        Boolean::parseBoolean,
+        useLicenseKey -> builder.useLicenseKey(useLicenseKey));
 
     return builder.build();
   }
@@ -102,6 +106,9 @@ public class SetupUtils {
     if (config.getEventsUri() != null) {
       eventsConfig = eventsConfig.endpoint(toURL(config.getEventsUri()));
     }
+    if (config.isUseLicenseKey()) {
+      eventsConfig = eventsConfig.useLicenseKey(true);
+    }
     return EventBatchSender.create(eventsConfig.build());
   }
 
@@ -114,6 +121,9 @@ public class SetupUtils {
             .auditLoggingEnabled(config.auditLogging());
     if (config.getMetricsUri() != null) {
       metricConfig = metricConfig.endpoint(toURL(config.getMetricsUri()));
+    }
+    if (config.isUseLicenseKey()) {
+      metricConfig = metricConfig.useLicenseKey(true);
     }
     return MetricBatchSender.create(metricConfig.build());
   }
