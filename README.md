@@ -130,6 +130,10 @@ Expose remote JMX on the application that the jfr-daemon will be attaching to by
 
 The JFR daemon logs with the Slf4j-Simple implementation at the default `Info` level. For audit logging from the underlying Telemetry SDK, set the log level to `Debug` and enable audit logging via environment variable as described above. 
 
+### Proxy
+
+Currently, the JFR daemon can not be directly configured to accept a proxy. Instead, please use system properties `-Dhttps.proxyHost` and `-Dhttps.proxyPort` [(reference)](https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html) to specify your proxy.
+
 ---
 ## Support
 
