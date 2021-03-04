@@ -30,8 +30,9 @@ dependencies {
 }
 
 tasks.jar {
-    // Create shadowJar instead of jar
-    enabled = false
+    //jfr agent extension needs the daemon jar
+    archiveClassifier.set("not_shadow")
+    enabled = true
 }
 
 tasks.shadowJar {
