@@ -25,10 +25,10 @@ class AgentExtensionSmokeTest extends SmokeTestBase {
     assertEdgeIsReset();
 
     var appContainer = buildAppWithAgentExtensionContainer();
+    cleanupContainer(appContainer);
     appContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);
-    appContainer.stop();
   }
 
   private GenericContainer<?> buildAppWithAgentExtensionContainer() {
