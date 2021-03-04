@@ -11,10 +11,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-import javax.management.JMException;
-import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.management.*;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -62,6 +59,9 @@ public class JmxJfrRecorderFactory implements JfrRecorderFactory {
     while (true) {
       try {
         return startRecording(connection);
+      } catch (InstanceNotFoundException e) {
+        // JFR recorder MBean is missing.
+        throw e;
       } catch (Exception e) {
         long backoffMillis = backoff.nextWaitMs();
         if (backoffMillis == -1) {
