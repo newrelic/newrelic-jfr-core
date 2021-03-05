@@ -30,8 +30,9 @@ dependencies {
 }
 
 tasks.jar {
-    // Create shadowJar instead of jar
-    enabled = false
+    // Create standard jar for jfr-agent-extension build
+    archiveClassifier.set("std")
+    enabled = true
 }
 
 tasks.shadowJar {

@@ -52,7 +52,7 @@ class AgentExtensionSmokeTest extends SmokeTestBase {
             .withDockerfileFromBuilder(
                 builder ->
                     builder
-                        .from(JDK_11_IMAGE)
+                        .from(JDK_8_IMAGE)
                         .add("smoke-test/smoke-tests-*-SNAPSHOT.jar", appFilename)
                         .add("newrelic/", "newrelic/")
                         .add(

@@ -27,7 +27,7 @@ public class SmokeTestApp {
 
   @Bean
   public FilterRegistrationBean<GzipDecompressFilter> gzipDecompressFilter() {
-    var registrationBean = new FilterRegistrationBean<GzipDecompressFilter>();
+    FilterRegistrationBean<GzipDecompressFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new GzipDecompressFilter());
     return registrationBean;
   }

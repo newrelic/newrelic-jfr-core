@@ -43,7 +43,7 @@ class DaemonAppSmokeTest extends SmokeTestBase {
             .withDockerfileFromBuilder(
                 builder ->
                     builder
-                        .from(JDK_11_IMAGE)
+                        .from(JDK_8_IMAGE)
                         .add("jfr-daemon/jfr-daemon-*-SNAPSHOT.jar", jfrDaemonFilename)
                         .entryPoint("java -jar " + jfrDaemonFilename)
                         .env(jfrEnvVars(Optional.of(appContainer.getNetworkAliases().get(0))))

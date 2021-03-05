@@ -25,6 +25,7 @@ public abstract class SmokeTestBase {
 
   private static final Logger logger = LoggerFactory.getLogger(SmokeTestBase.class);
 
+  static final String JDK_8_IMAGE = "adoptopenjdk:8";
   static final String JDK_11_IMAGE = "adoptopenjdk:11";
   static final int APP_PORT = 8080;
   static final int APP_JMX_PORT = 1099;
