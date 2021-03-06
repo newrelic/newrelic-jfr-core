@@ -109,14 +109,14 @@ default behavior, the following environment variables are recognized:
 | env var name          | required? | default             | description  |
 |-----------------------|-----------|---------------------|--------------|
 | INSIGHTS_INSERT_KEY   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or [license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key) for your account |
-| USE_LICENSE_KEY    |     N  |  false     | Use a License Key instead of Insights Insert Key.
-| NEW_RELIC_APP_NAME    |     N(!)  |  My Application     | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform.
+| USE_LICENSE_KEY       |     N     |  false              | Use a License Key instead of Insights Insert Key.
+| NEW_RELIC_APP_NAME    |     N(!)  |  My Application     | The name of the remote application being monitored.  You should probably set this so that your application shows up properly in the NR1 platform.
 | REMOTE_JMX_HOST       |     N     |  localhost          | The host to pull JFR data from via JMX        |
 | REMOTE_JMX_PORT       |     N     |  1099               | The port to pull JFR data from via JMX        |
 | METRICS_INGEST_URI    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1)          | Where to send metric data
 | EVENTS_INGEST_URI     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events), [EU production](https://insights-collector.eu01.nr-data.net/v1/accounts/events) | Where to send event data
 | JFR_SHARED_FILESYSTEM |     N     |  false              | Use a shared filesystem instead of streaming data from JMX
-| AUDIT_LOGGING |     N     |  false              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK
+| AUDIT_LOGGING         |     N     |  false              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK
 
 Expose remote JMX on the application that the jfr-daemon will be attaching to by adding the following system properties:
 
