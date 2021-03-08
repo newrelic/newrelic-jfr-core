@@ -45,7 +45,8 @@ public class GzipDecompressFilter implements Filter {
       logger.debug("Decompressing gzip POST request to {}", requestURI);
       InputStream inputStream = request.getInputStream();
       GZIPInputStream gis = new GZIPInputStream(inputStream);
-      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
+      BufferedReader bufferedReader =
+          new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
       request = new GzipRequestWrapper(request, gis, bufferedReader);
     } else if (requestTypeSupported) {
       logger.debug("POST body to {} does not require gzip decompression.", requestURI);
