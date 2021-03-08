@@ -89,7 +89,7 @@ JFR files.  It uses these files to build a "pseudo stream" of telemetry events.
 ### How To Use
 
 After building or downloading the jfr-daemon jar, you should first export the INSIGHTS_INSERT_KEY variable
-with [your insights key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key):
+with [your insights key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or [license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key):
 
 ```
 $ export INSIGHTS_INSERT_KEY=abc123youractualkeyhere
@@ -108,7 +108,8 @@ default behavior, the following environment variables are recognized:
 
 | env var name          | required? | default             | description  |
 |-----------------------|-----------|---------------------|--------------|
-| INSIGHTS_INSERT_KEY   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) for your account |
+| INSIGHTS_INSERT_KEY   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or [license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key) for your account |
+| USE_LICENSE_KEY    |     N  |  false     | Use a License Key instead of Insights Insert Key.
 | NEW_RELIC_APP_NAME    |     N(!)  |  My Application     | The name of the remote applicaiton being monitored.  You should probably set this so that your application shows up properly in the NR1 platform.
 | REMOTE_JMX_HOST       |     N     |  localhost          | The host to pull JFR data from via JMX        |
 | REMOTE_JMX_PORT       |     N     |  1099               | The port to pull JFR data from via JMX        |
@@ -128,6 +129,10 @@ Expose remote JMX on the application that the jfr-daemon will be attaching to by
 ### Logging
 
 The JFR daemon logs with the Slf4j-Simple implementation at the default `Info` level. For audit logging from the underlying Telemetry SDK, set the log level to `Debug` and enable audit logging via environment variable as described above. 
+
+### Proxy
+
+Currently, the JFR daemon can not be directly configured to accept a proxy. Instead, please use system properties `-Dhttps.proxyHost` and `-Dhttps.proxyPort` [(reference)](https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html) to specify your proxy.
 
 ---
 ## Support

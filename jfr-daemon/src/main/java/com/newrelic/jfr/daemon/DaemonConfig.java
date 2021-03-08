@@ -20,6 +20,7 @@ public class DaemonConfig {
   private static final String DEFAULT_JMX_HOST = "localhost";
   private static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
   private static final boolean DEFAULT_AUDIT_LOGGING = false;
+  private static final boolean DEFAULT_USE_LICENSE_KEY = false;
   private static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
   private static final String DEFAULT_MONITORED_APP_NAME = "My Application";
 
@@ -33,6 +34,7 @@ public class DaemonConfig {
   private final String daemonVersion;
   private final String monitoredAppName;
   private final boolean auditLogging;
+  private final boolean useLicenseKey;
 
   public DaemonConfig(Builder builder) {
     this.auditLogging = builder.auditLogging;
@@ -42,6 +44,7 @@ public class DaemonConfig {
     this.jmxHost = builder.jmxHost;
     this.jmxPort = builder.jmxPort;
     this.useSharedFilesystem = builder.useSharedFilesystem;
+    this.useLicenseKey = builder.useLicenseKey;
     this.harvestInterval = builder.harvestInterval;
     this.daemonVersion = builder.daemonVersion;
     this.monitoredAppName = builder.monitoredAppName;
@@ -75,6 +78,10 @@ public class DaemonConfig {
     return useSharedFilesystem;
   }
 
+  public boolean isUseLicenseKey() {
+    return useLicenseKey;
+  }
+
   public boolean streamFromJmx() {
     return !useSharedFilesystem;
   }
@@ -97,6 +104,7 @@ public class DaemonConfig {
 
   public static class Builder {
     private boolean auditLogging = DEFAULT_AUDIT_LOGGING;
+    private boolean useLicenseKey = DEFAULT_USE_LICENSE_KEY;
     private String apiKey;
     private URI metricsUri;
     private URI eventsUri;
@@ -139,6 +147,11 @@ public class DaemonConfig {
 
     public Builder useSharedFilesystem(boolean useSharedFilesystem) {
       this.useSharedFilesystem = useSharedFilesystem;
+      return this;
+    }
+
+    public Builder useLicenseKey(boolean useLicenseKey) {
+      this.useLicenseKey = useLicenseKey;
       return this;
     }
 
