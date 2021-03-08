@@ -28,7 +28,6 @@ class DaemonAgentSmokeTest extends SmokeTestBase {
     appContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);
-    appContainer.stop();
   }
 
   private GenericContainer<?> buildAppWithAgentContainer() {
@@ -42,7 +41,7 @@ class DaemonAgentSmokeTest extends SmokeTestBase {
             .withDockerfileFromBuilder(
                 builder ->
                     builder
-                        .from(JDK_11_IMAGE)
+                        .from(JDK_8_IMAGE)
                         .add("smoke-test/smoke-tests-*-SNAPSHOT.jar", appFilename)
                         .add("jfr-daemon/jfr-daemon-*-SNAPSHOT.jar", jfrDaemonFilename)
                         .env(jfrEnvVars(Optional.empty()))

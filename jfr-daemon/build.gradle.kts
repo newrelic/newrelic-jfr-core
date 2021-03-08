@@ -30,8 +30,8 @@ dependencies {
 }
 
 tasks.jar {
-    //jfr agent extension needs the daemon jar
-    archiveClassifier.set("not_shadow")
+    // Create standard jar for jfr-agent-extension build
+    archiveClassifier.set("std")
     enabled = true
 }
 

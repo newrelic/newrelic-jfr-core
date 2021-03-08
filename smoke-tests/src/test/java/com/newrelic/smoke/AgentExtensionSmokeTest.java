@@ -25,10 +25,10 @@ class AgentExtensionSmokeTest extends SmokeTestBase {
     assertEdgeIsReset();
 
     var appContainer = buildAppWithAgentExtensionContainer();
+    cleanupContainer(appContainer);
     appContainer.start();
 
     assertEdgeHasEventsAndMetrics(60);
-    appContainer.stop();
   }
 
   private GenericContainer<?> buildAppWithAgentExtensionContainer() {
@@ -52,7 +52,7 @@ class AgentExtensionSmokeTest extends SmokeTestBase {
             .withDockerfileFromBuilder(
                 builder ->
                     builder
-                        .from(JDK_11_IMAGE)
+                        .from(JDK_8_IMAGE)
                         .add("smoke-test/smoke-tests-*-SNAPSHOT.jar", appFilename)
                         .add("newrelic/", "newrelic/")
                         .add(
