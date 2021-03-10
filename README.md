@@ -126,6 +126,7 @@ Expose remote JMX on the application that the jfr-daemon will be attaching to by
 -Dcom.sun.management.jmxremote.ssl=false 
 -Dcom.sun.management.jmxremote.authenticate=false
 ```
+
 ### Logging
 
 The JFR daemon logs with the Slf4j-Simple implementation at the default `Info` level. For audit logging from the underlying Telemetry SDK, set the log level to `Debug` and enable audit logging via environment variable as described above. 

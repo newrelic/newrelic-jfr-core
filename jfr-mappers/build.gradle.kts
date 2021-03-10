@@ -1,9 +1,11 @@
 val newRelicTelemetryVersion: String by project
 val gsonVersion: String by project
+val slf4jVersion: String by project
 
 dependencies {
     implementation("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
+    implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
 }
 
 // Main source set compiles against java 8

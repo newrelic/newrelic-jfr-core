@@ -12,13 +12,18 @@ import static com.newrelic.jfr.tosummary.BaseDurationSummarizer.DEFAULT_CLOCK;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** This class aggregates the duration of Garbage Collection JFR events */
 public final class BasicGarbageCollectionSummarizer implements EventToSummary {
+  private static final Logger logger =
+      LoggerFactory.getLogger(BasicGarbageCollectionSummarizer.class);
 
   public static final String EVENT_NAME = "jdk.GarbageCollection";
 
@@ -30,22 +35,29 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
   private long minorGcEndTimeMs = 0L;
   private long majorGcEndTimeMs = 0L;
 
-  // TODO figure out exhaustive list of all minor/major GC names
   private static final Set<String> MINOR_GC_NAMES =
-      new HashSet<String>() {
-        {
-          add("G1New");
-          add("ParNew");
-        }
-      };
+      Collections.unmodifiableSet(
+          new HashSet<String>() {
+            {
+              add("DefNew");
+              add("G1New");
+              add("ParallelScavenge");
+              add("ParNew");
+              add("PSMarkSweep");
+            }
+          });
 
   private static final Set<String> MAJOR_GC_NAMES =
-      new HashSet<String>() {
-        {
-          add("G1Old");
-          add("ParallelOld");
-        }
-      };
+      Collections.unmodifiableSet(
+          new HashSet<String>() {
+            {
+              add("ConcurrentMarkSweep");
+              add("G1Full");
+              add("G1Old");
+              add("ParallelOld");
+              add("SerialOld");
+            }
+          });
 
   public BasicGarbageCollectionSummarizer() {
     this(Instant.now().toEpochMilli());
@@ -62,7 +74,6 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
       long startTimeMs,
       SimpleDurationSummarizer minorGcDurationSummarizer,
       SimpleDurationSummarizer majorGcDurationSummarizer) {
-    // TODO do we need a different start time for minor/major? Only end time?
     this.startTimeMs = startTimeMs;
     this.minorGcDurationSummarizer = minorGcDurationSummarizer;
     this.majorGcDurationSummarizer = majorGcDurationSummarizer;
@@ -85,33 +96,19 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
         majorGcEndTimeMs = ev.getStartTime().toEpochMilli();
         majorGcDurationSummarizer.accept(ev);
         majorGcCount++;
-      }
+      } else
+        // Ignore events with GC name: GCNameEndSentinel, N/A, Shenandoah, Z or anything unexpected
+        logger.warn("Ignoring unsupported " + EVENT_NAME + " event: " + name);
     }
   }
 
-  // Metric types TODO Do we need all four or is the count included in duration sufficient?
-  //    jfr.GarbageCollection.minorCount
-  //    jfr.GarbageCollection.minorDuration
-  //    jfr.GarbageCollection.majorCount
-  //    jfr.GarbageCollection.majorDuration
-
-  // Example JFR event
-  //    jdk.GarbageCollection {
-  //        startTime = 11:52:18.076
-  //        duration = 0.502 ms
-  //        gcId = 859
-  //        name = "G1New"
-  //        cause = "G1 Evacuation Pause"
-  //        sumOfPauses = 0.502 ms
-  //        longestPause = 0.502 ms
-  //    }
   @Override
   public Stream<Summary> summarize() {
     Attributes attr = new Attributes();
     Summary minorGcDuration =
         new Summary(
             "jfr.GarbageCollection.minorDuration",
-            minorGcCount, // TODO should count move to a jfr.GarbageCollection.minorCount metric?
+            minorGcCount,
             minorGcDurationSummarizer.getDurationMillis(),
             minorGcDurationSummarizer.getMinDurationMillis(),
             minorGcDurationSummarizer.getMaxDurationMillis(),
@@ -122,7 +119,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
     Summary majorGcDuration =
         new Summary(
             "jfr.GarbageCollection.majorDuration",
-            majorGcCount, // TODO should count move to a jfr.GarbageCollection.majorCount
+            majorGcCount,
             majorGcDurationSummarizer.getDurationMillis(),
             majorGcDurationSummarizer.getMinDurationMillis(),
             majorGcDurationSummarizer.getMaxDurationMillis(),
