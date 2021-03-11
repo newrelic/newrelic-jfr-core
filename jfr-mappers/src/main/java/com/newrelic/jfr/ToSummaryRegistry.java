@@ -9,6 +9,7 @@ package com.newrelic.jfr;
 
 import static java.util.stream.Collectors.toList;
 
+import com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer;
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
 import com.newrelic.jfr.tosummary.GCHeapSummarySummarizer;
@@ -26,6 +27,7 @@ public class ToSummaryRegistry {
 
   private static final List<EventToSummary> ALL_MAPPERS =
       Arrays.asList(
+          new BasicGarbageCollectionSummarizer(),
           new G1GarbageCollectionSummarizer(),
           new GCHeapSummarySummarizer(),
           new NetworkReadSummarizer(),
