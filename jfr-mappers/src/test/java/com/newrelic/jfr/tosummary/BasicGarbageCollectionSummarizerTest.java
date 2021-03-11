@@ -11,6 +11,7 @@ import com.newrelic.telemetry.metrics.Summary;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import jdk.jfr.consumer.RecordedEvent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -146,14 +147,14 @@ class BasicGarbageCollectionSummarizerTest {
     var majorGcEvent7 = mock(RecordedEvent.class);
     var majorGcEvent8 = mock(RecordedEvent.class);
 
-    var startTimeEvent1 = DEFAULT_START_TIME_MS + 1;
-    var startTimeEvent2 = ++startTimeEvent1;
-    var startTimeEvent3 = ++startTimeEvent2;
-    var startTimeEvent4 = ++startTimeEvent3;
-    var startTimeEvent5 = ++startTimeEvent4;
-    var startTimeEvent6 = ++startTimeEvent5;
-    var startTimeEvent7 = ++startTimeEvent6;
-    var startTimeEvent8 = ++startTimeEvent7;
+    var startTimeEvent1 = new AtomicLong(DEFAULT_START_TIME_MS + 1);
+    var startTimeEvent2 = new AtomicLong(startTimeEvent1.incrementAndGet());
+    var startTimeEvent3 = new AtomicLong(startTimeEvent2.incrementAndGet());
+    var startTimeEvent4 = new AtomicLong(startTimeEvent3.incrementAndGet());
+    var startTimeEvent5 = new AtomicLong(startTimeEvent4.incrementAndGet());
+    var startTimeEvent6 = new AtomicLong(startTimeEvent5.incrementAndGet());
+    var startTimeEvent7 = new AtomicLong(startTimeEvent6.incrementAndGet());
+    var startTimeEvent8 = new AtomicLong(startTimeEvent7.incrementAndGet());
 
     var eventDurationNanos = 13_700_000;
     var eventDurationMillis = Duration.ofNanos(eventDurationNanos).toMillis();
@@ -168,7 +169,7 @@ class BasicGarbageCollectionSummarizerTest {
             eventDurationMillis, // min
             eventDurationMillis, // max
             DEFAULT_START_TIME_MS, // startTimeMs
-            startTimeEvent4, // endTimeMs
+            startTimeEvent4.get(), // endTimeMs
             new Attributes());
 
     var expectedMajorGcSummaryMetric =
@@ -179,7 +180,7 @@ class BasicGarbageCollectionSummarizerTest {
             eventDurationMillis, // min
             eventDurationMillis, // max
             DEFAULT_START_TIME_MS, // startTimeMs
-            startTimeEvent8, // endTimeMs
+            startTimeEvent8.get(), // endTimeMs
             new Attributes());
 
     List<Metric> expected = List.of(expectedMinorGcSummaryMetric, expectedMajorGcSummaryMetric);
@@ -187,36 +188,36 @@ class BasicGarbageCollectionSummarizerTest {
 
     // minor GC events
     when(minorGcEvent1.getValue("name")).thenReturn("ParNew");
-    when(minorGcEvent1.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent1));
+    when(minorGcEvent1.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent1.get()));
     when(minorGcEvent1.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     when(minorGcEvent2.getValue("name")).thenReturn("DefNew");
-    when(minorGcEvent2.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent2));
+    when(minorGcEvent2.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent2.get()));
     when(minorGcEvent2.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     when(minorGcEvent3.getValue("name")).thenReturn("PSMarkSweep");
-    when(minorGcEvent3.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent3));
+    when(minorGcEvent3.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent3.get()));
     when(minorGcEvent3.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     when(minorGcEvent4.getValue("name")).thenReturn("ParallelScavenge");
-    when(minorGcEvent4.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent4));
+    when(minorGcEvent4.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent4.get()));
     when(minorGcEvent4.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     // major GC events
     when(majorGcEvent5.getValue("name")).thenReturn("ParallelOld");
-    when(majorGcEvent5.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent5));
+    when(majorGcEvent5.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent5.get()));
     when(majorGcEvent5.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     when(majorGcEvent6.getValue("name")).thenReturn("SerialOld");
-    when(majorGcEvent6.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent6));
+    when(majorGcEvent6.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent6.get()));
     when(majorGcEvent6.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     when(majorGcEvent7.getValue("name")).thenReturn("ConcurrentMarkSweep");
-    when(majorGcEvent7.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent7));
+    when(majorGcEvent7.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent7.get()));
     when(majorGcEvent7.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     when(majorGcEvent8.getValue("name")).thenReturn("G1Full");
-    when(majorGcEvent8.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent8));
+    when(majorGcEvent8.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent8.get()));
     when(majorGcEvent8.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(minorGcEvent1);

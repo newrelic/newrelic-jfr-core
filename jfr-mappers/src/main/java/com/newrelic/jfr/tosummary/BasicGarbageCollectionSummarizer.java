@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
@@ -29,8 +30,8 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
 
   private final SimpleDurationSummarizer minorGcDurationSummarizer;
   private final SimpleDurationSummarizer majorGcDurationSummarizer;
-  private int minorGcCount = 0;
-  private int majorGcCount = 0;
+  private final AtomicInteger minorGcCount = new AtomicInteger(0);
+  private final AtomicInteger majorGcCount = new AtomicInteger(0);
   private long startTimeMs;
   private long minorGcEndTimeMs = 0L;
   private long majorGcEndTimeMs = 0L;
@@ -91,11 +92,11 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
       if (MINOR_GC_NAMES.contains(name)) {
         minorGcEndTimeMs = ev.getStartTime().toEpochMilli();
         minorGcDurationSummarizer.accept(ev);
-        minorGcCount++;
+        minorGcCount.incrementAndGet();
       } else if (MAJOR_GC_NAMES.contains(name)) {
         majorGcEndTimeMs = ev.getStartTime().toEpochMilli();
         majorGcDurationSummarizer.accept(ev);
-        majorGcCount++;
+        majorGcCount.incrementAndGet();
       } else
         // Ignore events with GC name: GCNameEndSentinel, N/A, Shenandoah, Z or anything unexpected
         logger.warn("Ignoring unsupported " + EVENT_NAME + " event: " + name);
@@ -108,7 +109,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
     Summary minorGcDuration =
         new Summary(
             "jfr.GarbageCollection.minorDuration",
-            minorGcCount,
+            minorGcCount.get(),
             minorGcDurationSummarizer.getDurationMillis(),
             minorGcDurationSummarizer.getMinDurationMillis(),
             minorGcDurationSummarizer.getMaxDurationMillis(),
@@ -119,7 +120,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
     Summary majorGcDuration =
         new Summary(
             "jfr.GarbageCollection.majorDuration",
-            majorGcCount,
+            majorGcCount.get(),
             majorGcDurationSummarizer.getDurationMillis(),
             majorGcDurationSummarizer.getMinDurationMillis(),
             majorGcDurationSummarizer.getMaxDurationMillis(),
@@ -133,8 +134,8 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
     startTimeMs = Instant.now().toEpochMilli();
     minorGcEndTimeMs = 0L;
     majorGcEndTimeMs = 0L;
-    minorGcCount = 0;
-    majorGcCount = 0;
+    minorGcCount.set(0);
+    majorGcCount.set(0);
     minorGcDurationSummarizer.reset();
     majorGcDurationSummarizer.reset();
   }
