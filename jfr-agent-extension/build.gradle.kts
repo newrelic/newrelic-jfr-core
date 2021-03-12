@@ -67,10 +67,10 @@ tasks.named("build") {
 //    }
 //}
 
-signing {
-    val signingKey: String? by project
-    val signingKeyId: String? by project
-    val signingPassword: String? by project
-    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-    this.sign(publishing.publications["maven"])
-}
+//signing {
+//    val signingKey: String? by project
+//    val signingKeyId: String? by project
+//    val signingPassword: String? by project
+//    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+//    this.sign(publishing.publications["maven"])
+//}
