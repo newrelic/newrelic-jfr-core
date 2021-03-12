@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.1.0 (2021-03-12)
+* The JFR daemon has been back-ported to run with Java 8 (`version 8u262+`) or higher. [#143](https://github.com/newrelic/newrelic-jfr-core/pull/143)
+* Update telemetry sdk to `0.12.0`.
+* Generate two new `jdk.GarbageCollection` metrics. [#169](https://github.com/newrelic/newrelic-jfr-core/pull/169): 
+    * `jfr.GarbageCollection.minorDuration`
+    * `jfr.GarbageCollection.majorDuration`
+* Add support for general heap summary. [#106](https://github.com/newrelic/newrelic-jfr-core/pull/106)
+* Documentation updates:
+    * Add EU endpoints. [#109](https://github.com/newrelic/newrelic-jfr-core/pull/109)
+    * Add audit logging config. [#131](https://github.com/newrelic/newrelic-jfr-core/pull/131)
+    * Add proxy config. [#163](https://github.com/newrelic/newrelic-jfr-core/pull/163)
+* Add support for generating jlink binaries. [#128](https://github.com/newrelic/newrelic-jfr-core/pull/128)
+* Add support for Valhalla VBC events [#115](https://github.com/newrelic/newrelic-jfr-core/pull/115)
+* Change the default app name to `My Application`. [#125](https://github.com/newrelic/newrelic-jfr-core/pull/125)
+* Address `ConnectIOException` that could cause the JFR daemon to crash. [#127](https://github.com/newrelic/newrelic-jfr-core/pull/127)
+* Add support for APM license keys. [#163](https://github.com/newrelic/newrelic-jfr-core/pull/163)
+
 ## Version 1.0.0 (2020-11-03)
 * **Initial 1.0.0 GA release**
 * `jfr-mappers` module [no longer depends on `telemetry-java-http11`](https://github.com/newrelic/newrelic-jfr-core/pull/90).
