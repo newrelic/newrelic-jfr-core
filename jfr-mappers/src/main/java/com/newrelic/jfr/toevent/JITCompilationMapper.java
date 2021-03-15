@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedThread;
 
 // jdk.Compilation {
 //        startTime = 16:04:14.403
@@ -37,10 +38,11 @@ public class JITCompilationMapper implements EventToEvent {
     Duration duration = event.getDuration();
     Attributes attr = new Attributes();
     attr.put("desc", MethodSupport.describeMethod(event.getValue("method")));
-    attr.put("thread.name", event.getThread("eventThread").getJavaName());
     attr.put("duration", duration.toMillis());
     attr.put("succeeded", Workarounds.getSucceeded(event));
 
+    RecordedThread threadId = event.getThread("eventThread");
+    attr.put("thread.name", threadId == null ? null : threadId.getJavaName());
     return Collections.singletonList(new Event("JfrCompilation", attr, timestamp));
   }
 

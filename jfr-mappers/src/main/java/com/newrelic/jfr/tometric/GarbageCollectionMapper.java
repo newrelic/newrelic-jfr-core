@@ -21,7 +21,6 @@ public class GarbageCollectionMapper implements EventToMetric {
   public List<? extends Metric> apply(RecordedEvent ev) {
     long timestamp = ev.getStartTime().toEpochMilli();
     double longestPause = ev.getDouble("longestPause");
-
     Attributes attr =
         new Attributes().put("name", ev.getString("name")).put("cause", ev.getString("cause"));
 

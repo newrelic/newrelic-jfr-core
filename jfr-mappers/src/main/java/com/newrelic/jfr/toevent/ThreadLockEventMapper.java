@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedThread;
 
 public class ThreadLockEventMapper implements EventToEvent {
   public static final String EVENT_NAME = "jdk.JavaMonitorWait"; // jdk.JavaMonitorEnter
@@ -29,10 +30,9 @@ public class ThreadLockEventMapper implements EventToEvent {
       attr.put("thread.name", ev.getThread("eventThread").getJavaName());
       attr.put("class", ev.getClass("monitorClass").getName());
       attr.put("duration", duration.toMillis());
-      if (ev.getStackTrace() != null) {
-        attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
-      }
-
+      RecordedThread eventThread = ev.getThread("eventThread");
+      attr.put("thread.name", eventThread == null ? null : eventThread.getJavaName());
+      attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
       return Collections.singletonList(new Event("JfrJavaMonitorWait", attr, timestamp));
     }
     return Collections.emptyList();

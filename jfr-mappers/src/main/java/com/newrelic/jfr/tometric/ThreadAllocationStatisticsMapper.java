@@ -25,7 +25,8 @@ public class ThreadAllocationStatisticsMapper implements EventToMetric {
     RecordedThread t = ev.getValue("thread");
     Attributes attr = new Attributes();
     if (t != null) {
-      attr.put("thread.name", t.getJavaName()).put("thread.osName", t.getOSName());
+      attr.put("thread.name", t.getJavaName());
+      attr.put("thread.osName", t.getOSName());
     }
 
     return Collections.singletonList(
