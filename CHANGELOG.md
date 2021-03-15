@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Change the default app name to `My Application`. [#125](https://github.com/newrelic/newrelic-jfr-core/pull/125)
 * Address `ConnectIOException` that could cause the JFR daemon to crash. [#127](https://github.com/newrelic/newrelic-jfr-core/pull/127)
 * Add support for APM license keys. [#163](https://github.com/newrelic/newrelic-jfr-core/pull/163)
+* Guard against potential null values from `RecordedEvent`s. [#126](https://github.com/newrelic/newrelic-jfr-core/pull/126)
 
 ## Version 1.0.0 (2020-11-03)
 * **Initial 1.0.0 GA release**
