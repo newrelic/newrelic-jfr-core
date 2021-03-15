@@ -30,9 +30,8 @@ dependencies {
 }
 
 tasks.jar {
-    // Create standard jar for jfr-agent-extension build
-    archiveClassifier.set("std")
-    enabled = true
+// Create shadowJar instead of jar
+    enabled = false
 }
 
 tasks.shadowJar {
@@ -59,6 +58,8 @@ publishing {
             artifactId = "jfr-daemon"
             version = version
             project.shadow.component(this)
+            artifact(tasks.javadocJar)
+            artifact(tasks.sourcesJar)
             pom {
                 name.set(project.name)
                 description.set("JFR Daemon")
