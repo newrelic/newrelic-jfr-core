@@ -16,6 +16,10 @@ public class AgentMain {
   private static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 
   public static void premain(String agentArgs, Instrumentation inst) {
+    agentmain(agentArgs, inst);
+  }
+
+  public static void agentmain(String agentArgs, Instrumentation inst) {
     try {
       Class.forName("jdk.jfr.Recording");
       Class.forName("jdk.jfr.FlightRecorder");
