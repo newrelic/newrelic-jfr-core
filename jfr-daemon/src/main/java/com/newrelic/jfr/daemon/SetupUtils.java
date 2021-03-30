@@ -111,7 +111,7 @@ public class SetupUtils {
     if (config.getEventsUri() != null) {
       eventsConfig = eventsConfig.endpoint(toURL(config.getEventsUri()));
     }
-    if (config.isUseLicenseKey()) {
+    if (config.useLicenseKey()) {
       eventsConfig = eventsConfig.useLicenseKey(true);
     }
     return EventBatchSender.create(eventsConfig.build());
@@ -128,7 +128,7 @@ public class SetupUtils {
     if (config.getMetricsUri() != null) {
       metricConfig = metricConfig.endpoint(toURL(config.getMetricsUri()));
     }
-    if (config.isUseLicenseKey()) {
+    if (config.useLicenseKey()) {
       metricConfig = metricConfig.useLicenseKey(true);
     }
     return MetricBatchSender.create(metricConfig.build());
