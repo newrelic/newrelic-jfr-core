@@ -10,7 +10,6 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-
 import java.net.*;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -74,7 +73,8 @@ public class SetupUtils {
 
   public static DaemonConfig buildDynamicAttachConfig(String agentArgs) {
     String daemonVersion = VersionFinder.getVersion();
-    DaemonConfig.Builder builder = DaemonConfig.builder()
+    DaemonConfig.Builder builder =
+        DaemonConfig.builder()
             .useLicenseKey(true) // dynamic attach only works with license key
             .daemonVersion(daemonVersion);
 
@@ -90,16 +90,16 @@ public class SetupUtils {
       } catch (URISyntaxException urix) {
         throw new RuntimeException("Bad URI in config", urix);
       }
-    } if (args.length == 2) {
+    }
+    if (args.length == 2) {
       builder.apiKey(args[0]);
       builder.monitoredAppName(args[1]);
     } else {
-      throw new RuntimeException("Wrong number of arguments to config: "+ agentArgs);
+      throw new RuntimeException("Wrong number of arguments to config: " + agentArgs);
     }
 
     return builder.build();
   }
-
 
   /**
    * Build a {@link JFRUploader} with the {@code config}.
@@ -168,5 +168,4 @@ public class SetupUtils {
   private static String makeUserAgent(DaemonConfig config) {
     return "JFR-Daemon/" + config.getDaemonVersion();
   }
-
 }
