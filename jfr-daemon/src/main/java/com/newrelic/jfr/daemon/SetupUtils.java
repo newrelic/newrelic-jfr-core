@@ -67,13 +67,9 @@ public class SetupUtils {
     builder.maybeEnv(
         EnvironmentVars.JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
     builder.maybeEnv(
-        EnvironmentVars.JFR_USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
+        EnvironmentVars.USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
 
     builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
-    builder.maybeEnv(
-        EnvironmentVars.USE_LICENSE_KEY,
-        Boolean::parseBoolean,
-        useLicenseKey -> builder.useLicenseKey(useLicenseKey));
 
     return builder.build();
   }
@@ -86,7 +82,7 @@ public class SetupUtils {
    */
   public static JFRUploader buildUploader(DaemonConfig config) {
     TelemetryClient telemetryClient = buildTelemetryClient(config);
-    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
+    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(250_000);
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(telemetryClient, recordedEventBuffer);
   }
