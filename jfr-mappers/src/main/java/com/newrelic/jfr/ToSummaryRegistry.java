@@ -9,14 +9,8 @@ package com.newrelic.jfr;
 
 import static java.util.stream.Collectors.toList;
 
-import com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer;
-import com.newrelic.jfr.tosummary.EventToSummary;
-import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
-import com.newrelic.jfr.tosummary.GCHeapSummarySummarizer;
-import com.newrelic.jfr.tosummary.NetworkReadSummarizer;
-import com.newrelic.jfr.tosummary.NetworkWriteSummarizer;
-import com.newrelic.jfr.tosummary.ObjectAllocationInNewTLABSummarizer;
-import com.newrelic.jfr.tosummary.ObjectAllocationOutsideTLABSummarizer;
+import com.newrelic.jfr.tosummary.*;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +27,10 @@ public class ToSummaryRegistry {
           new NetworkReadSummarizer(),
           new NetworkWriteSummarizer(),
           new ObjectAllocationInNewTLABSummarizer(),
-          new ObjectAllocationOutsideTLABSummarizer());
+          new ObjectAllocationOutsideTLABSummarizer(),
+              ProfileSummarizer.forExecutionSample(),
+              ProfileSummarizer.forNativeMethodSample()
+      );
 
   private final List<EventToSummary> mappers;
 
