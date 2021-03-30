@@ -5,7 +5,9 @@ import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.Collections;
 import java.util.List;
+import jdk.jfr.consumer.RecordedClass;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedThread;
 
 // jdk.SyncOnPrimitiveWrapper {
 //        startTime = 17:16:25.584
@@ -35,12 +37,13 @@ public class ValhallaVBCDetector implements EventToEvent {
   @Override
   public List<Event> apply(RecordedEvent event) {
     long timestamp = event.getStartTime().toEpochMilli();
-
     Attributes attr = new Attributes();
-    attr.put("boxClass", event.getClass("boxClass").getName());
-    attr.put("thread.name", event.getThread("eventThread").getJavaName());
-    attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
+    RecordedThread eventThread = event.getThread("eventThread");
+    RecordedClass boxClass = event.getClass("boxClass");
 
+    attr.put("thread.name", eventThread == null ? null : eventThread.getJavaName());
+    attr.put("boxClass", boxClass == null ? null : boxClass.getName());
+    attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
     return Collections.singletonList(new Event("JfrValhallaVBCSync", attr, timestamp));
   }
 }

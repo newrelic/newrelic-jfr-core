@@ -31,8 +31,10 @@ dependencies {
 
 tasks.jar {
     // Create a standard jar as well as a shadowJar, add a classifier to differentiate
-    enabled = true
-    archiveClassifier.set("regular")
+//    enabled = true
+//    archiveClassifier.set("regular")
+// Create shadowJar instead of jar
+    enabled = false
 }
 
 tasks.shadowJar {
@@ -59,6 +61,8 @@ publishing {
             artifactId = "jfr-daemon"
             version = version
             project.shadow.component(this)
+            artifact(tasks.javadocJar)
+            artifact(tasks.sourcesJar)
             pom {
                 name.set(project.name)
                 description.set("JFR Daemon")

@@ -1,15 +1,23 @@
 import de.undercouch.gradle.tasks.download.Download
 
 plugins {
-    id("org.springframework.boot") version "2.4.1"
+    id("org.springframework.boot") version "2.4.3"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id("de.undercouch.download") version "4.1.1"
 }
 
-java {
-    toolchain {
+// Main source set compiles against java 8
+tasks.withType<JavaCompile>().configureEach {
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    })
+}
+
+// Test source set compiles against java 11
+tasks.named<JavaCompile>("compileTestJava") {
+    javaCompiler.set(javaToolchains.compilerFor {
         languageVersion.set(JavaLanguageVersion.of(11))
-    }
+    })
 }
 
 configurations {

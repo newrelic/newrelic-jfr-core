@@ -104,13 +104,13 @@ public class DaemonConfig {
 
   public static class Builder {
     private boolean auditLogging = DEFAULT_AUDIT_LOGGING;
+    private boolean useLicenseKey = DEFAULT_USE_LICENSE_KEY;
     private String apiKey;
     private URI metricsUri;
     private URI eventsUri;
     private String jmxHost = DEFAULT_JMX_HOST;
     private Integer jmxPort = DEFAULT_JMX_PORT;
     private boolean useSharedFilesystem = DEFAULT_USE_SHARED_FILESYSTEM;
-    private boolean useLicenseKey = DEFAULT_USE_LICENSE_KEY;
     private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
     public String daemonVersion = "UNKNOWN-VERSION";
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;

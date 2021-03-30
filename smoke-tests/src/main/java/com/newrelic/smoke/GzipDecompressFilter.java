@@ -2,6 +2,7 @@ package com.newrelic.smoke;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
@@ -27,24 +28,25 @@ public class GzipDecompressFilter implements Filter {
   public void doFilter(
       ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
       throws IOException, ServletException {
-    var request = (HttpServletRequest) servletRequest;
-    var response = (HttpServletResponse) servletResponse;
-    var isGzipped =
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    HttpServletResponse response = (HttpServletResponse) servletResponse;
+    boolean isGzipped =
         request.getHeader(HttpHeaders.CONTENT_ENCODING) != null
             && request.getHeader(HttpHeaders.CONTENT_ENCODING).contains("gzip");
-    var requestTypeSupported = "POST".equals(request.getMethod());
+    boolean requestTypeSupported = "POST".equals(request.getMethod());
     if (isGzipped && !requestTypeSupported) {
       throw new IllegalStateException(
           request.getMethod()
               + " is not supports gzipped body of parameters."
               + " Only POST requests are currently supported.");
     }
-    var requestURI = request.getRequestURI();
+    String requestURI = request.getRequestURI();
     if (isGzipped) {
       logger.debug("Decompressing gzip POST request to {}", requestURI);
-      var inputStream = request.getInputStream();
-      var gis = new GZIPInputStream(inputStream);
-      var bufferedReader = new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
+      InputStream inputStream = request.getInputStream();
+      GZIPInputStream gis = new GZIPInputStream(inputStream);
+      BufferedReader bufferedReader =
+          new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
       request = new GzipRequestWrapper(request, gis, bufferedReader);
     } else if (requestTypeSupported) {
       logger.debug("POST body to {} does not require gzip decompression.", requestURI);

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedStackTrace;
+import jdk.jfr.consumer.RecordedThread;
 
 // Need to handle both jdk.ExecutionSample and jdk.NativeMethodSample...
 
@@ -57,7 +58,8 @@ public class MethodSampleMapper implements EventToEvent {
 
     long timestamp = ev.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
-    attr.put("thread.name", ev.getThread("sampledThread").getJavaName());
+    RecordedThread sampledThread = ev.getThread("sampledThread");
+    attr.put("thread.name", sampledThread == null ? null : sampledThread.getJavaName());
     attr.put("thread.state", ev.getString("state"));
     attr.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
 

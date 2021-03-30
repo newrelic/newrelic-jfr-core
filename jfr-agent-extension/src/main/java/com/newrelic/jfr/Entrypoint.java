@@ -76,6 +76,7 @@ public class Entrypoint {
 
     JfrRecorderFactory factory = new FileJfrRecorderFactory(Duration.ofSeconds(10));
     JfrController jfrController = new JfrController(factory, uploader, config.getHarvestInterval());
+
     ExecutorService jfrMonitorService = Executors.newSingleThreadExecutor();
     jfrMonitorService.submit(
         () -> {
@@ -83,6 +84,7 @@ public class Entrypoint {
             jfrController.loop();
           } catch (JfrRecorderException e) {
             logger.info("Error in agent, shutting down", e);
+            jfrController.shutdown();
           }
         });
   }
