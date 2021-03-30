@@ -68,7 +68,7 @@ public final class JFRUploader {
 
   private void maybeDrainAndSend() {
     if (eventConverter == null) {
-      logger.warn("Drain attempt skipped because JFRUploader is not yet rady to send.");
+      logger.warn("Drain attempt skipped because JFRUploader is not yet ready to send.");
       return;
     }
     BufferedTelemetry telemetry = eventConverter.convert(eventBuffer);
