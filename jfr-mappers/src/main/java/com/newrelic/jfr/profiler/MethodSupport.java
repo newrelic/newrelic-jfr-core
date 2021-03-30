@@ -5,7 +5,7 @@
  *
  */
 
-package com.newrelic.jfr;
+package com.newrelic.jfr.profiler;
 
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;

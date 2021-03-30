@@ -7,7 +7,7 @@
 
 package com.newrelic.jfr.toevent;
 
-import com.newrelic.jfr.MethodSupport;
+import com.newrelic.jfr.profiler.MethodSupport;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;

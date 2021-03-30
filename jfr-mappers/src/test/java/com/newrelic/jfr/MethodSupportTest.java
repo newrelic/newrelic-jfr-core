@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.newrelic.jfr.profiler.MethodSupport;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
