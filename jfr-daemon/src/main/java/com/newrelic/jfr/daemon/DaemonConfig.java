@@ -36,6 +36,13 @@ public class DaemonConfig {
   private final boolean auditLogging;
   private final boolean useLicenseKey;
 
+  // TODO  The underlying TelemetrySDK needs to be modified to support these proxy settings.
+  private final String proxyHost;
+  private final Integer proxyPort;
+  private final String proxyUser;
+  private final String proxyPassword;
+  private final String proxyScheme;
+
   public DaemonConfig(Builder builder) {
     this.auditLogging = builder.auditLogging;
     this.apiKey = builder.apiKey;
@@ -48,6 +55,11 @@ public class DaemonConfig {
     this.harvestInterval = builder.harvestInterval;
     this.daemonVersion = builder.daemonVersion;
     this.monitoredAppName = builder.monitoredAppName;
+    this.proxyHost = builder.proxyHost;
+    this.proxyPort = builder.proxyPort;
+    this.proxyUser = builder.proxyUser;
+    this.proxyPassword = builder.proxyPassword;
+    this.proxyScheme = builder.proxyScheme;
   }
 
   public boolean auditLogging() {
@@ -98,6 +110,26 @@ public class DaemonConfig {
     return monitoredAppName;
   }
 
+  public String getProxyHost() {
+    return proxyHost;
+  }
+
+  public Integer getProxyPort() {
+    return proxyPort;
+  }
+
+  public String getProxyUser() {
+    return proxyUser;
+  }
+
+  public String getProxyPassword() {
+    return proxyPassword;
+  }
+
+  public String getProxyScheme() {
+    return proxyScheme;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -114,6 +146,11 @@ public class DaemonConfig {
     private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
     public String daemonVersion = "UNKNOWN-VERSION";
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
+    private String proxyHost;
+    private Integer proxyPort;
+    private String proxyUser;
+    private String proxyPassword;
+    private String proxyScheme;
 
     public Builder auditLogging(boolean auditLogging) {
       this.auditLogging = auditLogging;
@@ -167,6 +204,31 @@ public class DaemonConfig {
 
     public Builder monitoredAppName(String monitoredAppName) {
       this.monitoredAppName = monitoredAppName;
+      return this;
+    }
+
+    public Builder proxyHost(String proxyHost) {
+      this.proxyHost = proxyHost;
+      return this;
+    }
+
+    public Builder proxyPort(Integer proxyPort) {
+      this.proxyPort = proxyPort;
+      return this;
+    }
+
+    public Builder proxyUser(String proxyUser) {
+      this.proxyUser = proxyUser;
+      return this;
+    }
+
+    public Builder proxyPassword(String proxyPassword) {
+      this.proxyPassword = proxyPassword;
+      return this;
+    }
+
+    public Builder proxyScheme(String proxyScheme) {
+      this.proxyScheme = proxyScheme;
       return this;
     }
 
@@ -229,6 +291,21 @@ public class DaemonConfig {
         + '\''
         + ", monitoredAppName='"
         + monitoredAppName
+        + '\''
+        + ", proxyHost='"
+        + proxyHost
+        + '\''
+        + ", proxyPort='"
+        + proxyPort
+        + '\''
+        + ", proxyUser='"
+        + proxyUser
+        + '\''
+        + ", proxyPassword='"
+        + proxyPassword
+        + '\''
+        + ", proxyScheme='"
+        + proxyScheme
         + '\''
         + ", auditLogging="
         + auditLogging

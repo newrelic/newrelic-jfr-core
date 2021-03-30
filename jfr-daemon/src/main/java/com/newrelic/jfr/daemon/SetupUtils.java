@@ -2,6 +2,7 @@ package com.newrelic.jfr.daemon;
 
 import static java.util.function.Function.identity;
 
+import com.newrelic.jfr.daemon.agent.FileJfrRecorderFactory;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.EventBatchSenderFactory;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
@@ -67,10 +68,7 @@ public class SetupUtils {
     builder.maybeEnv(
         EnvironmentVars.JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
     builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
-    builder.maybeEnv(
-        EnvironmentVars.USE_LICENSE_KEY,
-        Boolean::parseBoolean,
-        useLicenseKey -> builder.useLicenseKey(useLicenseKey));
+    builder.maybeEnv(EnvironmentVars.USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
 
     return builder.build();
   }
@@ -86,6 +84,23 @@ public class SetupUtils {
     BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(new NewRelicTelemetrySender(telemetryClient), recordedEventBuffer);
+  }
+
+  /**
+   * Build a {@link JfrController} with the {@code config} and {@code uploader}.
+   *
+   * <p>This method is called by the New Relic Java Agent.
+   *
+   * @param config the config
+   * @param uploader the uploader
+   * @return the JfrController
+   */
+  public static JfrController buildJfrController(DaemonConfig config, JFRUploader uploader) {
+    FileJfrRecorderFactory recorderFactory =
+        new FileJfrRecorderFactory(config.getHarvestInterval());
+    final JfrController jfrController =
+        new JfrController(recorderFactory, uploader, config.getHarvestInterval());
+    return jfrController;
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
