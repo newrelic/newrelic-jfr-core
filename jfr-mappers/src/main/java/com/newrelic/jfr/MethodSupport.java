@@ -38,6 +38,10 @@ public final class MethodSupport {
   }
 
   public static String serialize(final RecordedStackTrace trace) {
+    if (trace == null) {
+      return null;
+    }
+
     List<Map<String, String>> payload = new ArrayList<>();
     List<RecordedFrame> frames = trace.getFrames();
     for (RecordedFrame frame : frames) {

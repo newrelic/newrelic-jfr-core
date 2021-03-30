@@ -38,10 +38,11 @@ public class JVMInformationMapper implements EventToEvent {
 
   @Override
   public List<Event> apply(RecordedEvent event) {
+
     long timestamp = event.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
-    attr.put("jvmArguments", event.getString("jvmArguments"));
     attr.put("jvmStartTime", event.getInstant("jvmStartTime").toEpochMilli());
+    attr.put("jvmArguments", event.getString("jvmArguments"));
     attr.put("jvmVersion", event.getString("jvmVersion"));
 
     return Collections.singletonList(new Event("JfrJVMInformation", attr, timestamp));

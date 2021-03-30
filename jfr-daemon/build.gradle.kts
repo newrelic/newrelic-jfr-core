@@ -30,7 +30,7 @@ dependencies {
 }
 
 tasks.jar {
-    // Create shadowJar instead of jar
+// Create shadowJar instead of jar
     enabled = false
 }
 
@@ -58,6 +58,8 @@ publishing {
             artifactId = "jfr-daemon"
             version = version
             project.shadow.component(this)
+            artifact(tasks.javadocJar)
+            artifact(tasks.sourcesJar)
             pom {
                 name.set(project.name)
                 description.set("JFR Daemon")
