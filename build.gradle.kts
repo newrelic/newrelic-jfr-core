@@ -7,7 +7,6 @@ allprojects {
     group = "com.newrelic.telemetry"
     repositories {
         mavenCentral()
-        mavenLocal()
     }
 }
 

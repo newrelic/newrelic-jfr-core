@@ -14,10 +14,8 @@ java {
 
 dependencies {
     api(project(":jfr-daemon"))
-//    implementation(project(":jfr-daemon"))
     implementation("org.slf4j:slf4j-api:${slf4jVersion}");
     implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentVersion}")
-//    implementation("org.conscrypt:conscrypt-openjdk-uber:2.5.1")
 }
 
 tasks.shadowJar {
