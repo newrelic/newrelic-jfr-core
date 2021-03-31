@@ -65,7 +65,7 @@ public class StatsMaker implements TelemetrySender {
     System.out.println("Total metrics data (MB): " + metricSize);
 
     double eventSize = (double) eventJson.length() / (1024 * 1024);
-    System.out.println("Total metrics data (MB): " + eventSize);
+    System.out.println("Total events data (MB): " + eventSize);
   }
 
   @Override
