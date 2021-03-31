@@ -23,11 +23,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This code is based upon a version of the JsonOutputWriter found at
+ * Some code originally based upon a version of the JsonOutputWriter found at
  * https://github.com/chrishantha/jfr-flame-graph - it creates JSON output to be used with
  * d3-flame-graph. https://github.com/spiermar/d3-flame-graph
- *
- * <p>It is similar to https://github.com/spiermar/node-stack-convert
  */
 public class FlamegraphMarshaller {
 

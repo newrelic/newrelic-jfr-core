@@ -1,10 +1,9 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.profiler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.newrelic.jfr.profiler.MethodSupport;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;

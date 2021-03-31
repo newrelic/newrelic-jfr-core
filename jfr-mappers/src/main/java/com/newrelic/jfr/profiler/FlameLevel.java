@@ -1,6 +1,8 @@
 package com.newrelic.jfr.profiler;
 
-public class FlameLevel {
+import java.util.Objects;
+
+public final class FlameLevel {
   private final String name;
   private final Integer count;
   private final String parentId;
@@ -27,5 +29,38 @@ public class FlameLevel {
 
   public String getId() {
     return id;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    FlameLevel that = (FlameLevel) o;
+    return Objects.equals(name, that.name)
+        && Objects.equals(count, that.count)
+        && Objects.equals(parentId, that.parentId)
+        && Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, count, parentId, id);
+  }
+
+  @Override
+  public String toString() {
+    return "FlameLevel{"
+        + "name='"
+        + name
+        + '\''
+        + ", count="
+        + count
+        + ", parentId='"
+        + parentId
+        + '\''
+        + ", id='"
+        + id
+        + '\''
+        + '}';
   }
 }
