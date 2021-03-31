@@ -7,7 +7,6 @@
 
 package com.newrelic.jfr.daemon;
 
-import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatch;
 import com.newrelic.telemetry.metrics.MetricBatch;
 import java.io.IOException;
@@ -20,11 +19,11 @@ import org.slf4j.LoggerFactory;
 public final class JFRUploader {
   private static final Logger logger = LoggerFactory.getLogger(JFRUploader.class);
 
-  private final TelemetryClient telemetryClient;
+  private final TelemetrySender telemetryClient;
   private final RecordedEventBuffer eventBuffer;
   private volatile EventConverter eventConverter;
 
-  public JFRUploader(TelemetryClient telemetryClient, RecordedEventBuffer eventBuffer) {
+  public JFRUploader(TelemetrySender telemetryClient, RecordedEventBuffer eventBuffer) {
     this.telemetryClient = telemetryClient;
     this.eventBuffer = eventBuffer;
   }
