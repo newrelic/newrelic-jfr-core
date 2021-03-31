@@ -53,6 +53,7 @@ tasks.register<Copy>("copySources") {
     description = "Copies sources from other subprojects"
     into(".generated-src")
     from("../jfr-daemon/src/main/java") {
+        exclude ("**org**")
         into("java")
     }
     from("../jfr-daemon/src/main/resources") {

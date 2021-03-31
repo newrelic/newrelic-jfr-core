@@ -68,7 +68,8 @@ public class SetupUtils {
     builder.maybeEnv(
         EnvironmentVars.JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
     builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
-    builder.maybeEnv(EnvironmentVars.USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
+    builder.maybeEnv(
+        EnvironmentVars.USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
 
     return builder.build();
   }
