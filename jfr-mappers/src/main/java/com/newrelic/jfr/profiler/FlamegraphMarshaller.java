@@ -14,11 +14,13 @@
 
 package com.newrelic.jfr.profiler;
 
-import com.google.gson.Gson;
+import static java.util.Collections.emptyList;
 
+import com.google.gson.Gson;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This code is based upon a version of the JsonOutputWriter found at
@@ -39,7 +41,7 @@ public class FlamegraphMarshaller {
     private String name;
     private Integer value = 0;
     private List<StackFrame> children = null;
-    private transient Map<String, StackFrame> childrenMap = new HashMap<>();
+    private Map<String, StackFrame> childrenMap = new HashMap<>();
 
     public StackFrame(String name) {
       this.name = name;
@@ -75,6 +77,33 @@ public class FlamegraphMarshaller {
       Gson gson = new Gson();
       return gson.toJson(this);
     }
+  }
+
+  public List<FlameLevel> flatten(FlamegraphMarshaller.StackFrame root) {
+    return addChildren(root, null, new AtomicInteger(0));
+  }
+
+  private List<FlameLevel> addChildren(
+      FlamegraphMarshaller.StackFrame current, FlameLevel parent, AtomicInteger idGenerator) {
+    if (current == null) {
+      return emptyList();
+    }
+
+    String parentId = parent == null ? null : parent.getId();
+    String id = String.valueOf(idGenerator.incrementAndGet());
+    FlameLevel currentNewFlameLevel =
+        new FlameLevel(current.getName(), current.getValue(), parentId, id);
+    List<FlameLevel> flattenedResult = new LinkedList<>();
+    flattenedResult.add(currentNewFlameLevel);
+
+    if (current.getChildren() == null) {
+      return flattenedResult;
+    }
+
+    for (FlamegraphMarshaller.StackFrame child : current.getChildren()) {
+      flattenedResult.addAll(addChildren(child, currentNewFlameLevel, idGenerator));
+    }
+    return flattenedResult;
   }
 
   public void processEvent(Stack<String> stack, Integer size) {

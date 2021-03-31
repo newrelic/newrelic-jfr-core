@@ -10,7 +10,6 @@ package com.newrelic.jfr;
 import static java.util.stream.Collectors.toList;
 
 import com.newrelic.jfr.tosummary.*;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -27,10 +26,7 @@ public class ToSummaryRegistry {
           new NetworkReadSummarizer(),
           new NetworkWriteSummarizer(),
           new ObjectAllocationInNewTLABSummarizer(),
-          new ObjectAllocationOutsideTLABSummarizer(),
-              ProfileSummarizer.forExecutionSample(),
-              ProfileSummarizer.forNativeMethodSample()
-      );
+          new ObjectAllocationOutsideTLABSummarizer());
 
   private final List<EventToSummary> mappers;
 
