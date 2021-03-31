@@ -42,10 +42,11 @@ public class StatsMaker implements TelemetrySender {
   }
 
   static Path getPathToTmpFile(final String jfrName) throws IOException {
-    Path agentFile = Files.createTempFile("jfr-tmp", ".jfr");
+    Path dir = Files.createTempDirectory("nr-jfr");
+    Path file = Files.createTempFile(dir, "stream-" + System.currentTimeMillis(), null);
     byte[] jfrBytes = Files.readAllBytes(Paths.get(jfrName));
-    Files.write(agentFile, jfrBytes);
-    return agentFile;
+    Files.write(file, jfrBytes);
+    return file;
   }
 
 
@@ -63,7 +64,7 @@ public class StatsMaker implements TelemetrySender {
     double metricSize = (double) metricJson.length() / (1024 * 1024);
     System.out.println("Total metrics data (MB): " + metricSize);
 
-    double eventSize = (double) metricJson.length() / (1024 * 1024);
+    double eventSize = (double) eventJson.length() / (1024 * 1024);
     System.out.println("Total metrics data (MB): " + eventSize);
   }
 
