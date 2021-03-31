@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import jdk.jfr.consumer.RecordedEvent;
@@ -57,15 +58,22 @@ public class StatsMaker implements TelemetrySender {
     uploader.readyToSend(new EventConverter(SetupUtils.buildCommonAttributes()));
 
     uploader.handleFile(fileName);
-    outputStats();
-  }
+    long lengthMillis = Duration.between(uploader.fileStart(), uploader.fileEnd()).toMillis();
+    double lengthHours = (double) lengthMillis / 3600_000;
+    System.out.println();
+    System.out.println("Duration (hrs): " + lengthHours);
+    System.out.println();
 
-  private void outputStats() {
     double metricSize = (double) metricJson.length() / (1024 * 1024);
     System.out.println("Total metrics data (MB): " + metricSize);
+    System.out.println("Hourly metrics data (MB): " + metricSize / lengthHours);
+    System.out.println("Monthly metrics data (GB): " + 30 * 24 * metricSize / (lengthHours * 1024));
+    System.out.println();
 
     double eventSize = (double) eventJson.length() / (1024 * 1024);
     System.out.println("Total events data (MB): " + eventSize);
+    System.out.println("Hourly events data (MB): " + eventSize / lengthHours);
+    System.out.println("Monthly events data (GB): " + 30 * 24 * eventSize / (lengthHours * 1024));
   }
 
   @Override

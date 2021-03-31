@@ -12,6 +12,7 @@ import com.newrelic.telemetry.metrics.MetricBatch;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,5 +108,13 @@ public final class JFRUploader {
       // throw an exception on the executor thread
       throw new RuntimeException(e);
     }
+  }
+
+  public Instant fileStart() {
+    return eventBuffer.start();
+  }
+
+  public Instant fileEnd() {
+    return eventBuffer.end();
   }
 }
