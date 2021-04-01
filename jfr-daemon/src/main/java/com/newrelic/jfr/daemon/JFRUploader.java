@@ -12,6 +12,7 @@ import com.newrelic.telemetry.metrics.MetricBatch;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,18 +20,18 @@ import org.slf4j.LoggerFactory;
 public final class JFRUploader {
   private static final Logger logger = LoggerFactory.getLogger(JFRUploader.class);
 
-  private final TelemetrySender telemetryClient;
+  private final TelemetrySender telemetrySender;
   private final RecordedEventBuffer eventBuffer;
   private volatile EventConverter eventConverter;
 
-  public JFRUploader(TelemetrySender telemetryClient, RecordedEventBuffer eventBuffer) {
-    this.telemetryClient = telemetryClient;
+  public JFRUploader(TelemetrySender telemetrySender, RecordedEventBuffer eventBuffer) {
+    this.telemetrySender = telemetrySender;
     this.eventBuffer = eventBuffer;
   }
 
   /**
    * Handle the JFR {@code dumpFile}. Buffer new events, then convert them and them to New Relic via
-   * {@link #telemetryClient}. Finally, delete the file and its parent directory.
+   * {@link #telemetrySender}. Finally, delete the file and its parent directory.
    *
    * @param dumpFile the JFR file
    */
@@ -79,7 +80,7 @@ public final class JFRUploader {
     MetricBatch metricBatch = bufferedMetrics.createMetricBatch();
     if (!metricBatch.isEmpty()) {
       logger.info(String.format("Sending metric batch of size %s", metricBatch.size()));
-      telemetryClient.sendBatch(metricBatch);
+      telemetrySender.sendBatch(metricBatch);
     }
   }
 
@@ -87,7 +88,7 @@ public final class JFRUploader {
     EventBatch eventBatch = bufferedMetrics.createEventBatch();
     if (!eventBatch.isEmpty()) {
       logger.info(String.format("Sending events batch of size %s", eventBatch.size()));
-      telemetryClient.sendBatch(eventBatch);
+      telemetrySender.sendBatch(eventBatch);
     }
   }
 
@@ -107,5 +108,13 @@ public final class JFRUploader {
       // throw an exception on the executor thread
       throw new RuntimeException(e);
     }
+  }
+
+  public Instant fileStart() {
+    return eventBuffer.start();
+  }
+
+  public Instant fileEnd() {
+    return eventBuffer.end();
   }
 }
