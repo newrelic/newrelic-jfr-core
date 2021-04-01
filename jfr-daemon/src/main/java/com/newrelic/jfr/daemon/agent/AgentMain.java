@@ -1,5 +1,7 @@
 package com.newrelic.jfr.daemon.agent;
 
+import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
+
 import com.newrelic.jfr.daemon.DaemonConfig;
 import com.newrelic.jfr.daemon.EventConverter;
 import com.newrelic.jfr.daemon.JFRUploader;
@@ -35,6 +37,12 @@ public class AgentMain {
   private void start() {
     DaemonConfig config = SetupUtils.buildConfig();
     Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+    // When running as a standalone agent, jfr needs to set service name because it can't obtain an
+    // entity guid.
+    // Without the service name, ingest will not tag data with an entity guid and it will be
+    // difficult to query.
+    commonAttrs.put(SERVICE_NAME, config.getMonitoredAppName());
+
     JFRUploader uploader = SetupUtils.buildUploader(config);
     uploader.readyToSend(new EventConverter(commonAttrs));
     FileJfrRecorderFactory recorderFactory =
