@@ -85,7 +85,7 @@ public class SetupUtils {
     TelemetryClient telemetryClient = buildTelemetryClient(config);
     BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
-    return new JFRUploader(telemetryClient, recordedEventBuffer);
+    return new JFRUploader(new NewRelicTelemetrySender(telemetryClient), recordedEventBuffer);
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {

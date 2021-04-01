@@ -23,6 +23,7 @@ tasks.shadowJar {
     manifest {
         attributes(
                 "Premain-Class" to "com.newrelic.jfr.Entrypoint",
+                "Main-Class" to "com.newrelic.jfr.StatsMaker",
                 "Implementation-Version" to project.version,
                 "Implementation-Vendor" to "New Relic, Inc."
         )
