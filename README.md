@@ -121,11 +121,26 @@ default behavior, the following environment variables are recognized:
 | `METRICS_INGEST_URI`    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1)          | Where to send metric data
 | `EVENTS_INGEST_URI`     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events), [EU production](https://insights-collector.eu01.nr-data.net/v1/accounts/events) | Where to send event data
 | `JFR_SHARED_FILESYSTEM` |     N     |  `false`              | Use a shared filesystem instead of streaming data from JMX
-| `AUDIT_LOGGING`         |     N     |  `false`              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK
+| `AUDIT_LOGGING`         |     N     |  `false`              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK - only if Slf4j log level is also set to `debug`.
 
 ##### Logging
 
-The JFR daemon logs with the Slf4j-Simple implementation at the default `Info` level. For audit logging from the underlying Telemetry SDK, set the log level to `Debug` and enable audit logging via environment variable as described above.
+The JFR daemon and the underlying Telemetry SDK logs with the Slf4j-Simple implementation at the default `Info` level. To increase the logging level, you can configure Slf4j with system properties or a simplelogger.properties file. For example, set this on the command line to log at the debug level.
+
+`-Dorg.slf4j.simpleLogger.defaultLogLevel=debug`
+
+Here is a sample of debug level logs.
+
+```java
+[JfrController] DEBUG com.newrelic.telemetry.metrics.MetricBuffer - Creating metric batch.
+[JfrController] INFO com.newrelic.jfr.daemon.JFRUploader - Sending metric batch of size 61
+[JfrController] DEBUG com.newrelic.telemetry.events.EventBuffer - Creating Event batch.
+[Thread-0] DEBUG com.newrelic.telemetry.metrics.MetricBatchSender - Sending a metric batch (number of metrics: 61) to the New Relic metric ingest endpoint)
+[Thread-0] DEBUG com.newrelic.telemetry.metrics.json.MetricBatchMarshaller - Generating json for metric batch.
+[JfrController] INFO com.newrelic.jfr.daemon.JFRUploader - Sending events batch of size 25
+```
+
+For audit logging from the underlying Telemetry SDK, you'll need Slf4j to be set at `debug` level and enable audit logging via environment variable as described above. 
 
 ##### Proxy
 
