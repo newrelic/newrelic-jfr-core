@@ -51,11 +51,12 @@ jlink {
 tasks.register<Copy>("copySources") {
     group = "Build"
     description = "Copies sources from other subprojects"
+    includeEmptyDirs = false
     into(".generated-src")
     from("../jfr-daemon/src/main/java") {
         //jlink binary will not need customized logging of slf4j. By excluding, it prevents a
         //split package issue in the binary
-        exclude ("**org**")
+        exclude ("org/slf4j/impl**")
         into("java")
     }
     from("../jfr-daemon/src/main/resources") {
