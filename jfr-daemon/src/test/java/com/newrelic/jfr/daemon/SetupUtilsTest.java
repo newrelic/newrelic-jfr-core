@@ -15,12 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class SetupUtilsTest {
 
   @Test
   void buildCommonAttributes() {
-    var attributesMap = SetupUtils.buildCommonAttributes().asMap();
+    var mockConfig = Mockito.mock(DaemonConfig.class);
+    var attributesMap = SetupUtils.buildCommonAttributes(mockConfig).asMap();
     assertEquals("JFR", attributesMap.get(INSTRUMENTATION_NAME));
     assertEquals("JFR-Uploader", attributesMap.get(INSTRUMENTATION_PROVIDER));
     assertEquals("JFR-Uploader", attributesMap.get(COLLECTOR_NAME));

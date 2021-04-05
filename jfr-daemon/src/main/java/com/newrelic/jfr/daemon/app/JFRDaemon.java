@@ -7,9 +7,7 @@
 
 package com.newrelic.jfr.daemon.app;
 
-import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
 import static com.newrelic.jfr.daemon.AttributeNames.ENTITY_GUID;
-import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
 import static com.newrelic.jfr.daemon.app.MBeanConnectionFactory.waitForeverBackoff;
 
 import com.newrelic.jfr.daemon.DaemonConfig;
@@ -29,7 +27,7 @@ public class JFRDaemon {
     DaemonConfig config = SetupUtils.buildConfig();
     MBeanConnectionFactory connectionFactory =
         new MBeanConnectionFactory(config.getJmxHost(), config.getJmxPort());
-    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes(config);
     JFRUploader uploader = SetupUtils.buildUploader(config);
     JmxJfrRecorderFactory recorderFactory = new JmxJfrRecorderFactory(config, connectionFactory);
     JfrController controller =
@@ -49,8 +47,8 @@ public class JFRDaemon {
                 if (optGuid.isPresent()) {
                   commonAttrs.put(ENTITY_GUID, optGuid.get());
                 } else {
-                  commonAttrs.put(APP_NAME, config.getMonitoredAppName());
-                  commonAttrs.put(SERVICE_NAME, config.getMonitoredAppName());
+                  //                  commonAttrs.put(APP_NAME, config.getMonitoredAppName());
+                  //                  commonAttrs.put(SERVICE_NAME, config.getMonitoredAppName());
                 }
                 uploader.readyToSend(new EventConverter(commonAttrs));
               });

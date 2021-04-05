@@ -30,8 +30,9 @@ public class SetupUtils {
    * Build a base set of common attributes.
    *
    * @return the attributes
+   * @param config
    */
-  public static Attributes buildCommonAttributes() {
+  public static Attributes buildCommonAttributes(DaemonConfig config) {
     Attributes attributes =
         new com.newrelic.telemetry.Attributes()
             .put(AttributeNames.INSTRUMENTATION_NAME, "JFR")
@@ -44,6 +45,8 @@ public class SetupUtils {
       hostname = InetAddress.getLoopbackAddress().toString();
     }
     attributes.put(AttributeNames.HOSTNAME, hostname);
+    attributes.put(AttributeNames.APP_NAME, config.getMonitoredAppName());
+    attributes.put(AttributeNames.SERVICE_NAME, config.getMonitoredAppName());
     return attributes;
   }
 
