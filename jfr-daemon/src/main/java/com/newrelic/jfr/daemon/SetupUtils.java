@@ -99,9 +99,7 @@ public class SetupUtils {
   public static JfrController buildJfrController(DaemonConfig config, JFRUploader uploader) {
     FileJfrRecorderFactory recorderFactory =
         new FileJfrRecorderFactory(config.getHarvestInterval());
-    final JfrController jfrController =
-        new JfrController(recorderFactory, uploader, config.getHarvestInterval());
-    return jfrController;
+    return new JfrController(recorderFactory, uploader, config.getHarvestInterval());
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
