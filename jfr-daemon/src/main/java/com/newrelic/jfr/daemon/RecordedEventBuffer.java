@@ -87,6 +87,14 @@ public class RecordedEventBuffer {
     return list.stream();
   }
 
+  public Instant start() {
+    return ctx.getFirstEventTime();
+  }
+
+  public Instant end() {
+    return ctx.getLastEventTime();
+  }
+
   static class RawProcessingContext {
     private Instant firstEventTime = null;
     private Instant lastEventTime = null;
