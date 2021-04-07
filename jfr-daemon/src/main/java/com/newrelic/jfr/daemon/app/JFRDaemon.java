@@ -7,7 +7,9 @@
 
 package com.newrelic.jfr.daemon.app;
 
+import static com.newrelic.jfr.daemon.AttributeNames.APP_NAME;
 import static com.newrelic.jfr.daemon.AttributeNames.ENTITY_GUID;
+import static com.newrelic.jfr.daemon.AttributeNames.SERVICE_NAME;
 import static com.newrelic.jfr.daemon.app.MBeanConnectionFactory.waitForeverBackoff;
 
 import com.newrelic.jfr.daemon.DaemonConfig;
@@ -16,6 +18,7 @@ import com.newrelic.jfr.daemon.JFRUploader;
 import com.newrelic.jfr.daemon.JfrController;
 import com.newrelic.jfr.daemon.SetupUtils;
 import com.newrelic.telemetry.Attributes;
+import java.util.Optional;
 import javax.management.MBeanServerConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,18 +40,24 @@ public class JFRDaemon {
       // Await initial connection to remote MBean Server.
       MBeanServerConnection connection = connectionFactory.awaitConnection(waitForeverBackoff());
 
+      final RemoteEntityBridge remoteEntityBridge = new RemoteEntityBridge();
+
       // Asynchronously fetch the remote entity id, and upon completion, mark the uploader as
       // readyToSend. This allows the JFR data to start being recorded while awaiting the
       // entity id to become available.
-      new RemoteEntityBridge()
+      remoteEntityBridge
           .fetchRemoteEntityIdAsync(connection)
           .thenAccept(
               optGuid -> {
-                if (optGuid.isPresent()) {
-                  commonAttrs.put(ENTITY_GUID, optGuid.get());
-                } else {
-                  //                  commonAttrs.put(APP_NAME, config.getMonitoredAppName());
-                  //                  commonAttrs.put(SERVICE_NAME, config.getMonitoredAppName());
+                optGuid.ifPresent(s -> commonAttrs.put(ENTITY_GUID, s));
+                // Asynchronously fetch the remote entity name and override the local config.
+                // The entity name should always be available once the entity guid is.
+                final Optional<String> remoteAppNameOptional =
+                    remoteEntityBridge.getRemoteEntityName(connection);
+                if (remoteAppNameOptional.isPresent()) {
+                  final String remoteAppName = remoteAppNameOptional.get();
+                  commonAttrs.put(SERVICE_NAME, remoteAppName);
+                  commonAttrs.put(APP_NAME, remoteAppName);
                 }
                 uploader.readyToSend(new EventConverter(commonAttrs));
               });

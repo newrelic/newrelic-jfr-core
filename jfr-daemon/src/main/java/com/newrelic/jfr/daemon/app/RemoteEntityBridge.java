@@ -76,11 +76,30 @@ public class RemoteEntityBridge {
 
   Optional<String> getRemoteEntityGuid(MBeanServerConnection connection)
       throws MalformedObjectNameException {
+    final Map<String, String> metadata = getLinkingMetadata(connection);
+    return Optional.ofNullable(metadata.get(AttributeNames.ENTITY_GUID));
+  }
+
+  Optional<String> getRemoteEntityName(MBeanServerConnection connection) {
+    final Map<String, String> metadata;
+    try {
+      metadata = getLinkingMetadata(connection);
+    } catch (Exception e) {
+      logger.info("Unable to identify remote agent. Not setting entity name from agent.");
+      return Optional.empty();
+    }
+    final Optional<String> entityNameOptional =
+        Optional.ofNullable(metadata.get(AttributeNames.ENTITY_NAME));
+    entityNameOptional.ifPresent(s -> logger.info("Obtained entity name from remote agent: {}", s));
+    return entityNameOptional;
+  }
+
+  Map<String, String> getLinkingMetadata(MBeanServerConnection connection)
+      throws MalformedObjectNameException {
     ObjectName name = new ObjectName("com.newrelic.jfr:type=LinkingMetadata");
     LinkingMetadataMBean linkingMetadataMBean =
         JMX.newMBeanProxy(connection, name, LinkingMetadataMBean.class);
-    Map<String, String> metadata = linkingMetadataMBean.readLinkingMetadata();
-    return Optional.ofNullable(metadata.get(AttributeNames.ENTITY_GUID));
+    return linkingMetadataMBean.readLinkingMetadata();
   }
 
   // NOTE: this must be public or NotCompliantMBeanException will be thrown
