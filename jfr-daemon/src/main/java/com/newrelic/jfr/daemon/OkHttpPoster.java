@@ -20,12 +20,14 @@ public class OkHttpPoster implements HttpPoster {
 
   public OkHttpPoster(Proxy proxy, Authenticator proxyAuthenticator, Duration callTimeout) {
     final OkHttpClient.Builder builder = new OkHttpClient.Builder().callTimeout(callTimeout);
+
     if (proxy != null) {
       builder.proxy(proxy);
+      if (proxyAuthenticator != null) {
+        builder.authenticator(proxyAuthenticator);
+      }
     }
-    if (proxyAuthenticator != null) {
-      builder.authenticator(proxyAuthenticator);
-    }
+
     // FIXME required for HTTPS proxies? see https://github.com/square/okhttp/issues/6561
     //    builder.socketFactory(new DelegatingSocketFactory(SSLSocketFactory.getDefault()));
 
