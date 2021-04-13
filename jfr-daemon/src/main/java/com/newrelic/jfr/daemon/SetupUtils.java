@@ -12,7 +12,9 @@ import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
@@ -21,8 +23,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SetupUtils {
+  private static final Logger logger = LoggerFactory.getLogger(SetupUtils.class);
 
   private SetupUtils() {}
 
@@ -30,7 +37,7 @@ public class SetupUtils {
    * Build a base set of common attributes.
    *
    * @return the attributes
-   * @param config
+   * @param config the daemon config
    */
   public static Attributes buildCommonAttributes(DaemonConfig config) {
     Attributes attributes =
@@ -73,7 +80,11 @@ public class SetupUtils {
     builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
     builder.maybeEnv(
         EnvironmentVars.USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
-
+    builder.maybeEnv(EnvironmentVars.PROXY_HOST, identity(), builder::proxyHost);
+    builder.maybeEnv(EnvironmentVars.PROXY_PORT, Integer::parseInt, builder::proxyPort);
+    builder.maybeEnv(EnvironmentVars.PROXY_USER, identity(), builder::proxyUser);
+    builder.maybeEnv(EnvironmentVars.PROXY_PASSWORD, identity(), builder::proxyPassword);
+    builder.maybeEnv(EnvironmentVars.PROXY_SCHEME, identity(), builder::proxyScheme);
     return builder.build();
   }
 
@@ -85,7 +96,7 @@ public class SetupUtils {
    */
   public static JFRUploader buildUploader(DaemonConfig config) {
     TelemetryClient telemetryClient = buildTelemetryClient(config);
-    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<RecordedEvent>(250_000);
+    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(250_000);
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(new NewRelicTelemetrySender(telemetryClient), recordedEventBuffer);
   }
@@ -107,7 +118,11 @@ public class SetupUtils {
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
     Supplier<HttpPoster> httpPosterCreator =
-        () -> new OkHttpPoster(Duration.of(10, ChronoUnit.SECONDS));
+        () ->
+            new OkHttpPoster(
+                buildProxy(config),
+                buildProxyAuthenticator(config),
+                Duration.of(10, ChronoUnit.SECONDS));
     MetricBatchSender metricBatchSender = buildMetricBatchSender(config, httpPosterCreator);
     EventBatchSender eventBatchSender = buildEventBatchSender(config, httpPosterCreator);
     return new TelemetryClient(metricBatchSender, null, eventBatchSender, null);
@@ -155,5 +170,47 @@ public class SetupUtils {
 
   private static String makeUserAgent(DaemonConfig config) {
     return "JFR-Daemon/" + config.getDaemonVersion();
+  }
+
+  private static Proxy buildProxy(DaemonConfig config) {
+    final String proxyHost = config.getProxyHost();
+    final Integer proxyPort = config.getProxyPort();
+    final String proxyScheme = config.getProxyScheme();
+
+    if (proxyHost == null || proxyPort == null || proxyScheme == null) {
+      return null;
+    }
+
+    if (proxyScheme.equalsIgnoreCase("https")) {
+      // TODO See FIXME in OkHttpPoster
+      logger.error("HTTPS proxy is not currently supported.");
+      return null;
+    }
+
+    logger.info(
+        "JFR HttpPoster configured to use "
+            + proxyScheme
+            + " proxy: "
+            + proxyHost
+            + ":"
+            + proxyPort);
+    return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+  }
+
+  private static Authenticator buildProxyAuthenticator(DaemonConfig config) {
+    final String proxyUser = config.getProxyUser();
+    final String proxyPassword = config.getProxyPassword();
+
+    if (proxyUser == null || proxyPassword == null) {
+      return null;
+    }
+
+    logger.info("JFR HttpPoster configured with proxy user and proxy password.");
+    return (route, response) ->
+        response
+            .request()
+            .newBuilder()
+            .header("Proxy-Authorization", Credentials.basic(proxyUser, proxyPassword))
+            .build();
   }
 }

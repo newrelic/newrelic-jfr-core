@@ -17,12 +17,18 @@ public class DaemonConfig {
 
   static final int DEFAULT_JMX_PORT = 1099;
 
+  private static final String DEFAULT_DAEMON_VERSION = "UNKNOWN-VERSION";
   private static final String DEFAULT_JMX_HOST = "localhost";
   private static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
   private static final boolean DEFAULT_AUDIT_LOGGING = false;
   private static final boolean DEFAULT_USE_LICENSE_KEY = false;
   private static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
   private static final String DEFAULT_MONITORED_APP_NAME = "My Application";
+  private static final String DEFAULT_PROXY_HOST = null;
+  private static final Integer DEFAULT_PROXY_PORT = null;
+  private static final String DEFAULT_PROXY_SCHEME = null;
+  private static final String DEFAULT_PROXY_USER = null;
+  private static final String DEFAULT_PROXY_PASSWORD = null;
 
   private final String apiKey;
   private final URI metricsUri;
@@ -35,8 +41,6 @@ public class DaemonConfig {
   private final String monitoredAppName;
   private final boolean auditLogging;
   private final boolean useLicenseKey;
-
-  // TODO  The underlying TelemetrySDK needs to be modified to support these proxy settings.
   private final String proxyHost;
   private final Integer proxyPort;
   private final String proxyUser;
@@ -144,13 +148,13 @@ public class DaemonConfig {
     private Integer jmxPort = DEFAULT_JMX_PORT;
     private boolean useSharedFilesystem = DEFAULT_USE_SHARED_FILESYSTEM;
     private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
-    public String daemonVersion = "UNKNOWN-VERSION";
+    public String daemonVersion = DEFAULT_DAEMON_VERSION;
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
-    private String proxyHost;
-    private Integer proxyPort;
-    private String proxyUser;
-    private String proxyPassword;
-    private String proxyScheme;
+    private String proxyHost = DEFAULT_PROXY_HOST;
+    private Integer proxyPort = DEFAULT_PROXY_PORT;
+    private String proxyUser = DEFAULT_PROXY_USER;
+    private String proxyPassword = DEFAULT_PROXY_PASSWORD;
+    private String proxyScheme = DEFAULT_PROXY_SCHEME;
 
     public Builder auditLogging(boolean auditLogging) {
       this.auditLogging = auditLogging;
