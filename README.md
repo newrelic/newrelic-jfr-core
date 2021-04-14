@@ -130,7 +130,22 @@ default behavior, the following environment variables are recognized:
 
 ##### Logging
 
-The JFR daemon logs with the Slf4j-Simple implementation at the default `Info` level. For audit logging from the underlying Telemetry SDK, set the log level to `Debug` and enable audit logging via environment variable as described above.
+The JFR daemon and the underlying Telemetry SDK logs with the Slf4j-Simple implementation at the default `Info` level. To increase the logging level, you can configure Slf4j with system properties or a simplelogger.properties file. For example, set this on the command line to log at the debug level.
+
+`-Dorg.slf4j.simpleLogger.defaultLogLevel=debug`
+
+Here is a sample of debug level logs.
+
+```java
+[JfrController] DEBUG com.newrelic.telemetry.metrics.MetricBuffer - Creating metric batch.
+[JfrController] INFO com.newrelic.jfr.daemon.JFRUploader - Sending metric batch of size 61
+[JfrController] DEBUG com.newrelic.telemetry.events.EventBuffer - Creating Event batch.
+[Thread-0] DEBUG com.newrelic.telemetry.metrics.MetricBatchSender - Sending a metric batch (number of metrics: 61) to the New Relic metric ingest endpoint)
+[Thread-0] DEBUG com.newrelic.telemetry.metrics.json.MetricBatchMarshaller - Generating json for metric batch.
+[JfrController] INFO com.newrelic.jfr.daemon.JFRUploader - Sending events batch of size 25
+```
+
+For audit logging from the underlying Telemetry SDK, you'll need Slf4j to be set at `debug` level and enable audit logging via environment variable as described above. 
 
 #### Target application configuration
 
@@ -166,7 +181,7 @@ For more information, review [New Relic’s General Data Privacy Notice](https:/
 
 ## Contribute
 
-We encourage your contributions to improve [project name]! Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
+We encourage your contributions to improve `newrelic-jfr-core`! Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. You only have to sign the CLA one time per project.
 
 If you have any questions, or to execute our corporate CLA (which is required if your contribution is on behalf of a company), drop us an email at opensource@newrelic.com.
 
