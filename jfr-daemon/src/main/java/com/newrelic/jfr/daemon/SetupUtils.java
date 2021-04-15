@@ -173,9 +173,9 @@ public class SetupUtils {
   }
 
   private static Proxy buildProxy(DaemonConfig config) {
-    final String proxyHost = config.getProxyHost();
-    final Integer proxyPort = config.getProxyPort();
-    final String proxyScheme = config.getProxyScheme();
+    String proxyHost = config.getProxyHost();
+    Integer proxyPort = config.getProxyPort();
+    String proxyScheme = config.getProxyScheme();
 
     if (proxyHost == null || proxyPort == null || proxyScheme == null) {
       return null;
@@ -198,8 +198,8 @@ public class SetupUtils {
   }
 
   private static Authenticator buildProxyAuthenticator(DaemonConfig config) {
-    final String proxyUser = config.getProxyUser();
-    final String proxyPassword = config.getProxyPassword();
+    String proxyUser = config.getProxyUser();
+    String proxyPassword = config.getProxyPassword();
 
     if (proxyUser == null || proxyPassword == null) {
       return null;

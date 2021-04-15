@@ -84,14 +84,14 @@ public class RemoteEntityBridgeTest {
   @Test
   void getRemoteEntityName() {
     doReturn(Optional.of("name")).when(target).getRemoteEntityName(eq(connection));
-    final var remoteEntityName = target.getRemoteEntityName(connection);
+    var remoteEntityName = target.getRemoteEntityName(connection);
     assertTrue(remoteEntityName.isPresent());
     assertEquals(Optional.of("name"), remoteEntityName);
   }
 
   @Test
   void getLinkingMetadata() throws MalformedObjectNameException {
-    final Map<String, String> expected = new HashMap<>();
+    Map<String, String> expected = new HashMap<>();
     expected.put("trace.id", "1234");
     expected.put("span.id", "foo");
     expected.put("hostname", "C012345G5J/192.168.1.17");
@@ -100,7 +100,7 @@ public class RemoteEntityBridgeTest {
     expected.put("entity.guid", "5678");
 
     doReturn(expected).when(target).getLinkingMetadata(eq(connection));
-    final var linkingMetadata = target.getLinkingMetadata(connection);
+    var linkingMetadata = target.getLinkingMetadata(connection);
     assertFalse(linkingMetadata.isEmpty());
     assertEquals(expected, linkingMetadata);
   }
