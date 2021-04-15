@@ -80,7 +80,15 @@ public class RemoteEntityBridge {
     return Optional.ofNullable(metadata.get(AttributeNames.ENTITY_GUID));
   }
 
-  Optional<String> getRemoteEntityName(MBeanServerConnection connection) {
+  /**
+   * Get the {@code entity.name} attribute from the remote agent's linking metadata. This method is
+   * only called after establishing that the remote agent's linking metadata exists by first
+   * retrieving the {@code entity.guid} attribute.
+   *
+   * @param connection MBeanServerConnection
+   * @return an Optional that may contain the remote agent's {@code entity.name} attribute
+   */
+  public Optional<String> getRemoteEntityName(MBeanServerConnection connection) {
     final Map<String, String> metadata;
     try {
       metadata = getLinkingMetadata(connection);
