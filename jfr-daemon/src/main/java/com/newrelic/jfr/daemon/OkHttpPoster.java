@@ -18,6 +18,22 @@ public class OkHttpPoster implements HttpPoster {
 
   private final OkHttpClient okHttpClient;
 
+  /**
+   * Create an OkHttpPoster without a Proxy.
+   *
+   * @param callTimeout call timeout
+   */
+  public OkHttpPoster(Duration callTimeout) {
+    this(null, null, callTimeout);
+  }
+
+  /**
+   * Create an OkHttpPoster with a Proxy.
+   *
+   * @param proxy the Proxy
+   * @param proxyAuthenticator the proxy Authenticator
+   * @param callTimeout call timeout
+   */
   public OkHttpPoster(Proxy proxy, Authenticator proxyAuthenticator, Duration callTimeout) {
     final OkHttpClient.Builder builder = new OkHttpClient.Builder().callTimeout(callTimeout);
 
