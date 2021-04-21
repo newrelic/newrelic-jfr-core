@@ -1,10 +1,13 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.RecordedObjectValidators.*;
+
 import java.time.Duration;
 import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class SimpleDurationSummarizer extends BaseDurationSummarizer {
+  private static final String SIMPLE_CLASS_NAME = SimpleDurationSummarizer.class.getSimpleName();
 
   public SimpleDurationSummarizer(long startTimeMs) {
     super(startTimeMs);
@@ -19,7 +22,10 @@ public class SimpleDurationSummarizer extends BaseDurationSummarizer {
   }
 
   private Duration getDuration(RecordedEvent ev) {
-    return durationName.map(ev::getDuration).orElse(ev.getDuration());
+    if (durationName.isPresent() && hasField(ev, durationName.get(), SIMPLE_CLASS_NAME)) {
+      return ev.getDuration(durationName.get());
+    }
+    return ev.getDuration();
   }
 
   public void accept(RecordedEvent ev) {

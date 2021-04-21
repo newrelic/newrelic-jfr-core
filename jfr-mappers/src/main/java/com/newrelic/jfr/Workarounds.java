@@ -7,11 +7,17 @@
 
 package com.newrelic.jfr;
 
+import static com.newrelic.jfr.RecordedObjectValidators.*;
+
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;
 
 public class Workarounds {
+  private static final String SIMPLE_CLASS_NAME = Workarounds.class.getSimpleName();
+  private static final String EVENT_THREAD = "eventThread";
+  private static final String SUCCEEDED = "succeeded";
+  private static final String SUCCEDED_TYPO = "succeded";
 
   /**
    * There are cases where the event has the wrong type inside it for the thread, so calling {@link
@@ -22,10 +28,13 @@ public class Workarounds {
    * @return the thread name, or null if unable to extract it
    */
   public static Optional<String> getThreadName(RecordedEvent ev) {
-    Object thisField = ev.getValue("eventThread");
-    if (thisField instanceof RecordedThread) {
-      return Optional.of(((RecordedThread) thisField).getJavaName());
+    if (hasField(ev, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+      Object thisField = ev.getValue(EVENT_THREAD);
+      if (thisField instanceof RecordedThread) {
+        return Optional.of(((RecordedThread) thisField).getJavaName());
+      }
     }
+
     return Optional.empty();
   }
 
@@ -35,12 +44,14 @@ public class Workarounds {
    * https://github.com/openjdk/jdk/blob/d74e4f22374b35ff5f84d320875b00313acdb14d/src/hotspot/share/jfr/metadata/metadata.xml#L494
    *
    * @param ev - The recorded event to check success for
-   * @return true if the event suceeded, false otherwise
+   * @return true if the event succeeded/succeded, false otherwise
    */
   public static boolean getSucceeded(RecordedEvent ev) {
-    if (ev.hasField("succeeded")) {
-      return ev.getBoolean("succeeded");
+    if (hasField(ev, SUCCEEDED, SIMPLE_CLASS_NAME)) {
+      return ev.getBoolean(SUCCEEDED);
+    } else if (hasField(ev, SUCCEDED_TYPO, SIMPLE_CLASS_NAME)) {
+      return ev.getBoolean(SUCCEDED_TYPO);
     }
-    return ev.getBoolean("succeded");
+    return false;
   }
 }

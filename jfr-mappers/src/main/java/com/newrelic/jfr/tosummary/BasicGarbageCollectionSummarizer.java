@@ -7,6 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.RecordedObjectValidators.*;
 import static com.newrelic.jfr.tosummary.BaseDurationSummarizer.DEFAULT_CLOCK;
 
 import com.newrelic.telemetry.Attributes;
@@ -26,7 +27,10 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
   private static final Logger logger =
       LoggerFactory.getLogger(BasicGarbageCollectionSummarizer.class);
 
+  private static final String SIMPLE_CLASS_NAME =
+      BasicGarbageCollectionSummarizer.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GarbageCollection";
+  private static final String NAME = "name";
 
   private final SimpleDurationSummarizer minorGcDurationSummarizer;
   private final SimpleDurationSummarizer majorGcDurationSummarizer;
@@ -87,7 +91,10 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
 
   @Override
   public void accept(RecordedEvent ev) {
-    final String name = ev.getValue("name");
+    String name = null;
+    if (hasField(ev, NAME, SIMPLE_CLASS_NAME)) {
+      name = ev.getValue(NAME);
+    }
     if (name != null) {
       if (MINOR_GC_NAMES.contains(name)) {
         minorGcEndTimeMs = ev.getStartTime().toEpochMilli();

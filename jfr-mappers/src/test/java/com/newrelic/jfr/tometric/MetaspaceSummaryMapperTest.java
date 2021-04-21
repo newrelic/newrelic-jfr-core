@@ -31,14 +31,11 @@ public class MetaspaceSummaryMapperTest {
 
     List<Metric> expected = new ArrayList<>(9);
     expected.addAll(
-        generateMetrics(
-            MetaspaceSummaryMapper.METASPACE_KEY, used, committed, reserved, now, attr));
+        generateMetrics(MetaspaceSummaryMapper.METASPACE, used, committed, reserved, now, attr));
     expected.addAll(
-        generateMetrics(
-            MetaspaceSummaryMapper.DATA_SPACE_KEY, used, committed, reserved, now, attr));
+        generateMetrics(MetaspaceSummaryMapper.DATA_SPACE, used, committed, reserved, now, attr));
     expected.addAll(
-        generateMetrics(
-            MetaspaceSummaryMapper.CLASS_SPACE_KEY, used, committed, reserved, now, attr));
+        generateMetrics(MetaspaceSummaryMapper.CLASS_SPACE, used, committed, reserved, now, attr));
 
     var testClass = new MetaspaceSummaryMapper();
 
