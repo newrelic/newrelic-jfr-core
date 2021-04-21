@@ -14,10 +14,10 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;
 
 public class Workarounds {
-  private static final String SIMPLE_CLASS_NAME = Workarounds.class.getSimpleName();
-  private static final String EVENT_THREAD = "eventThread";
-  private static final String SUCCEEDED = "succeeded";
-  private static final String SUCCEDED_TYPO = "succeded";
+  public static final String SIMPLE_CLASS_NAME = Workarounds.class.getSimpleName();
+  public static final String EVENT_THREAD = "eventThread";
+  public static final String SUCCEEDED = "succeeded";
+  public static final String SUCCEDED_TYPO = "succeded";
 
   /**
    * There are cases where the event has the wrong type inside it for the thread, so calling {@link

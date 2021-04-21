@@ -16,9 +16,11 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
   private final String threadName;
   private final LongSummarizer bytesSummary;
   private final SimpleDurationSummarizer duration;
+  public static final String BYTES_WRITTEN = "bytesWritten";
+  public static final String THREAD_NAME = "thread.name";
 
   public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
-    this(threadName, new LongSummarizer("bytesWritten"), new SimpleDurationSummarizer(startTimeMs));
+    this(threadName, new LongSummarizer(BYTES_WRITTEN), new SimpleDurationSummarizer(startTimeMs));
   }
 
   public PerThreadNetworkWriteSummarizer(
@@ -41,7 +43,7 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    Attributes attr = new Attributes().put("thread.name", threadName);
+    Attributes attr = new Attributes().put(THREAD_NAME, threadName);
     Summary outWritten =
         new Summary(
             "jfr.SocketWrite.bytesWritten",

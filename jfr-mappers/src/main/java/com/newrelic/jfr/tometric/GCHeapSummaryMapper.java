@@ -43,7 +43,7 @@ public class GCHeapSummaryMapper implements EventToMetric {
     if (hasField(ev, HEAP_SPACE, SIMPLE_CLASS_NAME)) {
       heapSpace = ev.getValue(HEAP_SPACE);
     }
-    if (heapSpace != null) {
+    if (!isRecordedObjectNull(heapSpace, SIMPLE_CLASS_NAME)) {
       long committedSize = 0;
       if (hasField(heapSpace, COMMITTED_SIZE, SIMPLE_CLASS_NAME)) {
         committedSize = heapSpace.getLong(COMMITTED_SIZE);

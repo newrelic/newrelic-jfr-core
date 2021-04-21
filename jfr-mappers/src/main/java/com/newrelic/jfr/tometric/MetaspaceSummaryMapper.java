@@ -60,7 +60,7 @@ public class MetaspaceSummaryMapper implements EventToMetric {
 
   private List<? extends Metric> generateMetric(
       String name, RecordedObject recordedObject, Attributes attr, long timestamp) {
-    if (recordedObject != null) {
+    if (!isRecordedObjectNull(recordedObject, SIMPLE_CLASS_NAME)) {
       double committedGaugeValue = 0;
       if (hasField(recordedObject, COMMITTED, SIMPLE_CLASS_NAME)) {
         committedGaugeValue = recordedObject.getDouble(COMMITTED);
