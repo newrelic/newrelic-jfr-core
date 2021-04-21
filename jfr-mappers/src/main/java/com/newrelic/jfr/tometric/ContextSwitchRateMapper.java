@@ -20,7 +20,7 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class ContextSwitchRateMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = ContextSwitchRateMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = ContextSwitchRateMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
   public static final String SWITCH_RATE = "switchRate";
 

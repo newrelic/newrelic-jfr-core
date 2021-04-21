@@ -19,9 +19,9 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class AllocationRequiringGCMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = AllocationRequiringGCMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = AllocationRequiringGCMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.AllocationRequiringGC";
-  private static final String SIZE = "size";
+  public static final String SIZE = "size";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {

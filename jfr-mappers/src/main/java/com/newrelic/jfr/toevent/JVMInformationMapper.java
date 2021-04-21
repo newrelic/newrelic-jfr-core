@@ -31,7 +31,7 @@ import jdk.jfr.consumer.RecordedEvent;
 //        pid = 13612
 //        }
 public class JVMInformationMapper implements EventToEvent {
-  private static final String SIMPLE_CLASS_NAME = JVMInformationMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = JVMInformationMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.JVMInformation";
   public static final String JVM_START_TIME = "jvmStartTime";
   public static final String JVM_ARGUMENTS = "jvmArguments";

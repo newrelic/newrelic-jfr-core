@@ -28,7 +28,7 @@ import jdk.jfr.consumer.RecordedEvent;
 //        eventThread = "C1 CompilerThread0" (javaThreadId = 8)
 //        }
 public class CPUThreadLoadMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = CPUThreadLoadMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = CPUThreadLoadMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.ThreadCPULoad";
   public static final String USER = "user";
   public static final String SYSTEM = "system";

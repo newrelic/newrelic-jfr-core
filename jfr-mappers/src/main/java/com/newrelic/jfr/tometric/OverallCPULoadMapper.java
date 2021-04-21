@@ -20,7 +20,7 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class OverallCPULoadMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = OverallCPULoadMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = OverallCPULoadMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.CPULoad";
   public static final String JVM_USER = "jvmUser";
   public static final String JVM_SYSTEM = "jvmSystem";

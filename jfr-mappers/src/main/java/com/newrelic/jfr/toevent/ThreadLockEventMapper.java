@@ -21,7 +21,7 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;
 
 public class ThreadLockEventMapper implements EventToEvent {
-  private static final String SIMPLE_CLASS_NAME = ThreadLockEventMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = ThreadLockEventMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.JavaMonitorWait"; // jdk.JavaMonitorEnter
   public static final String MONITOR_CLASS = "monitorClass";
   public static final String CLASS = "class";

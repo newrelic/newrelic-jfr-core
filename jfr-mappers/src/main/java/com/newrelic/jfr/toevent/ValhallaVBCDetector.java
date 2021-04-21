@@ -21,7 +21,7 @@ import jdk.jfr.consumer.RecordedThread;
 //        ]
 //        }
 public class ValhallaVBCDetector implements EventToEvent {
-  private static final String SIMPLE_CLASS_NAME = ValhallaVBCDetector.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = ValhallaVBCDetector.class.getSimpleName();
   // Is this going to change to SyncOnValueBasedClass ?
   public static final String OLD_EVENT_NAME = "jdk.SyncOnPrimitiveWrapper";
   public static final String EVENT_NAME = "jdk.SyncOnValueBasedClass";

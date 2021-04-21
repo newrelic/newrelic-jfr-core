@@ -32,14 +32,14 @@ import jdk.jfr.consumer.RecordedThread;
 //        eventThread = "C2 CompilerThread0" (javaThreadId = 5)
 //        }
 public class JITCompilationMapper implements EventToEvent {
-  private static final String SIMPLE_CLASS_NAME = JITCompilationMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = JITCompilationMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.Compilation";
-  private static final String METHOD = "method";
-  private static final String DESC = "desc";
-  private static final String DURATION = "duration";
-  private static final String SUCCEEDED = "succeeded";
-  private static final String EVENT_THREAD = "eventThread";
-  private static final String THREAD_NAME = "thread.name";
+  public static final String METHOD = "method";
+  public static final String DESC = "desc";
+  public static final String DURATION = "duration";
+  public static final String SUCCEEDED = "succeeded";
+  public static final String EVENT_THREAD = "eventThread";
+  public static final String THREAD_NAME = "thread.name";
 
   @Override
   public List<Event> apply(RecordedEvent event) {

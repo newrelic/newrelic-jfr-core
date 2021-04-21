@@ -12,7 +12,7 @@ import static com.newrelic.jfr.RecordedObjectValidators.*;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class LongSummarizer {
-  private static final String SIMPLE_CLASS_NAME = LongSummarizer.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = LongSummarizer.class.getSimpleName();
 
   private final String fieldName;
   private int count = 0;

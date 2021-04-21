@@ -22,7 +22,7 @@ import jdk.jfr.consumer.RecordedEvent;
 //        value = "Java Virtual Machine Specification"
 // }
 public class JVMSystemPropertyMapper implements EventToEvent {
-  private static final String SIMPLE_CLASS_NAME = JVMSystemPropertyMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = JVMSystemPropertyMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.InitialSystemProperty";
   public static final String JVM_PROPERTY = "jvmProperty";
   public static final String KEY = "key";

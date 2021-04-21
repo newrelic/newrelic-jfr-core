@@ -17,7 +17,7 @@ import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class GarbageCollectionMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = GarbageCollectionMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = GarbageCollectionMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GarbageCollection";
   public static final String LONGEST_PAUSE = "longestPause";
   public static final String NAME = "name";

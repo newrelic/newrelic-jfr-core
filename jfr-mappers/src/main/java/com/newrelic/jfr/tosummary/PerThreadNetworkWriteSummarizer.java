@@ -13,11 +13,13 @@ import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class PerThreadNetworkWriteSummarizer implements EventToSummary {
+  public static final String SIMPLE_CLASS_NAME =
+      PerThreadNetworkWriteSummarizer.class.getSimpleName();
+  public static final String BYTES_WRITTEN = "bytesWritten";
+  public static final String THREAD_NAME = "thread.name";
   private final String threadName;
   private final LongSummarizer bytesSummary;
   private final SimpleDurationSummarizer duration;
-  public static final String BYTES_WRITTEN = "bytesWritten";
-  public static final String THREAD_NAME = "thread.name";
 
   public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
     this(threadName, new LongSummarizer(BYTES_WRITTEN), new SimpleDurationSummarizer(startTimeMs));

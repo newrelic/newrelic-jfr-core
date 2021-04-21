@@ -20,17 +20,17 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
 public class MetaspaceSummaryMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = MetaspaceSummaryMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = MetaspaceSummaryMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.MetaspaceSummary";
-  static final String NR_METRIC_PREFIX = "jfr.MetaspaceSummary.";
-  static final String METASPACE = "metaspace";
-  static final String DATA_SPACE = "dataSpace";
-  static final String CLASS_SPACE = "classSpace";
-  static final String WHEN = "when";
-  static final String COMMITTED = "committed";
-  static final String USED = "used";
-  static final String RESERVED = "reserved";
-  static final String DOT_DELIMITER = ".";
+  public static final String NR_METRIC_PREFIX = "jfr.MetaspaceSummary.";
+  public static final String METASPACE = "metaspace";
+  public static final String DATA_SPACE = "dataSpace";
+  public static final String CLASS_SPACE = "classSpace";
+  public static final String WHEN = "when";
+  public static final String COMMITTED = "committed";
+  public static final String USED = "used";
+  public static final String RESERVED = "reserved";
+  public static final String DOT_DELIMITER = ".";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {

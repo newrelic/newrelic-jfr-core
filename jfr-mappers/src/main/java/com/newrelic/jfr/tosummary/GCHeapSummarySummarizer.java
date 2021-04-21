@@ -23,12 +23,12 @@ import jdk.jfr.consumer.RecordedEvent;
  * pairs.
  */
 public final class GCHeapSummarySummarizer implements EventToSummary {
-  private static final String SIMPLE_CLASS_NAME = GCHeapSummarySummarizer.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = GCHeapSummarySummarizer.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GCHeapSummary";
-  private static final String BEFORE = "Before GC";
-  private static final String AFTER = "After GC";
-  private static final String GC_ID = "gcId";
-  private static final String WHEN = "when";
+  public static final String BEFORE = "Before GC";
+  public static final String AFTER = "After GC";
+  public static final String GC_ID = "gcId";
+  public static final String WHEN = "when";
 
   private final Map<Long, RecordedEvent> awaitingPairs = new HashMap<>();
 

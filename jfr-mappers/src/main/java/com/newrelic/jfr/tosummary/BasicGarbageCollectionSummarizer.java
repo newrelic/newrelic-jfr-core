@@ -24,14 +24,13 @@ import org.slf4j.LoggerFactory;
 
 /** This class aggregates the duration of Garbage Collection JFR events */
 public final class BasicGarbageCollectionSummarizer implements EventToSummary {
-  private static final Logger logger =
-      LoggerFactory.getLogger(BasicGarbageCollectionSummarizer.class);
-
-  private static final String SIMPLE_CLASS_NAME =
+  public static final String SIMPLE_CLASS_NAME =
       BasicGarbageCollectionSummarizer.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GarbageCollection";
-  private static final String NAME = "name";
+  public static final String NAME = "name";
 
+  private static final Logger logger =
+      LoggerFactory.getLogger(BasicGarbageCollectionSummarizer.class);
   private final SimpleDurationSummarizer minorGcDurationSummarizer;
   private final SimpleDurationSummarizer majorGcDurationSummarizer;
   private final AtomicInteger minorGcCount = new AtomicInteger(0);

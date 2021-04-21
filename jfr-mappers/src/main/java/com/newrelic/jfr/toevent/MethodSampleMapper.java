@@ -34,7 +34,7 @@ import jdk.jfr.consumer.RecordedThread;
 //        ]
 //        }
 public class MethodSampleMapper implements EventToEvent {
-  private static final String SIMPLE_CLASS_NAME = MethodSampleMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = MethodSampleMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.ExecutionSample";
   public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
   public static final String THREAD_STATE = "thread.state";

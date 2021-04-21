@@ -18,17 +18,17 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
 public class GCHeapSummaryMapper implements EventToMetric {
-  private static final String SIMPLE_CLASS_NAME = GCHeapSummaryMapper.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = GCHeapSummaryMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GCHeapSummary";
-  private static final String HEAP_USED = "heapUsed";
-  private static final String HEAP_SPACE = "heapSpace";
-  private static final String COMMITTED_SIZE = "committedSize";
-  private static final String RESERVED_SIZE = "reservedSize";
-  private static final String START = "start";
-  private static final String HEAP_START = "heapStart";
-  private static final String WHEN = "when";
-  private static final String COMMITTED_END = "committedEnd";
-  private static final String RESERVED_END = "reservedEnd";
+  public static final String HEAP_USED = "heapUsed";
+  public static final String HEAP_SPACE = "heapSpace";
+  public static final String COMMITTED_SIZE = "committedSize";
+  public static final String RESERVED_SIZE = "reservedSize";
+  public static final String START = "start";
+  public static final String HEAP_START = "heapStart";
+  public static final String WHEN = "when";
+  public static final String COMMITTED_END = "committedEnd";
+  public static final String RESERVED_END = "reservedEnd";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {

@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class SimpleDurationSummarizer extends BaseDurationSummarizer {
-  private static final String SIMPLE_CLASS_NAME = SimpleDurationSummarizer.class.getSimpleName();
+  public static final String SIMPLE_CLASS_NAME = SimpleDurationSummarizer.class.getSimpleName();
 
   public SimpleDurationSummarizer(long startTimeMs) {
     super(startTimeMs);
