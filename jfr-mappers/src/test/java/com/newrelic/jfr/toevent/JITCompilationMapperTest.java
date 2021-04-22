@@ -1,9 +1,13 @@
 package com.newrelic.jfr.toevent;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.RecordedObjectValidators;
+import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.nio.file.Path;
@@ -12,11 +16,48 @@ import java.time.Instant;
 import java.util.List;
 import jdk.jfr.EventType;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
 import jdk.jfr.consumer.RecordedThread;
 import jdk.jfr.consumer.RecordingFile;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class JITCompilationMapperTest {
+  private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static MockedStatic<Workarounds> workaroundsMockedStatic;
+
+  @BeforeAll
+  static void init() {
+    workaroundsMockedStatic = Mockito.mockStatic(Workarounds.class);
+    workaroundsMockedStatic
+        .when(() -> Workarounds.getSucceeded(any(RecordedEvent.class)))
+        .thenReturn(true);
+
+    recordedObjectValidatorsMockedStatic = Mockito.mockStatic(RecordedObjectValidators.class);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.hasField(
+                    any(RecordedObject.class), anyString(), anyString()))
+        .thenReturn(true);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.isRecordedObjectNull(
+                    any(RecordedObject.class), anyString()))
+        .thenReturn(false);
+  }
+
+  @AfterAll
+  static void teardown() {
+    workaroundsMockedStatic.close();
+    recordedObjectValidatorsMockedStatic.close();
+  }
 
   @Test
   void testApply() {

@@ -2,9 +2,12 @@ package com.newrelic.jfr.tosummary;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
@@ -13,8 +16,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class BasicGarbageCollectionSummarizerTest {
   private static Summary defaultMinorGcSummary;
@@ -27,6 +34,7 @@ class BasicGarbageCollectionSummarizerTest {
   private static final long DEFAULT_END_TIME_MS = 0L;
   private static final String MINOR_GC_DURATION_METRIC_NAME = "jfr.GarbageCollection.minorDuration";
   private static final String MAJOR_GC_DURATION_METRIC_NAME = "jfr.GarbageCollection.majorDuration";
+  private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
 
   @BeforeAll
   static void init() {
@@ -51,6 +59,27 @@ class BasicGarbageCollectionSummarizerTest {
             DEFAULT_START_TIME_MS,
             DEFAULT_END_TIME_MS,
             new Attributes());
+
+    recordedObjectValidatorsMockedStatic = Mockito.mockStatic(RecordedObjectValidators.class);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.hasField(
+                    any(RecordedObject.class), anyString(), anyString()))
+        .thenReturn(true);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.isRecordedObjectNull(
+                    any(RecordedObject.class), anyString()))
+        .thenReturn(false);
+  }
+
+  @AfterAll
+  static void teardown() {
+    recordedObjectValidatorsMockedStatic.close();
   }
 
   @Test
