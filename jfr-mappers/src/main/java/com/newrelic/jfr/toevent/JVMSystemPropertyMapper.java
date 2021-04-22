@@ -21,6 +21,11 @@ import jdk.jfr.consumer.RecordedEvent;
 // }
 public class JVMSystemPropertyMapper implements EventToEvent {
   public static final String EVENT_NAME = "jdk.InitialSystemProperty";
+  private final AttributeValueSplitter valueSplitter;
+
+  public JVMSystemPropertyMapper(AttributeValueSplitter valueSplitter) {
+    this.valueSplitter = valueSplitter;
+  }
 
   @Override
   public String getEventName() {
@@ -32,7 +37,7 @@ public class JVMSystemPropertyMapper implements EventToEvent {
     long timestamp = event.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
     attr.put("jvmProperty", event.getString("key"));
-    attr.put("jvmPropertyValue", event.getString("value"));
+    valueSplitter.maybeSplit(attr, "jvmPropertyValue", event.getString("value"));
     return Collections.singletonList(new Event("JfrJVMInformation", attr, timestamp));
   }
 }

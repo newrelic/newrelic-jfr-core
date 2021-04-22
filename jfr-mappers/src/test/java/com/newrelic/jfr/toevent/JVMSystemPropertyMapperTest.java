@@ -26,7 +26,7 @@ class JVMSystemPropertyMapperTest {
     var expectedEvent = new Event("JfrJVMInformation", expectedAttrs, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
-    var mapper = new JVMSystemPropertyMapper();
+    var mapper = new JVMSystemPropertyMapper(new AttributeValueSplitter());
 
     var event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(startTime);
