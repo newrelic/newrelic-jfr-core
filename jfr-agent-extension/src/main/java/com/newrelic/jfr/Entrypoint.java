@@ -60,7 +60,7 @@ public class Entrypoint {
   }
 
   private void start(DaemonConfig config, Agent agent) {
-    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes(config);
     JFRUploader uploader = buildUploader(config);
     fetchRemoteEntityIdAsync(agent)
         .thenAccept(
