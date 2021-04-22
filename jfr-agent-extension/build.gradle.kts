@@ -37,7 +37,6 @@ tasks.named("build") {
     dependsOn("shadowJar")
 }
 
-
 //publishing {
 //    publications {
 //        create<MavenPublication>("maven") {
