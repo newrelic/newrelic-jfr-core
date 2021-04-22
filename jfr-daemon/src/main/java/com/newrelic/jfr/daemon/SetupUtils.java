@@ -30,6 +30,10 @@ import org.slf4j.LoggerFactory;
 
 public class SetupUtils {
   private static final Logger logger = LoggerFactory.getLogger(SetupUtils.class);
+  private static final int DEFAULT_QUEUE_SIZE = 250_000;
+  public static final String JFR_DAEMON = "JFR-Daemon/";
+  public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
+  public static final String HTTPS = "https";
 
   private SetupUtils() {}
 
@@ -96,7 +100,7 @@ public class SetupUtils {
    */
   public static JFRUploader buildUploader(DaemonConfig config) {
     TelemetryClient telemetryClient = buildTelemetryClient(config);
-    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(250_000);
+    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(DEFAULT_QUEUE_SIZE);
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(new NewRelicTelemetrySender(telemetryClient), recordedEventBuffer);
   }
@@ -169,7 +173,7 @@ public class SetupUtils {
   }
 
   private static String makeUserAgent(DaemonConfig config) {
-    return "JFR-Daemon/" + config.getDaemonVersion();
+    return JFR_DAEMON + config.getDaemonVersion();
   }
 
   private static Proxy buildProxy(DaemonConfig config) {
@@ -181,7 +185,7 @@ public class SetupUtils {
       return null;
     }
 
-    if (proxyScheme.equalsIgnoreCase("https")) {
+    if (proxyScheme.equalsIgnoreCase(HTTPS)) {
       // TODO See FIXME in OkHttpPoster
       logger.error("HTTPS proxy is not currently supported.");
       return null;
@@ -210,7 +214,7 @@ public class SetupUtils {
         response
             .request()
             .newBuilder()
-            .header("Proxy-Authorization", Credentials.basic(proxyUser, proxyPassword))
+            .header(PROXY_AUTHORIZATION, Credentials.basic(proxyUser, proxyPassword))
             .build();
   }
 }
