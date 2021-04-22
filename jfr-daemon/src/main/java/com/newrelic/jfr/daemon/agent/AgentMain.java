@@ -34,7 +34,8 @@ public class AgentMain {
 
   private void start() {
     DaemonConfig config = SetupUtils.buildConfig();
-    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes(config);
+
     JFRUploader uploader = SetupUtils.buildUploader(config);
     uploader.readyToSend(new EventConverter(commonAttrs));
     FileJfrRecorderFactory recorderFactory =

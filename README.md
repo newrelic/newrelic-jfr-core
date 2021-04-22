@@ -111,17 +111,22 @@ By default, the JFR daemon will connect JMX to `localhost` on port 1099 and send
 New Relic US production metric and event ingest endpoints.  If you need to change this
 default behavior, the following environment variables are recognized:
 
-| env var name            | required? | default             | description  |
-|-------------------------|-----------|---------------------|--------------|
-| `INSIGHTS_INSERT_KEY`   |     Y     |  n/a                | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key) for your account |
-| `USE_LICENSE_KEY`       |     N     |  `false`              | Use a License Key instead of Insights Insert Key.
-| `NEW_RELIC_APP_NAME`    |     N(!)  |  `My Application`     | The name of the remote application being monitored.  You should probably set this so that your application shows up properly in the NR1 platform.
-| `REMOTE_JMX_HOST`       |     N     |  `localhost`          | The host to pull JFR data from via JMX        |
-| `REMOTE_JMX_PORT`       |     N     |  `1099`               | The port to pull JFR data from via JMX        |
-| `METRICS_INGEST_URI`    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1)          | Where to send metric data
-| `EVENTS_INGEST_URI`     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events), [EU production](https://insights-collector.eu01.nr-data.net/v1/accounts/events) | Where to send event data
-| `JFR_SHARED_FILESYSTEM` |     N     |  `false`              | Use a shared filesystem instead of streaming data from JMX
-| `AUDIT_LOGGING`         |     N     |  `false`              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK - only if Slf4j log level is also set to `debug`.
+| env var name            | required? | default               | description  |
+|-------------------------|-----------|-----------------------|--------------|
+| `INSIGHTS_INSERT_KEY`   |     Y     |  n/a                  | The New Relic [insert key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key) for your account |
+| `USE_LICENSE_KEY`       |     N     |  `false`              | Use a License Key instead of Insights Insert Key. |
+| `NEW_RELIC_APP_NAME`    |     N(!)  |  `My Application`     | The name of the remote application being monitored. You should probably set this so that your application shows up properly in the NR1 platform. |
+| `REMOTE_JMX_HOST`       |     N     |  `localhost`          | The host to pull JFR data from via JMX |
+| `REMOTE_JMX_PORT`       |     N     |  `1099`               | The port to pull JFR data from via JMX |
+| `METRICS_INGEST_URI`    |     N     |  [US production](https://metric-api.newrelic.com/metric/v1), [EU production](https://metric-api.eu.newrelic.com/metric/v1) | Where to send metric data |
+| `EVENTS_INGEST_URI`     |     N     |  [US production](https://insights-collector.newrelic.com/v1/accounts/events), [EU production](https://insights-collector.eu01.nr-data.net/v1/accounts/events) | Where to send event data |
+| `JFR_SHARED_FILESYSTEM` |     N     |  `false`              | Use a shared filesystem instead of streaming data from JMX |
+| `AUDIT_LOGGING`         |     N     |  `false`              | [Enables audit logging](https://github.com/newrelic/newrelic-telemetry-sdk-java#enabling-audit-logging) in the underlying Telemetry SDK |
+| `PROXY_HOST`            |     N     |  `null`               | Proxy host name |
+| `PROXY_PORT`            |     N     |  `null`               | Proxy host port |
+| `PROXY_USER`            |     N     |  `null`               | Proxy user name |
+| `PROXY_PASSWORD`        |     N     |  `null`               | Proxy password  |
+| `PROXY_SCHEME`          |     N     |  `null`               | Proxy scheme (`http` or `https`) |
 
 ##### Logging
 
@@ -141,10 +146,6 @@ Here is a sample of debug level logs.
 ```
 
 For audit logging from the underlying Telemetry SDK, you'll need Slf4j to be set at `debug` level and enable audit logging via environment variable as described above. 
-
-##### Proxy
-
-Currently, the JFR daemon can not be directly configured to accept a proxy. Instead, please use system properties `-Dhttps.proxyHost` and `-Dhttps.proxyPort` [(reference)](https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html) to specify your proxy.
 
 #### Target application configuration
 

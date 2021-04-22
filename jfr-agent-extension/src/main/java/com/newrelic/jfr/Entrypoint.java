@@ -49,7 +49,7 @@ public class Entrypoint {
 
   private void start() {
     DaemonConfig config = buildConfig();
-    Attributes attr = SetupUtils.buildCommonAttributes();
+    Attributes attr = SetupUtils.buildCommonAttributes(config);
     JFRUploader uploader = buildUploader(config);
     uploader.readyToSend(new EventConverter(attr));
     FileJfrRecorderFactory recorderFactory =

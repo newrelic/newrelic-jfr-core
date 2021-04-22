@@ -3,9 +3,11 @@ package com.newrelic.jfr.daemon;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.http.HttpResponse;
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Map;
+import okhttp3.Authenticator;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -16,8 +18,36 @@ public class OkHttpPoster implements HttpPoster {
 
   private final OkHttpClient okHttpClient;
 
+  /**
+   * Create an OkHttpPoster without a Proxy.
+   *
+   * @param callTimeout call timeout
+   */
   public OkHttpPoster(Duration callTimeout) {
-    this.okHttpClient = new OkHttpClient.Builder().callTimeout(callTimeout).build();
+    this(null, null, callTimeout);
+  }
+
+  /**
+   * Create an OkHttpPoster with a Proxy.
+   *
+   * @param proxy the Proxy
+   * @param proxyAuthenticator the proxy Authenticator
+   * @param callTimeout call timeout
+   */
+  public OkHttpPoster(Proxy proxy, Authenticator proxyAuthenticator, Duration callTimeout) {
+    final OkHttpClient.Builder builder = new OkHttpClient.Builder().callTimeout(callTimeout);
+
+    if (proxy != null) {
+      builder.proxy(proxy);
+      if (proxyAuthenticator != null) {
+        builder.authenticator(proxyAuthenticator);
+      }
+    }
+
+    // FIXME required for HTTPS proxies? see https://github.com/square/okhttp/issues/6561
+    //    builder.socketFactory(new DelegatingSocketFactory(SSLSocketFactory.getDefault()));
+
+    this.okHttpClient = builder.build();
   }
 
   @Override
