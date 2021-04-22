@@ -11,7 +11,7 @@ class AttributeValueSplitterTest {
 
   private AttributeValueSplitter classUnderTest;
   private final String TEST_KEY = "test_key";
-  private final String TEST_KEY_EXTENDED = TEST_KEY + "Extended_";
+  private final String TEST_KEY_EXTENDED = TEST_KEY + KEY_EXTENDED;
   private Attributes attr;
 
   @BeforeEach
