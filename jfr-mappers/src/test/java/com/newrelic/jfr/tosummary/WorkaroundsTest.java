@@ -1,9 +1,13 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.Workarounds.EVENT_THREAD;
+import static com.newrelic.jfr.Workarounds.SUCCEDED_TYPO;
+import static com.newrelic.jfr.Workarounds.SUCCEEDED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,30 +55,44 @@ class WorkaroundsTest {
     var ev = mock(RecordedEvent.class);
     var thread = mock(RecordedThread.class);
     when(thread.getJavaName()).thenReturn(threadName);
-    when(ev.getValue("eventThread")).thenReturn(thread);
+    when(ev.getValue(EVENT_THREAD)).thenReturn(thread);
     assertEquals(threadName, Workarounds.getThreadName(ev).get());
   }
 
   @Test
   void testGetThreadNameWrongType() throws Exception {
     var ev = mock(RecordedEvent.class);
-    when(ev.getValue("eventThread")).thenReturn(new Object[] {"aa", 21, "bbbbbbb"});
+    when(ev.getValue(EVENT_THREAD)).thenReturn(new Object[] {"aa", 21, "bbbbbbb"});
     assertTrue(Workarounds.getThreadName(ev).isEmpty());
   }
 
   @Test
   public void testGetSucceededCorrect() throws Exception {
     var ev = mock(RecordedEvent.class);
-    when(ev.hasField("succeeded")).thenReturn(true);
-    when(ev.getBoolean("succeeded")).thenReturn(true);
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.hasField(
+                    any(RecordedObject.class), eq(SUCCEEDED), anyString()))
+        .thenReturn(true);
+
+    when(ev.hasField(SUCCEEDED)).thenReturn(true);
+    when(ev.getBoolean(SUCCEEDED)).thenReturn(true);
     assertTrue(Workarounds.getSucceeded(ev));
   }
 
   @Test
   public void testGetSucceededIncorrect() throws Exception {
     var ev = mock(RecordedEvent.class);
-    when(ev.hasField("succeeded")).thenReturn(false);
-    when(ev.getBoolean("succeded")).thenReturn(true);
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.hasField(
+                    any(RecordedObject.class), eq(SUCCEEDED), anyString()))
+        .thenReturn(false);
+
+    when(ev.hasField(SUCCEEDED)).thenReturn(false);
+    when(ev.getBoolean(SUCCEDED_TYPO)).thenReturn(true);
     assertTrue(Workarounds.getSucceeded(ev));
   }
 }
