@@ -1,5 +1,5 @@
 val gsonVersion: String by project
-val newRelicAgentVersion: String by project
+val newRelicAgentApiVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
@@ -15,7 +15,7 @@ java {
 dependencies {
     api(project(":jfr-daemon"))
     implementation("org.slf4j:slf4j-api:${slf4jVersion}");
-    implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentVersion}")
+    implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
 }
 
 tasks.shadowJar {

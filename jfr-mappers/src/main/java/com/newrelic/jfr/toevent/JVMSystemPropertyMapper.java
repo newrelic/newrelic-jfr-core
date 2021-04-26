@@ -30,6 +30,12 @@ public class JVMSystemPropertyMapper implements EventToEvent {
   public static final String VALUE = "value";
   public static final String JFR_JVM_INFORMATION = "JfrJVMInformation";
 
+  private final AttributeValueSplitter valueSplitter;
+
+  public JVMSystemPropertyMapper(AttributeValueSplitter valueSplitter) {
+    this.valueSplitter = valueSplitter;
+  }
+
   @Override
   public String getEventName() {
     return EVENT_NAME;
@@ -44,7 +50,7 @@ public class JVMSystemPropertyMapper implements EventToEvent {
       attr.put(JVM_PROPERTY, event.getString(KEY));
     }
     if (hasField(event, VALUE, SIMPLE_CLASS_NAME)) {
-      attr.put(JVM_PROPERTY_VALUE, event.getString(VALUE));
+      valueSplitter.maybeSplit(attr, JVM_PROPERTY_VALUE, event.getString(VALUE));
     }
     return Collections.singletonList(new Event(JFR_JVM_INFORMATION, attr, timestamp));
   }

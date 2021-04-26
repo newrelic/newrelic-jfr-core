@@ -22,7 +22,7 @@ public class ToEventRegistry {
       Arrays.asList(
           new JITCompilationMapper(),
           new JVMInformationMapper(),
-          new JVMSystemPropertyMapper(),
+          new JVMSystemPropertyMapper(new AttributeValueSplitter()),
           new ThreadLockEventMapper(),
           new ValhallaVBCDetector(),
           MethodSampleMapper.forExecutionSample(),
