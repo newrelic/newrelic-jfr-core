@@ -1,5 +1,10 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper.ALLOCATED;
+import static com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper.JFR_THREAD_ALLOCATION_STATISTICS_ALLOCATED;
+import static com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper.THREAD;
+import static com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper.THREAD_NAME;
+import static com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper.THREAD_OS_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -58,8 +63,8 @@ class ThreadAllocationStatisticsMapperTest {
     var startTime = Instant.ofEpochMilli(now);
     var allocated = 1250229920d;
 
-    var attr = new Attributes().put("thread.name", threadName).put("thread.osName", threadOsName);
-    var gauge = new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, now, attr);
+    var attr = new Attributes().put(THREAD_NAME, threadName).put(THREAD_OS_NAME, threadOsName);
+    var gauge = new Gauge(JFR_THREAD_ALLOCATION_STATISTICS_ALLOCATED, allocated, now, attr);
     var expected = List.of(gauge);
 
     var testClass = new ThreadAllocationStatisticsMapper();
@@ -68,8 +73,8 @@ class ThreadAllocationStatisticsMapperTest {
     when(recordedThread.getOSName()).thenReturn(threadOsName);
 
     when(recordedEvent.getStartTime()).thenReturn(startTime);
-    when(recordedEvent.getDouble("allocated")).thenReturn(allocated);
-    when(recordedEvent.getValue("thread")).thenReturn(recordedThread);
+    when(recordedEvent.getDouble(ALLOCATED)).thenReturn(allocated);
+    when(recordedEvent.getValue(THREAD)).thenReturn(recordedThread);
 
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);
@@ -83,14 +88,14 @@ class ThreadAllocationStatisticsMapperTest {
     var allocated = 1250229920d;
 
     var attr = new Attributes();
-    var gauge = new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, now, attr);
+    var gauge = new Gauge(JFR_THREAD_ALLOCATION_STATISTICS_ALLOCATED, allocated, now, attr);
     var expected = List.of(gauge);
 
     var testClass = new ThreadAllocationStatisticsMapper();
 
     when(recordedEvent.getStartTime()).thenReturn(startTime);
-    when(recordedEvent.getDouble("allocated")).thenReturn(allocated);
-    when(recordedEvent.getValue("thread")).thenReturn(null);
+    when(recordedEvent.getDouble(ALLOCATED)).thenReturn(allocated);
+    when(recordedEvent.getValue(THREAD)).thenReturn(null);
 
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);

@@ -1,5 +1,12 @@
 package com.newrelic.jfr.toevent;
 
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.CLASS;
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.DURATION;
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.EVENT_THREAD;
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.JFR_JAVA_MONITOR_WAIT;
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.MONITOR_CLASS;
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.STACK_TRACE;
+import static com.newrelic.jfr.toevent.ThreadLockEventMapper.THREAD_NAME;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,12 +65,12 @@ class ThreadLockEventMapperTest {
     var monitorClassName = "ooo";
     var expectedAttributes =
         new Attributes()
-            .put("thread.name", threadName)
-            .put("class", monitorClassName)
-            .put("duration", duration.toMillis())
-            .put("stackTrace", (String) null);
+            .put(THREAD_NAME, threadName)
+            .put(CLASS, monitorClassName)
+            .put(DURATION, duration.toMillis())
+            .put(STACK_TRACE, (String) null);
     var expectedEvent =
-        new Event("JfrJavaMonitorWait", expectedAttributes, startTime.toEpochMilli());
+        new Event(JFR_JAVA_MONITOR_WAIT, expectedAttributes, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);
@@ -71,9 +78,9 @@ class ThreadLockEventMapperTest {
     var eventThread = mock(RecordedThread.class);
 
     when(event.getStartTime()).thenReturn(startTime);
-    when(event.getThread("eventThread")).thenReturn(eventThread);
+    when(event.getThread(EVENT_THREAD)).thenReturn(eventThread);
     when(event.getDuration()).thenReturn(duration);
-    when(event.getClass("monitorClass")).thenReturn(monitorClass);
+    when(event.getClass(MONITOR_CLASS)).thenReturn(monitorClass);
     when(eventThread.getJavaName()).thenReturn(threadName);
     when(monitorClass.getName()).thenReturn(monitorClassName);
 

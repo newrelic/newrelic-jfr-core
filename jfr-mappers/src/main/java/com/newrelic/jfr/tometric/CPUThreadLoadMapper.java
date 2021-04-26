@@ -33,6 +33,8 @@ public class CPUThreadLoadMapper implements EventToMetric {
   public static final String USER = "user";
   public static final String SYSTEM = "system";
   public static final String THREAD_NAME = "thread.name";
+  public static final String JFR_THREAD_CPU_LOAD_USER = "jfr.ThreadCPULoad.user";
+  public static final String JFR_THREAD_CPU_LOAD_SYSTEM = "jfr.ThreadCPULoad.system";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
@@ -51,8 +53,8 @@ public class CPUThreadLoadMapper implements EventToMetric {
       }
       // Do we need to throttle these events somehow? Or just send everything?
       return Arrays.asList(
-          new Gauge("jfr.ThreadCPULoad.user", userGaugeValue, timestamp, attr),
-          new Gauge("jfr.ThreadCPULoad.system", systemGaugeValue, timestamp, attr));
+          new Gauge(JFR_THREAD_CPU_LOAD_USER, userGaugeValue, timestamp, attr),
+          new Gauge(JFR_THREAD_CPU_LOAD_SYSTEM, systemGaugeValue, timestamp, attr));
     }
     return Collections.emptyList();
   }

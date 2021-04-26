@@ -1,5 +1,8 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.tosummary.PerThreadObjectAllocationOutsideTLABSummarizer.ALLOCATION_SIZE;
+import static com.newrelic.jfr.tosummary.PerThreadObjectAllocationOutsideTLABSummarizer.JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION;
+import static com.newrelic.jfr.tosummary.PerThreadObjectAllocationOutsideTLABSummarizer.THREAD_NAME;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,6 +28,7 @@ import org.mockito.Mockito;
 
 class ObjectAllocationOutsideTLABSummarizerTest {
   private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static final String EVENT_THREAD = "eventThread";
 
   @BeforeAll
   static void init() {
@@ -59,11 +63,11 @@ class ObjectAllocationOutsideTLABSummarizerTest {
     var numOfEvents = 1;
     var eventStartTime = Instant.now().toEpochMilli();
     var eventAllocationSize = 1500L;
-    var attr = new Attributes().put("thread.name", eventThreadName);
+    var attr = new Attributes().put(THREAD_NAME, eventThreadName);
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr.ObjectAllocationOutsideTLAB.allocation",
+            JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION,
             numOfEvents, // count
             eventAllocationSize, // sum
             eventAllocationSize, // min
@@ -78,8 +82,8 @@ class ObjectAllocationOutsideTLABSummarizerTest {
     var testClass = new ObjectAllocationOutsideTLABSummarizer();
 
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getValue("eventThread")).thenReturn(recordedThread);
-    when(event.getLong("allocationSize")).thenReturn(eventAllocationSize);
+    when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event.getLong(ALLOCATION_SIZE)).thenReturn(eventAllocationSize);
 
     when(recordedThread.getJavaName()).thenReturn(eventThreadName);
 
@@ -100,7 +104,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
     var numOfEvents = 1;
     var event1StartTime = Instant.now().toEpochMilli();
     var event1AllocationSize = 847L;
-    var attr = new Attributes().put("thread.name", eventThreadName);
+    var attr = new Attributes().put(THREAD_NAME, eventThreadName);
 
     var event2 = mock(RecordedEvent.class);
     numOfEvents = ++numOfEvents;
@@ -116,7 +120,7 @@ class ObjectAllocationOutsideTLABSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr.ObjectAllocationOutsideTLAB.allocation",
+            JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION,
             numOfEvents, // count
             summedAllocationSize, // sum
             event2AllocationSize, // min
@@ -131,16 +135,16 @@ class ObjectAllocationOutsideTLABSummarizerTest {
     var testClass = new ObjectAllocationOutsideTLABSummarizer();
 
     when(event1.getStartTime()).thenReturn(Instant.ofEpochMilli(event1StartTime));
-    when(event1.getLong("allocationSize")).thenReturn(event1AllocationSize);
-    when(event1.getValue("eventThread")).thenReturn(recordedThread);
+    when(event1.getLong(ALLOCATION_SIZE)).thenReturn(event1AllocationSize);
+    when(event1.getValue(EVENT_THREAD)).thenReturn(recordedThread);
 
     when(event2.getStartTime()).thenReturn(Instant.ofEpochMilli(event2StartTime));
-    when(event2.getLong("allocationSize")).thenReturn(event2AllocationSize);
-    when(event2.getValue("eventThread")).thenReturn(recordedThread);
+    when(event2.getLong(ALLOCATION_SIZE)).thenReturn(event2AllocationSize);
+    when(event2.getValue(EVENT_THREAD)).thenReturn(recordedThread);
 
     when(event3.getStartTime()).thenReturn(Instant.ofEpochMilli(event3StartTime));
-    when(event3.getLong("allocationSize")).thenReturn(event3AllocationSize);
-    when(event3.getValue("eventThread")).thenReturn(recordedThread);
+    when(event3.getLong(ALLOCATION_SIZE)).thenReturn(event3AllocationSize);
+    when(event3.getValue(EVENT_THREAD)).thenReturn(recordedThread);
 
     when(recordedThread.getJavaName()).thenReturn(eventThreadName);
 
@@ -167,8 +171,8 @@ class ObjectAllocationOutsideTLABSummarizerTest {
     var testClass = new ObjectAllocationOutsideTLABSummarizer();
 
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getValue("eventThread")).thenReturn(recordedThread);
-    when(event.getLong("allocationSize")).thenReturn(eventAllocationSize);
+    when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event.getLong(ALLOCATION_SIZE)).thenReturn(eventAllocationSize);
 
     when(recordedThread.getJavaName()).thenReturn(eventThreadName);
 

@@ -29,6 +29,7 @@ public class ValhallaVBCDetector implements EventToEvent {
   public static final String EVENT_THREAD = "eventThread";
   public static final String THREAD_NAME = "thread.name";
   public static final String STACK_TRACE = "stackTrace";
+  public static final String JFR_VALHALLA_VBC_SYNC = "JfrValhallaVBCSync";
 
   @Override
   public String getEventName() {
@@ -56,6 +57,6 @@ public class ValhallaVBCDetector implements EventToEvent {
     attr.put(THREAD_NAME, eventThread == null ? null : eventThread.getJavaName());
     attr.put(BOX_CLASS, boxClass == null ? null : boxClass.getName());
     attr.put(STACK_TRACE, MethodSupport.serialize(event.getStackTrace()));
-    return Collections.singletonList(new Event("JfrValhallaVBCSync", attr, timestamp));
+    return Collections.singletonList(new Event(JFR_VALHALLA_VBC_SYNC, attr, timestamp));
   }
 }

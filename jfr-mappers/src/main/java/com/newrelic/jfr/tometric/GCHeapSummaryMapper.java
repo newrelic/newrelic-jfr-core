@@ -29,6 +29,10 @@ public class GCHeapSummaryMapper implements EventToMetric {
   public static final String WHEN = "when";
   public static final String COMMITTED_END = "committedEnd";
   public static final String RESERVED_END = "reservedEnd";
+  public static final String JFR_GC_HEAP_SUMMARY_HEAP_COMMITTED_SIZE =
+      "jfr.GCHeapSummary.heapCommittedSize";
+  public static final String JFR_GC_HEAP_SUMMARY_RESERVED_SIZE = "jfr.GCHeapSummary.reservedSize";
+  public static final String JFR_GC_HEAP_SUMMARY_HEAP_USED = "jfr.GCHeapSummary.heapUsed";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
@@ -64,10 +68,10 @@ public class GCHeapSummaryMapper implements EventToMetric {
       if (hasField(heapSpace, RESERVED_END, SIMPLE_CLASS_NAME)) {
         attr.put(RESERVED_END, heapSpace.getLong(RESERVED_END));
       }
-      list.add(new Gauge("jfr.GCHeapSummary.heapCommittedSize", committedSize, timestamp, attr));
-      list.add(new Gauge("jfr.GCHeapSummary.reservedSize", reservedSize, timestamp, attr));
+      list.add(new Gauge(JFR_GC_HEAP_SUMMARY_HEAP_COMMITTED_SIZE, committedSize, timestamp, attr));
+      list.add(new Gauge(JFR_GC_HEAP_SUMMARY_RESERVED_SIZE, reservedSize, timestamp, attr));
     }
-    list.add(new Gauge("jfr.GCHeapSummary.heapUsed", heapUsed, timestamp, attr));
+    list.add(new Gauge(JFR_GC_HEAP_SUMMARY_HEAP_USED, heapUsed, timestamp, attr));
     return list;
   }
 

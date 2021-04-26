@@ -29,6 +29,7 @@ public class ThreadLockEventMapper implements EventToEvent {
   public static final String EVENT_THREAD = "eventThread";
   public static final String DURATION = "duration";
   public static final String STACK_TRACE = "stackTrace";
+  public static final String JFR_JAVA_MONITOR_WAIT = "JfrJavaMonitorWait";
 
   @Override
   public List<Event> apply(RecordedEvent ev) {
@@ -49,7 +50,7 @@ public class ThreadLockEventMapper implements EventToEvent {
       }
       attr.put(THREAD_NAME, eventThread == null ? null : eventThread.getJavaName());
       attr.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
-      return Collections.singletonList(new Event("JfrJavaMonitorWait", attr, timestamp));
+      return Collections.singletonList(new Event(JFR_JAVA_MONITOR_WAIT, attr, timestamp));
     }
     return Collections.emptyList();
   }

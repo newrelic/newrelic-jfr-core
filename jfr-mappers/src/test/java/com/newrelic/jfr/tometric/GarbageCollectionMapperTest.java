@@ -1,5 +1,9 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.GarbageCollectionMapper.CAUSE;
+import static com.newrelic.jfr.tometric.GarbageCollectionMapper.JFR_GARBAGE_COLLECTION_LONGEST_PAUSE;
+import static com.newrelic.jfr.tometric.GarbageCollectionMapper.LONGEST_PAUSE;
+import static com.newrelic.jfr.tometric.GarbageCollectionMapper.NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -57,16 +61,16 @@ class GarbageCollectionMapperTest {
     attr.put("name", name);
     attr.put("cause", cause);
     var longestPause = 21.77;
-    var gauge1 = new Gauge("jfr.GarbageCollection.longestPause", longestPause, now, attr);
+    var gauge1 = new Gauge(JFR_GARBAGE_COLLECTION_LONGEST_PAUSE, longestPause, now, attr);
     List<Metric> expected = List.of(gauge1);
 
     var testClass = new GarbageCollectionMapper();
     var event = mock(RecordedEvent.class);
 
     when(event.getStartTime()).thenReturn(startTime);
-    when(event.getDouble("longestPause")).thenReturn(longestPause);
-    when(event.getString("name")).thenReturn(name);
-    when(event.getString("cause")).thenReturn(cause);
+    when(event.getDouble(LONGEST_PAUSE)).thenReturn(longestPause);
+    when(event.getString(NAME)).thenReturn(name);
+    when(event.getString(CAUSE)).thenReturn(cause);
 
     List<? extends Metric> result = testClass.apply(event);
 

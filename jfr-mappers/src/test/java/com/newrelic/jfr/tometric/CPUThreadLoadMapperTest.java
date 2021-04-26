@@ -1,5 +1,10 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.CPUThreadLoadMapper.JFR_THREAD_CPU_LOAD_SYSTEM;
+import static com.newrelic.jfr.tometric.CPUThreadLoadMapper.JFR_THREAD_CPU_LOAD_USER;
+import static com.newrelic.jfr.tometric.CPUThreadLoadMapper.SYSTEM;
+import static com.newrelic.jfr.tometric.CPUThreadLoadMapper.THREAD_NAME;
+import static com.newrelic.jfr.tometric.CPUThreadLoadMapper.USER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -23,6 +28,7 @@ import org.mockito.Mockito;
 
 class CPUThreadLoadMapperTest {
   private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static final String EVENT_THREAD = "eventThread";
 
   @BeforeAll
   static void init() {
@@ -57,19 +63,19 @@ class CPUThreadLoadMapperTest {
   @Test
   void testApplyWithThreadName() {
 
-    Attributes attributes = new Attributes().put("thread.name", threadName);
+    Attributes attributes = new Attributes().put(THREAD_NAME, threadName);
 
-    Metric gauge1 = new Gauge("jfr.ThreadCPULoad.user", user, timestamp, attributes);
-    Metric gauge2 = new Gauge("jfr.ThreadCPULoad.system", system, timestamp, attributes);
+    Metric gauge1 = new Gauge(JFR_THREAD_CPU_LOAD_USER, user, timestamp, attributes);
+    Metric gauge2 = new Gauge(JFR_THREAD_CPU_LOAD_SYSTEM, system, timestamp, attributes);
     List<Metric> expected = List.of(gauge1, gauge2);
 
     RecordedEvent event = mock(RecordedEvent.class);
     RecordedThread recordedThread = mock(RecordedThread.class);
 
     when(event.getStartTime()).thenReturn(instant);
-    when(event.getDouble("user")).thenReturn(user);
-    when(event.getDouble("system")).thenReturn(system);
-    when(event.getValue("eventThread")).thenReturn(recordedThread);
+    when(event.getDouble(USER)).thenReturn(user);
+    when(event.getDouble(SYSTEM)).thenReturn(system);
+    when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
     when(recordedThread.getJavaName()).thenReturn(threadName);
 
     CPUThreadLoadMapper mapper = new CPUThreadLoadMapper();
@@ -85,7 +91,7 @@ class CPUThreadLoadMapperTest {
     Object recordedThread = new Object(); // not a recorded thread
 
     RecordedEvent event = mock(RecordedEvent.class);
-    when(event.getValue("eventThread")).thenReturn(recordedThread);
+    when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
 
     CPUThreadLoadMapper mapper = new CPUThreadLoadMapper();
 

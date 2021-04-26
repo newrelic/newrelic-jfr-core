@@ -25,6 +25,9 @@ public class OverallCPULoadMapper implements EventToMetric {
   public static final String JVM_USER = "jvmUser";
   public static final String JVM_SYSTEM = "jvmSystem";
   public static final String MACHINE_TOTAL = "machineTotal";
+  public static final String JFR_CPU_LOAD_JVM_USER = "jfr.CPULoad.jvmUser";
+  public static final String JFR_CPU_LOAD_JVM_SYSTEM = "jfr.CPULoad.jvmSystem";
+  public static final String JFR_CPU_LOAD_MACHINE_TOTAL = "jfr.CPULoad.machineTotal";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
@@ -43,9 +46,9 @@ public class OverallCPULoadMapper implements EventToMetric {
       machineTotalGaugeValue = ev.getDouble(MACHINE_TOTAL);
     }
     return Arrays.asList(
-        new Gauge("jfr.CPULoad.jvmUser", jvmUserGaugeValue, timestamp, attr),
-        new Gauge("jfr.CPULoad.jvmSystem", jvmSystemGaugeValue, timestamp, attr),
-        new Gauge("jfr.CPULoad.machineTotal", machineTotalGaugeValue, timestamp, attr));
+        new Gauge(JFR_CPU_LOAD_JVM_USER, jvmUserGaugeValue, timestamp, attr),
+        new Gauge(JFR_CPU_LOAD_JVM_SYSTEM, jvmSystemGaugeValue, timestamp, attr),
+        new Gauge(JFR_CPU_LOAD_MACHINE_TOTAL, machineTotalGaugeValue, timestamp, attr));
   }
 
   @Override

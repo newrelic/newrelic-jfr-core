@@ -1,5 +1,6 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer.JFR_G1_GARBAGE_COLLECTION_DURATION;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,12 +27,15 @@ class G1GarbageCollectionSummarizerTest {
 
   private static Summary defaultSummary;
   private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static final String DURATION = "duration";
+  private static final String JFR_OBJECT_ALLOCATION_IN_NEW_TLAB_ALLOCATION =
+      "jfr.ObjectAllocationInNewTLAB.allocation";
 
   @BeforeAll
   static void init() {
     defaultSummary =
         new Summary(
-            "jfr.ObjectAllocationInNewTLAB.allocation",
+            JFR_OBJECT_ALLOCATION_IN_NEW_TLAB_ALLOCATION,
             0,
             Duration.ofNanos(0L).toMillis(),
             Duration.ofNanos(Long.MAX_VALUE).toMillis(),
@@ -74,7 +78,7 @@ class G1GarbageCollectionSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr.G1GarbageCollection.duration",
+            JFR_G1_GARBAGE_COLLECTION_DURATION,
             numOfEvents, // count
             eventDurationMillis, // sum
             eventDurationMillis, // min
@@ -88,7 +92,7 @@ class G1GarbageCollectionSummarizerTest {
     var testClass = new G1GarbageCollectionSummarizer(summaryStartTime);
 
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
@@ -121,7 +125,7 @@ class G1GarbageCollectionSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr.G1GarbageCollection.duration",
+            JFR_G1_GARBAGE_COLLECTION_DURATION,
             numOfEvents, // count
             summedDurationMillis, // sum
             event3DurationMillis, // min
@@ -136,13 +140,13 @@ class G1GarbageCollectionSummarizerTest {
     var testClass = new G1GarbageCollectionSummarizer(summaryStartTime);
 
     when(event1.getStartTime()).thenReturn(Instant.ofEpochMilli(event1StartTime));
-    when(event1.getDuration("duration")).thenReturn(Duration.ofNanos(event1DurationNanos));
+    when(event1.getDuration(DURATION)).thenReturn(Duration.ofNanos(event1DurationNanos));
 
     when(event2.getStartTime()).thenReturn(Instant.ofEpochMilli(event2StartTime));
-    when(event2.getDuration("duration")).thenReturn(Duration.ofNanos(event2DurationNanos));
+    when(event2.getDuration(DURATION)).thenReturn(Duration.ofNanos(event2DurationNanos));
 
     when(event3.getStartTime()).thenReturn(Instant.ofEpochMilli(event3StartTime));
-    when(event3.getDuration("duration")).thenReturn(Duration.ofNanos(event3DurationNanos));
+    when(event3.getDuration(DURATION)).thenReturn(Duration.ofNanos(event3DurationNanos));
 
     // Summarize all events
     testClass.accept(event1);
@@ -165,7 +169,7 @@ class G1GarbageCollectionSummarizerTest {
 
     var expectedSummaryMetric =
         new Summary(
-            "jfr.G1GarbageCollection.duration",
+            JFR_G1_GARBAGE_COLLECTION_DURATION,
             numOfEvents, // count
             eventDurationMillis, // sum
             eventDurationMillis, // min
@@ -179,7 +183,7 @@ class G1GarbageCollectionSummarizerTest {
     var testClass = new G1GarbageCollectionSummarizer(summaryStartTime);
 
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());

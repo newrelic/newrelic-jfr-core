@@ -28,6 +28,7 @@ public class JVMSystemPropertyMapper implements EventToEvent {
   public static final String KEY = "key";
   public static final String JVM_PROPERTY_VALUE = "jvmPropertyValue";
   public static final String VALUE = "value";
+  public static final String JFR_JVM_INFORMATION = "JfrJVMInformation";
 
   @Override
   public String getEventName() {
@@ -45,6 +46,6 @@ public class JVMSystemPropertyMapper implements EventToEvent {
     if (hasField(event, VALUE, SIMPLE_CLASS_NAME)) {
       attr.put(JVM_PROPERTY_VALUE, event.getString(VALUE));
     }
-    return Collections.singletonList(new Event("JfrJVMInformation", attr, timestamp));
+    return Collections.singletonList(new Event(JFR_JVM_INFORMATION, attr, timestamp));
   }
 }

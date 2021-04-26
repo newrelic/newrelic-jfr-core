@@ -23,6 +23,7 @@ public class ContextSwitchRateMapper implements EventToMetric {
   public static final String SIMPLE_CLASS_NAME = ContextSwitchRateMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.ThreadContextSwitchRate";
   public static final String SWITCH_RATE = "switchRate";
+  public static final String JFR_THREAD_CONTEXT_SWITCH_RATE = "jfr.ThreadContextSwitchRate";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
@@ -33,7 +34,7 @@ public class ContextSwitchRateMapper implements EventToMetric {
       gaugeValue = ev.getDouble(SWITCH_RATE);
     }
     return Collections.singletonList(
-        new Gauge("jfr.ThreadContextSwitchRate", gaugeValue, timestamp, attr));
+        new Gauge(JFR_THREAD_CONTEXT_SWITCH_RATE, gaugeValue, timestamp, attr));
   }
 
   @Override

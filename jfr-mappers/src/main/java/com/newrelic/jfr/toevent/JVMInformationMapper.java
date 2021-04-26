@@ -36,6 +36,7 @@ public class JVMInformationMapper implements EventToEvent {
   public static final String JVM_START_TIME = "jvmStartTime";
   public static final String JVM_ARGUMENTS = "jvmArguments";
   public static final String JVM_VERSION = "jvmVersion";
+  public static final String JFR_JVM_INFORMATION = "JfrJVMInformation";
 
   @Override
   public String getEventName() {
@@ -56,7 +57,6 @@ public class JVMInformationMapper implements EventToEvent {
     if (hasField(event, JVM_VERSION, SIMPLE_CLASS_NAME)) {
       attr.put(JVM_VERSION, event.getString(JVM_VERSION));
     }
-
-    return Collections.singletonList(new Event("JfrJVMInformation", attr, timestamp));
+    return Collections.singletonList(new Event(JFR_JVM_INFORMATION, attr, timestamp));
   }
 }

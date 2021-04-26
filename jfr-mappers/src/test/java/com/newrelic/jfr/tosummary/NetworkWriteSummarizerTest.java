@@ -1,5 +1,9 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.Workarounds.*;
+import static com.newrelic.jfr.tosummary.PerThreadNetworkWriteSummarizer.*;
+import static com.newrelic.jfr.tosummary.PerThreadNetworkWriteSummarizer.JFR_SOCKET_WRITE_BYTES_WRITTEN;
+import static com.newrelic.jfr.tosummary.PerThreadNetworkWriteSummarizer.JFR_SOCKET_WRITE_DURATION;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +13,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.newrelic.jfr.RecordedObjectValidators;
-import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
 import java.time.Duration;
@@ -26,6 +29,7 @@ import org.mockito.Mockito;
 
 class NetworkWriteSummarizerTest {
   private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static final String THREAD_NAME = "thread.name";
 
   @BeforeAll
   static void init() {
@@ -61,44 +65,44 @@ class NetworkWriteSummarizerTest {
 
     var summary1bytes =
         new Summary(
-            "jfr.SocketWrite.bytesWritten",
+            JFR_SOCKET_WRITE_BYTES_WRITTEN,
             2,
             13 + 17,
             13,
             17,
             time1.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName1));
+            new Attributes().put(THREAD_NAME, threadName1));
     var summary1duration =
         new Summary(
-            "jfr.SocketWrite.duration",
+            JFR_SOCKET_WRITE_DURATION,
             2,
             Duration.between(time1, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
             Duration.between(time1, time2).toMillis(),
             time1.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName1));
+            new Attributes().put(THREAD_NAME, threadName1));
     var summary2bytes =
         new Summary(
-            "jfr.SocketWrite.bytesWritten",
+            JFR_SOCKET_WRITE_BYTES_WRITTEN,
             1,
             12,
             12,
             12,
             time2.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName2));
+            new Attributes().put(THREAD_NAME, threadName2));
     var summary2duration =
         new Summary(
-            "jfr.SocketWrite.duration",
+            JFR_SOCKET_WRITE_DURATION,
             1,
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
             time2.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName2));
+            new Attributes().put(THREAD_NAME, threadName2));
     List<Summary> expected =
         List.of(summary2bytes, summary2duration, summary1bytes, summary1duration);
 
@@ -141,8 +145,8 @@ class NetworkWriteSummarizerTest {
     var recordedThread = mock(RecordedThread.class);
     when(recordedThread.getJavaName()).thenReturn(threadName);
     var event = mock(RecordedEvent.class);
-    when(event.getValue(Workarounds.EVENT_THREAD)).thenReturn(recordedThread);
-    when(event.getLong(PerThreadNetworkWriteSummarizer.BYTES_WRITTEN)).thenReturn(bytes);
+    when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event.getLong(BYTES_WRITTEN)).thenReturn(bytes);
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getDuration()).thenReturn(Duration.between(startTime, endTime));
     return event;

@@ -25,6 +25,8 @@ public class ThreadAllocationStatisticsMapper implements EventToMetric {
   public static final String THREAD_NAME = "thread.name";
   public static final String THREAD_OS_NAME = "thread.osName";
   public static final String ALLOCATED = "allocated";
+  public static final String JFR_THREAD_ALLOCATION_STATISTICS_ALLOCATED =
+      "jfr.ThreadAllocationStatistics.allocated";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
@@ -42,9 +44,8 @@ public class ThreadAllocationStatisticsMapper implements EventToMetric {
       attr.put(THREAD_NAME, t.getJavaName());
       attr.put(THREAD_OS_NAME, t.getOSName());
     }
-
     return Collections.singletonList(
-        new Gauge("jfr.ThreadAllocationStatistics.allocated", allocated, time, attr));
+        new Gauge(JFR_THREAD_ALLOCATION_STATISTICS_ALLOCATED, allocated, time, attr));
   }
 
   @Override

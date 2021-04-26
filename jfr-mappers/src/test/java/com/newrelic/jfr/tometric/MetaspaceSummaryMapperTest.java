@@ -1,5 +1,13 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.CLASS_SPACE;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.COMMITTED;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.DATA_SPACE;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.DOT_DELIMITER;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.METASPACE;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.RESERVED;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.USED;
+import static com.newrelic.jfr.tometric.MetaspaceSummaryMapper.WHEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,7 +63,7 @@ public class MetaspaceSummaryMapperTest {
 
     var attr = new Attributes();
     String when = "when";
-    attr.put("when", when);
+    attr.put(WHEN, when);
 
     double used = 10;
     double committed = 30;
@@ -72,16 +80,16 @@ public class MetaspaceSummaryMapperTest {
     var testClass = new MetaspaceSummaryMapper();
 
     var recordedObject = mock(RecordedObject.class);
-    when(recordedObject.getDouble("used")).thenReturn(used);
-    when(recordedObject.getDouble("committed")).thenReturn(committed);
-    when(recordedObject.getDouble("reserved")).thenReturn(reserved);
+    when(recordedObject.getDouble(USED)).thenReturn(used);
+    when(recordedObject.getDouble(COMMITTED)).thenReturn(committed);
+    when(recordedObject.getDouble(RESERVED)).thenReturn(reserved);
 
     var event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(startTime);
-    when(event.getString("when")).thenReturn(when);
-    when(event.getValue("metaspace")).thenReturn(recordedObject);
-    when(event.getValue("dataSpace")).thenReturn(recordedObject);
-    when(event.getValue("classSpace")).thenReturn(recordedObject);
+    when(event.getString(WHEN)).thenReturn(when);
+    when(event.getValue(METASPACE)).thenReturn(recordedObject);
+    when(event.getValue(DATA_SPACE)).thenReturn(recordedObject);
+    when(event.getValue(CLASS_SPACE)).thenReturn(recordedObject);
 
     List<? extends Metric> result = testClass.apply(event);
 
@@ -97,15 +105,19 @@ public class MetaspaceSummaryMapperTest {
       Attributes attr) {
     var gauge1 =
         new Gauge(
-            MetaspaceSummaryMapper.NR_METRIC_PREFIX + metricName + ".committed",
+            MetaspaceSummaryMapper.NR_METRIC_PREFIX + metricName + DOT_DELIMITER + COMMITTED,
             committed,
             now,
             attr);
     var gauge2 =
-        new Gauge(MetaspaceSummaryMapper.NR_METRIC_PREFIX + metricName + ".used", used, now, attr);
+        new Gauge(
+            MetaspaceSummaryMapper.NR_METRIC_PREFIX + metricName + DOT_DELIMITER + USED,
+            used,
+            now,
+            attr);
     var gauge3 =
         new Gauge(
-            MetaspaceSummaryMapper.NR_METRIC_PREFIX + metricName + ".reserved",
+            MetaspaceSummaryMapper.NR_METRIC_PREFIX + metricName + DOT_DELIMITER + RESERVED,
             reserved,
             now,
             attr);

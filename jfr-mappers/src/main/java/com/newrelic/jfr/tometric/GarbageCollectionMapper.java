@@ -22,6 +22,8 @@ public class GarbageCollectionMapper implements EventToMetric {
   public static final String LONGEST_PAUSE = "longestPause";
   public static final String NAME = "name";
   public static final String CAUSE = "cause";
+  public static final String JFR_GARBAGE_COLLECTION_LONGEST_PAUSE =
+      "jfr.GarbageCollection.longestPause";
 
   @Override
   public List<? extends Metric> apply(RecordedEvent ev) {
@@ -38,7 +40,7 @@ public class GarbageCollectionMapper implements EventToMetric {
       attr.put(CAUSE, ev.getString(CAUSE));
     }
     return Collections.singletonList(
-        new Gauge("jfr.GarbageCollection.longestPause", longestPause, timestamp, attr));
+        new Gauge(JFR_GARBAGE_COLLECTION_LONGEST_PAUSE, longestPause, timestamp, attr));
   }
 
   @Override

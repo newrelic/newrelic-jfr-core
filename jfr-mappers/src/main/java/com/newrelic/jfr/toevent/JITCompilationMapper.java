@@ -40,6 +40,7 @@ public class JITCompilationMapper implements EventToEvent {
   public static final String SUCCEEDED = "succeeded";
   public static final String EVENT_THREAD = "eventThread";
   public static final String THREAD_NAME = "thread.name";
+  public static final String JFR_COMPILATION = "JfrCompilation";
 
   @Override
   public List<Event> apply(RecordedEvent event) {
@@ -56,7 +57,7 @@ public class JITCompilationMapper implements EventToEvent {
       threadId = event.getThread(EVENT_THREAD);
     }
     attr.put(THREAD_NAME, threadId == null ? null : threadId.getJavaName());
-    return Collections.singletonList(new Event("JfrCompilation", attr, timestamp));
+    return Collections.singletonList(new Event(JFR_COMPILATION, attr, timestamp));
   }
 
   @Override

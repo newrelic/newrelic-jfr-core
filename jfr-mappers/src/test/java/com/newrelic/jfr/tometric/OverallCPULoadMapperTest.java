@@ -1,5 +1,11 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.OverallCPULoadMapper.JFR_CPU_LOAD_JVM_SYSTEM;
+import static com.newrelic.jfr.tometric.OverallCPULoadMapper.JFR_CPU_LOAD_JVM_USER;
+import static com.newrelic.jfr.tometric.OverallCPULoadMapper.JFR_CPU_LOAD_MACHINE_TOTAL;
+import static com.newrelic.jfr.tometric.OverallCPULoadMapper.JVM_SYSTEM;
+import static com.newrelic.jfr.tometric.OverallCPULoadMapper.JVM_USER;
+import static com.newrelic.jfr.tometric.OverallCPULoadMapper.MACHINE_TOTAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,18 +62,18 @@ class OverallCPULoadMapperTest {
     var jvmUser = 21.77;
     var jvmSystem = 22.98;
     var machineTotal = 1203987.22;
-    var gauge1 = new Gauge("jfr.CPULoad.jvmUser", jvmUser, now, attr);
-    var gauge2 = new Gauge("jfr.CPULoad.jvmSystem", jvmSystem, now, attr);
-    var gauge3 = new Gauge("jfr.CPULoad.machineTotal", machineTotal, now, attr);
+    var gauge1 = new Gauge(JFR_CPU_LOAD_JVM_USER, jvmUser, now, attr);
+    var gauge2 = new Gauge(JFR_CPU_LOAD_JVM_SYSTEM, jvmSystem, now, attr);
+    var gauge3 = new Gauge(JFR_CPU_LOAD_MACHINE_TOTAL, machineTotal, now, attr);
     List<Metric> expected = List.of(gauge1, gauge2, gauge3);
 
     var testClass = new OverallCPULoadMapper();
     var event = mock(RecordedEvent.class);
 
     when(event.getStartTime()).thenReturn(startTime);
-    when(event.getDouble("jvmUser")).thenReturn(jvmUser);
-    when(event.getDouble("jvmSystem")).thenReturn(jvmSystem);
-    when(event.getDouble("machineTotal")).thenReturn(machineTotal);
+    when(event.getDouble(JVM_USER)).thenReturn(jvmUser);
+    when(event.getDouble(JVM_SYSTEM)).thenReturn(jvmSystem);
+    when(event.getDouble(MACHINE_TOTAL)).thenReturn(machineTotal);
 
     List<? extends Metric> result = testClass.apply(event);
 

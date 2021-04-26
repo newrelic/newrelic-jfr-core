@@ -1,5 +1,8 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.AllocationRequiringGCMapper.JFR_ALLOCATION_REQUIRING_GC_ALLOCATION_SIZE;
+import static com.newrelic.jfr.tometric.AllocationRequiringGCMapper.SIZE;
+import static com.newrelic.jfr.tometric.AllocationRequiringGCMapper.THREAD_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,6 +25,7 @@ import org.mockito.Mockito;
 
 class AllocationRequiringGCMapperTest {
   private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static final String EVENT_THREAD = "eventThread";
 
   @BeforeAll
   static void init() {
@@ -59,8 +63,8 @@ class AllocationRequiringGCMapperTest {
     var endTime = Instant.ofEpochMilli(end);
     var size = 32784L;
 
-    var attr = new Attributes().put("thread.name", eventThread);
-    var gauge = new Gauge("jfr.AllocationRequiringGC.allocationSize", size, now, attr);
+    var attr = new Attributes().put(THREAD_NAME, eventThread);
+    var gauge = new Gauge(JFR_ALLOCATION_REQUIRING_GC_ALLOCATION_SIZE, size, now, attr);
     var expected = List.of(gauge);
 
     var testClass = new AllocationRequiringGCMapper();
@@ -69,8 +73,8 @@ class AllocationRequiringGCMapperTest {
 
     when(recordedEvent.getStartTime()).thenReturn(startTime);
     when(recordedEvent.getEndTime()).thenReturn(endTime);
-    when(recordedEvent.getValue("eventThread")).thenReturn(recordedThread);
-    when(recordedEvent.getLong("size")).thenReturn(size);
+    when(recordedEvent.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(recordedEvent.getLong(SIZE)).thenReturn(size);
 
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);

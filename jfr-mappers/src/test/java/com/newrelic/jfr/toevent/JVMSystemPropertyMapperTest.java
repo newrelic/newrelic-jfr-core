@@ -1,5 +1,10 @@
 package com.newrelic.jfr.toevent;
 
+import static com.newrelic.jfr.toevent.JVMSystemPropertyMapper.JFR_JVM_INFORMATION;
+import static com.newrelic.jfr.toevent.JVMSystemPropertyMapper.JVM_PROPERTY;
+import static com.newrelic.jfr.toevent.JVMSystemPropertyMapper.JVM_PROPERTY_VALUE;
+import static com.newrelic.jfr.toevent.JVMSystemPropertyMapper.KEY;
+import static com.newrelic.jfr.toevent.JVMSystemPropertyMapper.VALUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,18 +58,18 @@ class JVMSystemPropertyMapperTest {
     var startTime = Instant.now();
 
     var expectedAttrs = new Attributes();
-    expectedAttrs.put("jvmProperty", key);
-    expectedAttrs.put("jvmPropertyValue", value);
+    expectedAttrs.put(JVM_PROPERTY, key);
+    expectedAttrs.put(JVM_PROPERTY_VALUE, value);
 
-    var expectedEvent = new Event("JfrJVMInformation", expectedAttrs, startTime.toEpochMilli());
+    var expectedEvent = new Event(JFR_JVM_INFORMATION, expectedAttrs, startTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var mapper = new JVMSystemPropertyMapper();
 
     var event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(startTime);
-    when(event.getString("key")).thenReturn(key);
-    when(event.getString("value")).thenReturn(value);
+    when(event.getString(KEY)).thenReturn(key);
+    when(event.getString(VALUE)).thenReturn(value);
 
     var result = mapper.apply(event);
 

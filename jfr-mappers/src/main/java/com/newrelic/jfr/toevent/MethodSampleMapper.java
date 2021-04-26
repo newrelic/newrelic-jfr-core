@@ -42,6 +42,7 @@ public class MethodSampleMapper implements EventToEvent {
   public static final String THREAD_NAME = "thread.name";
   public static final String SAMPLED_THREAD = "sampledThread";
   public static final String STACK_TRACE = "stackTrace";
+  public static final String JFR_METHOD_SAMPLE = "JfrMethodSample";
 
   private final String eventName;
 
@@ -75,8 +76,7 @@ public class MethodSampleMapper implements EventToEvent {
       attr.put(THREAD_STATE, ev.getString(STATE));
     }
     attr.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
-
-    return Collections.singletonList(new Event("JfrMethodSample", attr, timestamp));
+    return Collections.singletonList(new Event(JFR_METHOD_SAMPLE, attr, timestamp));
   }
 
   @Override

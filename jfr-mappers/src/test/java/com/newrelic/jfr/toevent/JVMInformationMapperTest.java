@@ -1,5 +1,9 @@
 package com.newrelic.jfr.toevent;
 
+import static com.newrelic.jfr.toevent.JVMInformationMapper.JFR_JVM_INFORMATION;
+import static com.newrelic.jfr.toevent.JVMInformationMapper.JVM_ARGUMENTS;
+import static com.newrelic.jfr.toevent.JVMInformationMapper.JVM_START_TIME;
+import static com.newrelic.jfr.toevent.JVMInformationMapper.JVM_VERSION;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,19 +59,19 @@ class JVMInformationMapperTest {
     var eventTime = Instant.now().plus(12, MILLIS);
     var expectedAttributes =
         new Attributes()
-            .put("jvmArguments", jvmArgs)
-            .put("jvmStartTime", startTime.toEpochMilli())
-            .put("jvmVersion", jvmVersion);
+            .put(JVM_ARGUMENTS, jvmArgs)
+            .put(JVM_START_TIME, startTime.toEpochMilli())
+            .put(JVM_VERSION, jvmVersion);
     var expectedEvent =
-        new Event("JfrJVMInformation", expectedAttributes, eventTime.toEpochMilli());
+        new Event(JFR_JVM_INFORMATION, expectedAttributes, eventTime.toEpochMilli());
     var expected = List.of(expectedEvent);
 
     var event = mock(RecordedEvent.class);
 
     when(event.getStartTime()).thenReturn(eventTime);
-    when(event.getString("jvmArguments")).thenReturn(jvmArgs);
-    when(event.getInstant("jvmStartTime")).thenReturn(startTime);
-    when(event.getString("jvmVersion")).thenReturn(jvmVersion);
+    when(event.getString(JVM_ARGUMENTS)).thenReturn(jvmArgs);
+    when(event.getInstant(JVM_START_TIME)).thenReturn(startTime);
+    when(event.getString(JVM_VERSION)).thenReturn(jvmVersion);
 
     var mapper = new JVMInformationMapper();
 

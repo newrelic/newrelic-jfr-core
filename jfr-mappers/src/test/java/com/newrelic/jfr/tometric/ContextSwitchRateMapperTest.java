@@ -1,5 +1,7 @@
 package com.newrelic.jfr.tometric;
 
+import static com.newrelic.jfr.tometric.ContextSwitchRateMapper.JFR_THREAD_CONTEXT_SWITCH_RATE;
+import static com.newrelic.jfr.tometric.ContextSwitchRateMapper.SWITCH_RATE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,11 +56,11 @@ class ContextSwitchRateMapperTest {
 
     Gauge expectedGauge =
         new Gauge(
-            "jfr.ThreadContextSwitchRate", switchRate, timestamp.toEpochMilli(), new Attributes());
+            JFR_THREAD_CONTEXT_SWITCH_RATE, switchRate, timestamp.toEpochMilli(), new Attributes());
 
     RecordedEvent event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(timestamp);
-    when(event.getDouble("switchRate")).thenReturn(switchRate);
+    when(event.getDouble(SWITCH_RATE)).thenReturn(switchRate);
 
     ContextSwitchRateMapper mapper = new ContextSwitchRateMapper();
     List<? extends Metric> result = mapper.apply(event);
