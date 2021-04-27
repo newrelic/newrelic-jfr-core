@@ -115,6 +115,8 @@ class NetworkReadSummarizerTest {
     var event = mock(RecordedEvent.class);
     when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
     when(event.getLong(BYTES_READ)).thenReturn(bytes);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
+    when(event.hasField(BYTES_READ)).thenReturn(true);
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getDuration()).thenReturn(Duration.between(startTime, endTime));
     return event;

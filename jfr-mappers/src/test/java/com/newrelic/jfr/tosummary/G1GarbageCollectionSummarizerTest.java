@@ -63,6 +63,7 @@ class G1GarbageCollectionSummarizerTest {
 
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
     when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.hasField(DURATION)).thenReturn(true);
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
@@ -111,12 +112,15 @@ class G1GarbageCollectionSummarizerTest {
 
     when(event1.getStartTime()).thenReturn(Instant.ofEpochMilli(event1StartTime));
     when(event1.getDuration(DURATION)).thenReturn(Duration.ofNanos(event1DurationNanos));
+    when(event1.hasField(DURATION)).thenReturn(true);
 
     when(event2.getStartTime()).thenReturn(Instant.ofEpochMilli(event2StartTime));
     when(event2.getDuration(DURATION)).thenReturn(Duration.ofNanos(event2DurationNanos));
+    when(event2.hasField(DURATION)).thenReturn(true);
 
     when(event3.getStartTime()).thenReturn(Instant.ofEpochMilli(event3StartTime));
     when(event3.getDuration(DURATION)).thenReturn(Duration.ofNanos(event3DurationNanos));
+    when(event3.hasField(DURATION)).thenReturn(true);
 
     // Summarize all events
     testClass.accept(event1);
@@ -154,6 +158,7 @@ class G1GarbageCollectionSummarizerTest {
 
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
     when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.hasField(DURATION)).thenReturn(true);
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());

@@ -88,8 +88,10 @@ class BasicGarbageCollectionSummarizerTest {
     var testClass = new BasicGarbageCollectionSummarizer(DEFAULT_START_TIME_MS);
 
     when(event.getValue(NAME)).thenReturn(G1_NEW);
+    when(event.hasField(NAME)).thenReturn(true);
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
     when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.hasField(DURATION)).thenReturn(true);
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
@@ -128,8 +130,10 @@ class BasicGarbageCollectionSummarizerTest {
     var testClass = new BasicGarbageCollectionSummarizer(DEFAULT_START_TIME_MS);
 
     when(event.getValue(NAME)).thenReturn(G1_OLD);
+    when(event.hasField(NAME)).thenReturn(true);
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
     when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.hasField(DURATION)).thenReturn(true);
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
@@ -200,37 +204,53 @@ class BasicGarbageCollectionSummarizerTest {
 
     // minor GC events
     when(minorGcEvent1.getValue(NAME)).thenReturn(PAR_NEW);
+    when(minorGcEvent1.hasField(NAME)).thenReturn(true);
     when(minorGcEvent1.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent1.get()));
     when(minorGcEvent1.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent1.hasField(DURATION)).thenReturn(true);
 
     when(minorGcEvent2.getValue(NAME)).thenReturn(DEF_NEW);
+    when(minorGcEvent2.hasField(NAME)).thenReturn(true);
     when(minorGcEvent2.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent2.get()));
     when(minorGcEvent2.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent2.hasField(DURATION)).thenReturn(true);
 
     when(minorGcEvent3.getValue(NAME)).thenReturn(PS_MARK_SWEEP);
+    when(minorGcEvent3.hasField(NAME)).thenReturn(true);
     when(minorGcEvent3.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent3.get()));
     when(minorGcEvent3.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent3.hasField(DURATION)).thenReturn(true);
 
     when(minorGcEvent4.getValue(NAME)).thenReturn(PARALLEL_SCAVENGE);
+    when(minorGcEvent4.hasField(NAME)).thenReturn(true);
     when(minorGcEvent4.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent4.get()));
     when(minorGcEvent4.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent4.hasField(DURATION)).thenReturn(true);
 
     // major GC events
     when(majorGcEvent5.getValue(NAME)).thenReturn(PARALLEL_OLD);
+    when(majorGcEvent5.hasField(NAME)).thenReturn(true);
     when(majorGcEvent5.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent5.get()));
     when(majorGcEvent5.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent5.hasField(DURATION)).thenReturn(true);
 
     when(majorGcEvent6.getValue(NAME)).thenReturn(SERIAL_OLD);
+    when(majorGcEvent6.hasField(NAME)).thenReturn(true);
     when(majorGcEvent6.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent6.get()));
     when(majorGcEvent6.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent6.hasField(DURATION)).thenReturn(true);
 
     when(majorGcEvent7.getValue(NAME)).thenReturn(CONCURRENT_MARK_SWEEP);
+    when(majorGcEvent7.hasField(NAME)).thenReturn(true);
     when(majorGcEvent7.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent7.get()));
     when(majorGcEvent7.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent7.hasField(DURATION)).thenReturn(true);
 
     when(majorGcEvent8.getValue(NAME)).thenReturn(G1_FULL);
+    when(majorGcEvent8.hasField(NAME)).thenReturn(true);
     when(majorGcEvent8.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent8.get()));
     when(majorGcEvent8.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent8.hasField(DURATION)).thenReturn(true);
 
     testClass.accept(minorGcEvent1);
     testClass.accept(minorGcEvent2);

@@ -38,6 +38,9 @@ class GarbageCollectionMapperTest {
     when(event.getDouble(LONGEST_PAUSE)).thenReturn(longestPause);
     when(event.getString(NAME)).thenReturn(name);
     when(event.getString(CAUSE)).thenReturn(cause);
+    when(event.hasField(LONGEST_PAUSE)).thenReturn(true);
+    when(event.hasField(NAME)).thenReturn(true);
+    when(event.hasField(CAUSE)).thenReturn(true);
 
     List<? extends Metric> result = testClass.apply(event);
 

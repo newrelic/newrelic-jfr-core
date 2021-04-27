@@ -42,6 +42,8 @@ class ThreadAllocationStatisticsMapperTest {
     when(recordedEvent.getStartTime()).thenReturn(startTime);
     when(recordedEvent.getDouble(ALLOCATED)).thenReturn(allocated);
     when(recordedEvent.getValue(THREAD)).thenReturn(recordedThread);
+    when(recordedEvent.hasField(ALLOCATED)).thenReturn(true);
+    when(recordedEvent.hasField(THREAD)).thenReturn(true);
 
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);
@@ -63,6 +65,8 @@ class ThreadAllocationStatisticsMapperTest {
     when(recordedEvent.getStartTime()).thenReturn(startTime);
     when(recordedEvent.getDouble(ALLOCATED)).thenReturn(allocated);
     when(recordedEvent.getValue(THREAD)).thenReturn(null);
+    when(recordedEvent.hasField(ALLOCATED)).thenReturn(true);
+    when(recordedEvent.hasField(THREAD)).thenReturn(true);
 
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);

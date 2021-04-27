@@ -22,6 +22,7 @@ class WorkaroundsTest {
     var thread = mock(RecordedThread.class);
     when(thread.getJavaName()).thenReturn(threadName);
     when(ev.getValue(EVENT_THREAD)).thenReturn(thread);
+    when(ev.hasField(EVENT_THREAD)).thenReturn(true);
     assertEquals(threadName, Workarounds.getThreadName(ev).get());
   }
 
@@ -47,6 +48,7 @@ class WorkaroundsTest {
 
     when(ev.hasField(SUCCEEDED)).thenReturn(false);
     when(ev.getBoolean(SUCCEDED_TYPO)).thenReturn(true);
+    when(ev.hasField(SUCCEDED_TYPO)).thenReturn(true);
     assertTrue(Workarounds.getSucceeded(ev));
   }
 }

@@ -41,6 +41,9 @@ class OverallCPULoadMapperTest {
     when(event.getDouble(JVM_USER)).thenReturn(jvmUser);
     when(event.getDouble(JVM_SYSTEM)).thenReturn(jvmSystem);
     when(event.getDouble(MACHINE_TOTAL)).thenReturn(machineTotal);
+    when(event.hasField(JVM_USER)).thenReturn(true);
+    when(event.hasField(JVM_SYSTEM)).thenReturn(true);
+    when(event.hasField(MACHINE_TOTAL)).thenReturn(true);
 
     List<? extends Metric> result = testClass.apply(event);
 

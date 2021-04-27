@@ -57,12 +57,21 @@ class GCHeapSummaryMapperTest {
     when(recordedObject.getLong(START)).thenReturn(heapStart);
     when(recordedObject.getLong(COMMITTED_END)).thenReturn(committedEnd);
     when(recordedObject.getLong(RESERVED_END)).thenReturn(reservedEnd);
+    when(recordedObject.hasField(COMMITTED_SIZE)).thenReturn(true);
+    when(recordedObject.hasField(RESERVED_SIZE)).thenReturn(true);
+    when(recordedObject.hasField(START)).thenReturn(true);
+    when(recordedObject.hasField(COMMITTED_END)).thenReturn(true);
+    when(recordedObject.hasField(RESERVED_END)).thenReturn(true);
+    when(recordedObject.hasField(WHEN)).thenReturn(true);
 
     var event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getLong(HEAP_USED)).thenReturn(heapUsed);
     when(event.getValue(HEAP_SPACE)).thenReturn(recordedObject);
     when(event.getString(WHEN)).thenReturn(when);
+    when(event.hasField(HEAP_USED)).thenReturn(true);
+    when(event.hasField(HEAP_SPACE)).thenReturn(true);
+    when(event.hasField(WHEN)).thenReturn(true);
 
     List<? extends Metric> result = testClass.apply(event);
 

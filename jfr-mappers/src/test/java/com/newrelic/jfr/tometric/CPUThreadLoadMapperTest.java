@@ -42,7 +42,10 @@ class CPUThreadLoadMapperTest {
     when(event.getStartTime()).thenReturn(instant);
     when(event.getDouble(USER)).thenReturn(user);
     when(event.getDouble(SYSTEM)).thenReturn(system);
+    when(event.hasField(SYSTEM)).thenReturn(true);
+    when(event.hasField(USER)).thenReturn(true);
     when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
     when(recordedThread.getJavaName()).thenReturn(threadName);
 
     CPUThreadLoadMapper mapper = new CPUThreadLoadMapper();

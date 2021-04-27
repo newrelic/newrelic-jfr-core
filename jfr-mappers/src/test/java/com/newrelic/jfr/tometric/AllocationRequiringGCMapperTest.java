@@ -42,6 +42,8 @@ class AllocationRequiringGCMapperTest {
     when(recordedEvent.getEndTime()).thenReturn(endTime);
     when(recordedEvent.getValue(EVENT_THREAD)).thenReturn(recordedThread);
     when(recordedEvent.getLong(SIZE)).thenReturn(size);
+    when(recordedEvent.hasField(EVENT_THREAD)).thenReturn(true);
+    when(recordedEvent.hasField(SIZE)).thenReturn(true);
 
     var result = testClass.apply(recordedEvent);
     assertEquals(expected, result);

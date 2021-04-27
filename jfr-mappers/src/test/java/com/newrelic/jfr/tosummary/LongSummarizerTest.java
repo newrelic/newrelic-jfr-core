@@ -15,6 +15,7 @@ class LongSummarizerTest {
 
     var fieldName = "theGoodData";
     when(ev.getLong(fieldName)).thenReturn(11L, 12L);
+    when(ev.hasField(fieldName)).thenReturn(true);
 
     var testClass = new LongSummarizer(fieldName);
     testClass.accept(ev);
@@ -44,6 +45,7 @@ class LongSummarizerTest {
 
     var fieldName = "theGoodData";
     when(ev.getLong(fieldName)).thenReturn(101L, 102L);
+    when(ev.hasField(fieldName)).thenReturn(true);
 
     var testClass = new LongSummarizer(fieldName);
     testClass.accept(ev);

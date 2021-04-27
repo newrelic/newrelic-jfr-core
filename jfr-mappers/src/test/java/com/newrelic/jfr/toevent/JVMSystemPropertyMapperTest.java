@@ -37,6 +37,8 @@ class JVMSystemPropertyMapperTest {
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getString(KEY)).thenReturn(key);
     when(event.getString(VALUE)).thenReturn(value);
+    when(event.hasField(KEY)).thenReturn(true);
+    when(event.hasField(VALUE)).thenReturn(true);
 
     var result = mapper.apply(event);
 

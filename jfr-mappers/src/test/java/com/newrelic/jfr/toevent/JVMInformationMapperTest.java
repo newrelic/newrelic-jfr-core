@@ -39,6 +39,9 @@ class JVMInformationMapperTest {
     when(event.getString(JVM_ARGUMENTS)).thenReturn(jvmArgs);
     when(event.getInstant(JVM_START_TIME)).thenReturn(startTime);
     when(event.getString(JVM_VERSION)).thenReturn(jvmVersion);
+    when(event.hasField(JVM_ARGUMENTS)).thenReturn(true);
+    when(event.hasField(JVM_START_TIME)).thenReturn(true);
+    when(event.hasField(JVM_VERSION)).thenReturn(true);
 
     var mapper = new JVMInformationMapper();
 

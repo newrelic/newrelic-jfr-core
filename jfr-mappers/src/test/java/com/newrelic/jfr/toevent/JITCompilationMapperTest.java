@@ -52,6 +52,8 @@ class JITCompilationMapperTest {
     when(event.hasField(SUCCEEDED)).thenReturn(true);
     when(event.getBoolean(SUCCEEDED)).thenReturn(true);
     when(event.getEventType()).thenReturn(eventType);
+    when(event.hasField(METHOD)).thenReturn(true);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
 
     when(eventThread.getJavaName()).thenReturn(threadName);
     when(eventType.getName()).thenReturn(EVENT_NAME);

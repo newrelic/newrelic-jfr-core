@@ -48,6 +48,8 @@ class ThreadLockEventMapperTest {
     when(event.getThread(EVENT_THREAD)).thenReturn(eventThread);
     when(event.getDuration()).thenReturn(duration);
     when(event.getClass(MONITOR_CLASS)).thenReturn(monitorClass);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
+    when(event.hasField(MONITOR_CLASS)).thenReturn(true);
     when(eventThread.getJavaName()).thenReturn(threadName);
     when(monitorClass.getName()).thenReturn(monitorClassName);
 

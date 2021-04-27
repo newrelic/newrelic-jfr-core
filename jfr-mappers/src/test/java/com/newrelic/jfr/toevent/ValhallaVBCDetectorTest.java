@@ -46,6 +46,8 @@ public class ValhallaVBCDetectorTest {
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getStackTrace()).thenReturn(stack);
     when(event.getThread(EVENT_THREAD)).thenReturn(eventThread);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
+    when(event.hasField(BOX_CLASS)).thenReturn(true);
 
     when(eventThread.getJavaName()).thenReturn(threadName);
 

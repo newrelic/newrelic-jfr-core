@@ -51,6 +51,9 @@ public class MetaspaceSummaryMapperTest {
     when(recordedObject.getDouble(USED)).thenReturn(used);
     when(recordedObject.getDouble(COMMITTED)).thenReturn(committed);
     when(recordedObject.getDouble(RESERVED)).thenReturn(reserved);
+    when(recordedObject.hasField(USED)).thenReturn(true);
+    when(recordedObject.hasField(COMMITTED)).thenReturn(true);
+    when(recordedObject.hasField(RESERVED)).thenReturn(true);
 
     var event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(startTime);
@@ -58,6 +61,10 @@ public class MetaspaceSummaryMapperTest {
     when(event.getValue(METASPACE)).thenReturn(recordedObject);
     when(event.getValue(DATA_SPACE)).thenReturn(recordedObject);
     when(event.getValue(CLASS_SPACE)).thenReturn(recordedObject);
+    when(event.hasField(WHEN)).thenReturn(true);
+    when(event.hasField(METASPACE)).thenReturn(true);
+    when(event.hasField(DATA_SPACE)).thenReturn(true);
+    when(event.hasField(CLASS_SPACE)).thenReturn(true);
 
     List<? extends Metric> result = testClass.apply(event);
 

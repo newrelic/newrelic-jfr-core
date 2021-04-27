@@ -51,6 +51,8 @@ class ObjectAllocationInNewTLABSummarizerTest {
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
     when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
     when(event.getLong(TLAB_SIZE)).thenReturn(eventTlabSize);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
+    when(event.hasField(TLAB_SIZE)).thenReturn(true);
 
     when(recordedThread.getJavaName()).thenReturn(eventThreadName);
 
@@ -102,14 +104,20 @@ class ObjectAllocationInNewTLABSummarizerTest {
     when(event1.getStartTime()).thenReturn(Instant.ofEpochMilli(event1StartTime));
     when(event1.getLong(TLAB_SIZE)).thenReturn(event1TlabSize);
     when(event1.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event1.hasField(TLAB_SIZE)).thenReturn(true);
+    when(event1.hasField(EVENT_THREAD)).thenReturn(true);
 
     when(event2.getStartTime()).thenReturn(Instant.ofEpochMilli(event2StartTime));
     when(event2.getLong(TLAB_SIZE)).thenReturn(event2TlabSize);
     when(event2.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event2.hasField(TLAB_SIZE)).thenReturn(true);
+    when(event2.hasField(EVENT_THREAD)).thenReturn(true);
 
     when(event3.getStartTime()).thenReturn(Instant.ofEpochMilli(event3StartTime));
     when(event3.getLong(TLAB_SIZE)).thenReturn(event3TlabSize);
     when(event3.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event3.hasField(TLAB_SIZE)).thenReturn(true);
+    when(event3.hasField(EVENT_THREAD)).thenReturn(true);
 
     when(recordedThread.getJavaName()).thenReturn(eventThreadName);
 
@@ -136,6 +144,8 @@ class ObjectAllocationInNewTLABSummarizerTest {
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
     when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
     when(event.getLong(TLAB_SIZE)).thenReturn(eventTlabSize);
+    when(event.hasField(EVENT_THREAD)).thenReturn(true);
+    when(event.hasField(TLAB_SIZE)).thenReturn(true);
 
     when(recordedThread.getJavaName()).thenReturn(eventThreadName);
 

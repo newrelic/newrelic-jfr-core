@@ -45,6 +45,8 @@ class MethodSampleMapperTest {
     when(event.getStackTrace()).thenReturn(stack);
     when(event.getThread(SAMPLED_THREAD)).thenReturn(sampledThread);
     when(event.getString(STATE)).thenReturn(threadState);
+    when(event.hasField(SAMPLED_THREAD)).thenReturn(true);
+    when(event.hasField(STATE)).thenReturn(true);
     when(sampledThread.getJavaName()).thenReturn(threadName);
 
     var mapper = MethodSampleMapper.forExecutionSample();

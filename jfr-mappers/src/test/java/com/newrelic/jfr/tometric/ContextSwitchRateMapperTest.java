@@ -28,6 +28,7 @@ class ContextSwitchRateMapperTest {
     RecordedEvent event = mock(RecordedEvent.class);
     when(event.getStartTime()).thenReturn(timestamp);
     when(event.getDouble(SWITCH_RATE)).thenReturn(switchRate);
+    when(event.hasField(SWITCH_RATE)).thenReturn(true);
 
     ContextSwitchRateMapper mapper = new ContextSwitchRateMapper();
     List<? extends Metric> result = mapper.apply(event);
