@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.tometric;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
@@ -20,7 +18,6 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class OverallCPULoadMapper implements EventToMetric {
-  public static final String SIMPLE_CLASS_NAME = OverallCPULoadMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.CPULoad";
   public static final String JVM_USER = "jvmUser";
   public static final String JVM_SYSTEM = "jvmSystem";
@@ -34,15 +31,15 @@ public class OverallCPULoadMapper implements EventToMetric {
     long timestamp = ev.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
     double jvmUserGaugeValue = 0;
-    if (hasField(ev, JVM_USER, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(JVM_USER)) {
       jvmUserGaugeValue = ev.getDouble(JVM_USER);
     }
     double jvmSystemGaugeValue = 0;
-    if (hasField(ev, JVM_SYSTEM, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(JVM_SYSTEM)) {
       jvmSystemGaugeValue = ev.getDouble(JVM_SYSTEM);
     }
     double machineTotalGaugeValue = 0;
-    if (hasField(ev, MACHINE_TOTAL, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(MACHINE_TOTAL)) {
       machineTotalGaugeValue = ev.getDouble(MACHINE_TOTAL);
     }
     return Arrays.asList(

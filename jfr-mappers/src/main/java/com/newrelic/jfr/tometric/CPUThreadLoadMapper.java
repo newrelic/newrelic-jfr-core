@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.tometric;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
@@ -28,7 +26,6 @@ import jdk.jfr.consumer.RecordedEvent;
 //        eventThread = "C1 CompilerThread0" (javaThreadId = 8)
 //        }
 public class CPUThreadLoadMapper implements EventToMetric {
-  public static final String SIMPLE_CLASS_NAME = CPUThreadLoadMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.ThreadCPULoad";
   public static final String USER = "user";
   public static final String SYSTEM = "system";
@@ -44,11 +41,11 @@ public class CPUThreadLoadMapper implements EventToMetric {
       long timestamp = ev.getStartTime().toEpochMilli();
       Attributes attr = new Attributes().put(THREAD_NAME, threadName);
       double userGaugeValue = 0;
-      if (hasField(ev, USER, SIMPLE_CLASS_NAME)) {
+      if (ev.hasField(USER)) {
         userGaugeValue = ev.getDouble(USER);
       }
       double systemGaugeValue = 0;
-      if (hasField(ev, SYSTEM, SIMPLE_CLASS_NAME)) {
+      if (ev.hasField(SYSTEM)) {
         systemGaugeValue = ev.getDouble(SYSTEM);
       }
       // Do we need to throttle these events somehow? Or just send everything?

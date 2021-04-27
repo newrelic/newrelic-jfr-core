@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.toevent;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.Collections;
@@ -31,7 +29,6 @@ import jdk.jfr.consumer.RecordedEvent;
 //        pid = 13612
 //        }
 public class JVMInformationMapper implements EventToEvent {
-  public static final String SIMPLE_CLASS_NAME = JVMInformationMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.JVMInformation";
   public static final String JVM_START_TIME = "jvmStartTime";
   public static final String JVM_ARGUMENTS = "jvmArguments";
@@ -48,13 +45,13 @@ public class JVMInformationMapper implements EventToEvent {
 
     long timestamp = event.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
-    if (hasField(event, JVM_START_TIME, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(JVM_START_TIME)) {
       attr.put(JVM_START_TIME, event.getInstant(JVM_START_TIME).toEpochMilli());
     }
-    if (hasField(event, JVM_ARGUMENTS, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(JVM_ARGUMENTS)) {
       attr.put(JVM_ARGUMENTS, event.getString(JVM_ARGUMENTS));
     }
-    if (hasField(event, JVM_VERSION, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(JVM_VERSION)) {
       attr.put(JVM_VERSION, event.getString(JVM_VERSION));
     }
     return Collections.singletonList(new Event(JFR_JVM_INFORMATION, attr, timestamp));

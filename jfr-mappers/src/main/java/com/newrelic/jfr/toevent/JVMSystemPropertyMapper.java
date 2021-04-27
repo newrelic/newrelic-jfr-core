@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.toevent;
 
-import static com.newrelic.jfr.RecordedObjectValidators.hasField;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.util.Collections;
@@ -22,7 +20,6 @@ import jdk.jfr.consumer.RecordedEvent;
 //        value = "Java Virtual Machine Specification"
 // }
 public class JVMSystemPropertyMapper implements EventToEvent {
-  public static final String SIMPLE_CLASS_NAME = JVMSystemPropertyMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.InitialSystemProperty";
   public static final String JVM_PROPERTY = "jvmProperty";
   public static final String KEY = "key";
@@ -46,10 +43,10 @@ public class JVMSystemPropertyMapper implements EventToEvent {
     long timestamp = event.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
 
-    if (hasField(event, KEY, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(KEY)) {
       attr.put(JVM_PROPERTY, event.getString(KEY));
     }
-    if (hasField(event, VALUE, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(VALUE)) {
       valueSplitter.maybeSplit(attr, JVM_PROPERTY_VALUE, event.getString(VALUE));
     }
     return Collections.singletonList(new Event(JFR_JVM_INFORMATION, attr, timestamp));

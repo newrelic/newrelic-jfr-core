@@ -7,13 +7,9 @@
 
 package com.newrelic.jfr.tosummary;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import jdk.jfr.consumer.RecordedEvent;
 
 public class LongSummarizer {
-  public static final String SIMPLE_CLASS_NAME = LongSummarizer.class.getSimpleName();
-
   private final String fieldName;
   private int count = 0;
   private long sum = 0L;
@@ -27,7 +23,7 @@ public class LongSummarizer {
   public void accept(RecordedEvent ev) {
     count++;
     long currentValue = 0;
-    if (hasField(ev, fieldName, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(fieldName)) {
       currentValue = ev.getLong(fieldName);
     }
     sum = sum + currentValue;

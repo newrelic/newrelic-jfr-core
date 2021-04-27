@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.tometric;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
@@ -17,7 +15,6 @@ import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class GarbageCollectionMapper implements EventToMetric {
-  public static final String SIMPLE_CLASS_NAME = GarbageCollectionMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GarbageCollection";
   public static final String LONGEST_PAUSE = "longestPause";
   public static final String NAME = "name";
@@ -29,14 +26,14 @@ public class GarbageCollectionMapper implements EventToMetric {
   public List<? extends Metric> apply(RecordedEvent ev) {
     long timestamp = ev.getStartTime().toEpochMilli();
     double longestPause = 0;
-    if (hasField(ev, LONGEST_PAUSE, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(LONGEST_PAUSE)) {
       longestPause = ev.getDouble(LONGEST_PAUSE);
     }
     Attributes attr = new Attributes();
-    if (hasField(ev, NAME, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(NAME)) {
       attr.put(NAME, ev.getString(NAME));
     }
-    if (hasField(ev, CAUSE, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(CAUSE)) {
       attr.put(CAUSE, ev.getString(CAUSE));
     }
     return Collections.singletonList(

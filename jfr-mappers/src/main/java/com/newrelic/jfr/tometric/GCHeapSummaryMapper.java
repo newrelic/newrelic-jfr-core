@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.tometric;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
 import com.newrelic.telemetry.metrics.Metric;
@@ -18,7 +16,6 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 
 public class GCHeapSummaryMapper implements EventToMetric {
-  public static final String SIMPLE_CLASS_NAME = GCHeapSummaryMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GCHeapSummary";
   public static final String HEAP_USED = "heapUsed";
   public static final String HEAP_SPACE = "heapSpace";
@@ -38,34 +35,34 @@ public class GCHeapSummaryMapper implements EventToMetric {
   public List<? extends Metric> apply(RecordedEvent ev) {
     long timestamp = ev.getStartTime().toEpochMilli();
     long heapUsed = 0;
-    if (hasField(ev, HEAP_USED, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(HEAP_USED)) {
       heapUsed = ev.getLong(HEAP_USED);
     }
     List<Gauge> list = new ArrayList<>();
     Attributes attr = new Attributes();
     RecordedObject heapSpace = null;
-    if (hasField(ev, HEAP_SPACE, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(HEAP_SPACE)) {
       heapSpace = ev.getValue(HEAP_SPACE);
     }
-    if (!isRecordedObjectNull(heapSpace, SIMPLE_CLASS_NAME)) {
+    if (heapSpace != null) {
       long committedSize = 0;
-      if (hasField(heapSpace, COMMITTED_SIZE, SIMPLE_CLASS_NAME)) {
+      if (heapSpace.hasField(COMMITTED_SIZE)) {
         committedSize = heapSpace.getLong(COMMITTED_SIZE);
       }
       long reservedSize = 0;
-      if (hasField(heapSpace, RESERVED_SIZE, SIMPLE_CLASS_NAME)) {
+      if (heapSpace.hasField(RESERVED_SIZE)) {
         reservedSize = heapSpace.getLong(RESERVED_SIZE);
       }
-      if (hasField(heapSpace, WHEN, SIMPLE_CLASS_NAME)) {
+      if (heapSpace.hasField(WHEN)) {
         attr.put(WHEN, ev.getString(WHEN));
       }
-      if (hasField(heapSpace, START, SIMPLE_CLASS_NAME)) {
+      if (heapSpace.hasField(START)) {
         attr.put(HEAP_START, heapSpace.getLong(START));
       }
-      if (hasField(heapSpace, COMMITTED_END, SIMPLE_CLASS_NAME)) {
+      if (heapSpace.hasField(COMMITTED_END)) {
         attr.put(COMMITTED_END, heapSpace.getLong(COMMITTED_END));
       }
-      if (hasField(heapSpace, RESERVED_END, SIMPLE_CLASS_NAME)) {
+      if (heapSpace.hasField(RESERVED_END)) {
         attr.put(RESERVED_END, heapSpace.getLong(RESERVED_END));
       }
       list.add(new Gauge(JFR_GC_HEAP_SUMMARY_HEAP_COMMITTED_SIZE, committedSize, timestamp, attr));

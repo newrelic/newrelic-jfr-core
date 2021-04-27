@@ -1,7 +1,5 @@
 package com.newrelic.jfr.toevent;
 
-import static com.newrelic.jfr.RecordedObjectValidators.hasField;
-
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
@@ -21,7 +19,6 @@ import jdk.jfr.consumer.RecordedThread;
 //        ]
 //        }
 public class ValhallaVBCDetector implements EventToEvent {
-  public static final String SIMPLE_CLASS_NAME = ValhallaVBCDetector.class.getSimpleName();
   // Is this going to change to SyncOnValueBasedClass ?
   public static final String OLD_EVENT_NAME = "jdk.SyncOnPrimitiveWrapper";
   public static final String EVENT_NAME = "jdk.SyncOnValueBasedClass";
@@ -47,11 +44,11 @@ public class ValhallaVBCDetector implements EventToEvent {
     long timestamp = event.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
     RecordedThread eventThread = null;
-    if (hasField(event, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(EVENT_THREAD)) {
       eventThread = event.getThread(EVENT_THREAD);
     }
     RecordedClass boxClass = null;
-    if (hasField(event, BOX_CLASS, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(BOX_CLASS)) {
       boxClass = event.getClass(BOX_CLASS);
     }
     attr.put(THREAD_NAME, eventThread == null ? null : eventThread.getJavaName());

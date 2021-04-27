@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.toevent;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
@@ -32,7 +30,6 @@ import jdk.jfr.consumer.RecordedThread;
 //        eventThread = "C2 CompilerThread0" (javaThreadId = 5)
 //        }
 public class JITCompilationMapper implements EventToEvent {
-  public static final String SIMPLE_CLASS_NAME = JITCompilationMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.Compilation";
   public static final String METHOD = "method";
   public static final String DESC = "desc";
@@ -47,13 +44,13 @@ public class JITCompilationMapper implements EventToEvent {
     long timestamp = event.getStartTime().toEpochMilli();
     Duration duration = event.getDuration();
     Attributes attr = new Attributes();
-    if (hasField(event, METHOD, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(METHOD)) {
       attr.put(DESC, MethodSupport.describeMethod(event.getValue(METHOD)));
     }
     attr.put(DURATION, duration.toMillis());
     attr.put(SUCCEEDED, Workarounds.getSucceeded(event));
     RecordedThread threadId = null;
-    if (hasField(event, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+    if (event.hasField(EVENT_THREAD)) {
       threadId = event.getThread(EVENT_THREAD);
     }
     attr.put(THREAD_NAME, threadId == null ? null : threadId.getJavaName());

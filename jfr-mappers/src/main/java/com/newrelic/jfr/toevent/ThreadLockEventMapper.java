@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.toevent;
 
-import static com.newrelic.jfr.RecordedObjectValidators.hasField;
-
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
@@ -21,7 +19,6 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;
 
 public class ThreadLockEventMapper implements EventToEvent {
-  public static final String SIMPLE_CLASS_NAME = ThreadLockEventMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.JavaMonitorWait"; // jdk.JavaMonitorEnter
   public static final String MONITOR_CLASS = "monitorClass";
   public static final String CLASS = "class";
@@ -37,15 +34,15 @@ public class ThreadLockEventMapper implements EventToEvent {
     if (duration.toMillis() > 20) {
       long timestamp = ev.getStartTime().toEpochMilli();
       Attributes attr = new Attributes();
-      if (hasField(ev, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+      if (ev.hasField(EVENT_THREAD)) {
         attr.put(THREAD_NAME, ev.getThread(EVENT_THREAD).getJavaName());
       }
-      if (hasField(ev, MONITOR_CLASS, SIMPLE_CLASS_NAME)) {
+      if (ev.hasField(MONITOR_CLASS)) {
         attr.put(CLASS, ev.getClass(MONITOR_CLASS).getName());
       }
       attr.put(DURATION, duration.toMillis());
       RecordedThread eventThread = null;
-      if (hasField(ev, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+      if (ev.hasField(EVENT_THREAD)) {
         eventThread = ev.getThread(EVENT_THREAD);
       }
       attr.put(THREAD_NAME, eventThread == null ? null : eventThread.getJavaName());

@@ -7,14 +7,11 @@
 
 package com.newrelic.jfr;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedThread;
 
 public class Workarounds {
-  public static final String SIMPLE_CLASS_NAME = Workarounds.class.getSimpleName();
   public static final String EVENT_THREAD = "eventThread";
   public static final String SUCCEEDED = "succeeded";
   public static final String SUCCEDED_TYPO = "succeded";
@@ -28,7 +25,7 @@ public class Workarounds {
    * @return the thread name, or null if unable to extract it
    */
   public static Optional<String> getThreadName(RecordedEvent ev) {
-    if (hasField(ev, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(EVENT_THREAD)) {
       Object thisField = ev.getValue(EVENT_THREAD);
       if (thisField instanceof RecordedThread) {
         return Optional.of(((RecordedThread) thisField).getJavaName());
@@ -47,9 +44,9 @@ public class Workarounds {
    * @return true if the event succeeded/succeded, false otherwise
    */
   public static boolean getSucceeded(RecordedEvent ev) {
-    if (hasField(ev, SUCCEEDED, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(SUCCEEDED)) {
       return ev.getBoolean(SUCCEEDED);
-    } else if (hasField(ev, SUCCEDED_TYPO, SIMPLE_CLASS_NAME)) {
+    } else if (ev.hasField(SUCCEDED_TYPO)) {
       return ev.getBoolean(SUCCEDED_TYPO);
     }
     return false;

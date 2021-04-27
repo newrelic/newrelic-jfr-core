@@ -7,7 +7,6 @@
 
 package com.newrelic.jfr.tosummary;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
 import static com.newrelic.jfr.tosummary.BaseDurationSummarizer.DEFAULT_CLOCK;
 
 import com.newrelic.telemetry.Attributes;
@@ -23,7 +22,6 @@ import jdk.jfr.consumer.RecordedEvent;
  * pairs.
  */
 public final class GCHeapSummarySummarizer implements EventToSummary {
-  public static final String SIMPLE_CLASS_NAME = GCHeapSummarySummarizer.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GCHeapSummary";
   public static final String BEFORE = "Before GC";
   public static final String AFTER = "After GC";
@@ -59,7 +57,7 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
   public void accept(RecordedEvent ev) {
     endTimeMs = ev.getStartTime().toEpochMilli();
     String when = null;
-    if (hasField(ev, WHEN, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(WHEN)) {
       when = ev.getString(WHEN);
     }
     if (when != null) {
@@ -69,7 +67,7 @@ public final class GCHeapSummarySummarizer implements EventToSummary {
     }
     count = count + 1;
     long gcId = 0;
-    if (hasField(ev, GC_ID, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(GC_ID)) {
       gcId = ev.getLong(GC_ID);
     }
     RecordedEvent pair = awaitingPairs.get(gcId);

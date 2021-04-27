@@ -7,7 +7,6 @@
 
 package com.newrelic.jfr.tosummary;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
 import static com.newrelic.jfr.tosummary.BaseDurationSummarizer.DEFAULT_CLOCK;
 
 import com.newrelic.telemetry.Attributes;
@@ -24,8 +23,6 @@ import org.slf4j.LoggerFactory;
 
 /** This class aggregates the duration of Garbage Collection JFR events */
 public final class BasicGarbageCollectionSummarizer implements EventToSummary {
-  public static final String SIMPLE_CLASS_NAME =
-      BasicGarbageCollectionSummarizer.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.GarbageCollection";
   public static final String NAME = "name";
   public static final String JFR_GARBAGE_COLLECTION_MINOR_DURATION =
@@ -106,7 +103,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
   @Override
   public void accept(RecordedEvent ev) {
     String name = null;
-    if (hasField(ev, NAME, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(NAME)) {
       name = ev.getValue(NAME);
     }
     if (name != null) {

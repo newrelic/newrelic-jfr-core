@@ -7,8 +7,6 @@
 
 package com.newrelic.jfr.tometric;
 
-import static com.newrelic.jfr.RecordedObjectValidators.*;
-
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Gauge;
@@ -19,7 +17,6 @@ import java.util.Optional;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class AllocationRequiringGCMapper implements EventToMetric {
-  public static final String SIMPLE_CLASS_NAME = AllocationRequiringGCMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.AllocationRequiringGC";
   public static final String SIZE = "size";
   public static final String THREAD_NAME = "thread.name";
@@ -33,7 +30,7 @@ public class AllocationRequiringGCMapper implements EventToMetric {
     Optional<String> threadName = Workarounds.getThreadName(ev);
     threadName.ifPresent(thread -> attr.put(THREAD_NAME, thread));
     long gaugeValue = 0;
-    if (hasField(ev, SIZE, SIMPLE_CLASS_NAME)) {
+    if (ev.hasField(SIZE)) {
       gaugeValue = ev.getLong(SIZE);
     }
     return Collections.singletonList(
