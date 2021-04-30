@@ -7,6 +7,7 @@
 
 package com.newrelic.jfr.daemon;
 
+import com.newrelic.jfr.ProfilerRegistry;
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
@@ -29,24 +30,30 @@ public class EventConverter {
   private final ToEventRegistry toEventRegistry;
 
   private final Map<String, Integer> eventCount = new HashMap<>();
+  private final ProfilerRegistry profilerRegistry;
 
   public EventConverter(Attributes commonAttributes) {
     this(
         commonAttributes,
         ToMetricRegistry.createDefault(),
         ToSummaryRegistry.createDefault(),
-        ToEventRegistry.createDefault());
+        ToEventRegistry.createDefault(),
+    ProfilerRegistry.createDefault()
+    );
+    
   }
 
   EventConverter(
       Attributes commonAttributes,
       ToMetricRegistry toMetricRegistry,
       ToSummaryRegistry toSummaryRegistry,
-      ToEventRegistry toEventRegistry) {
+      ToEventRegistry toEventRegistry,
+      ProfilerRegistry profilerRegistry) {
     this.commonAttributes = commonAttributes;
     this.toMetricRegistry = toMetricRegistry;
     this.toSummaryRegistry = toSummaryRegistry;
     this.toEventRegistry = toEventRegistry;
+    this.profilerRegistry = profilerRegistry;
   }
 
   /**
@@ -91,7 +98,9 @@ public class EventConverter {
           .flatMap(m -> m.apply(event).stream())
           .forEach(batches::addEvent);
 
+      
       toSummaryRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
+      profilerRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
 
     } catch (Throwable e) {
       logger.error(

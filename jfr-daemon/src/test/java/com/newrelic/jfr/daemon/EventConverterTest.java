@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.ProfilerRegistry;
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
@@ -45,6 +46,7 @@ class EventConverterTest {
     var toEventRegistry = mock(ToEventRegistry.class);
     var toMetricRegistry = mock(ToMetricRegistry.class);
     var toSummaryRegistry = mock(ToSummaryRegistry.class);
+    var profilerRegistry = mock(ProfilerRegistry.class);
     var buffer = mock(RecordedEventBuffer.class);
     var eventToEvent = mock(EventToEvent.class);
     var eventToMetric = mock(EventToMetric.class);
@@ -64,7 +66,7 @@ class EventConverterTest {
     when(eventToSummary.test(e3)).thenReturn(true);
     doReturn(Stream.of(summary)).when(eventToSummary).summarize();
 
-    var testClass = new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, toEventRegistry);
+    var testClass = new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, toEventRegistry, profilerRegistry);
 
     var result = testClass.convert(buffer);
     var eventBatch = result.createEventBatch();
@@ -82,6 +84,8 @@ class EventConverterTest {
     var attrs = new Attributes().put("foo", "bar");
     var toMetricRegistry = mock(ToMetricRegistry.class);
     var toSummaryRegistry = mock(ToSummaryRegistry.class);
+    var profilerRegistry = mock(ProfilerRegistry.class);
+
     var buffer = mock(RecordedEventBuffer.class);
 
     when(buffer.drainToStream()).thenReturn(Stream.of(e1));
@@ -89,7 +93,7 @@ class EventConverterTest {
 
     when(toMetricRegistry.all()).thenThrow(new RuntimeException("Whoops"));
 
-    var testClass = new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, null);
+    var testClass = new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, null, profilerRegistry);
 
     var result = testClass.convert(buffer);
     assertNotNull(result);

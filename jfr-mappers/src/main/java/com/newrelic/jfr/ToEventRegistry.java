@@ -24,9 +24,9 @@ public class ToEventRegistry {
           new JVMInformationMapper(),
           new JVMSystemPropertyMapper(),
           new ThreadLockEventMapper(),
-          new ValhallaVBCDetector()
-          //          MethodSampleMapper.forExecutionSample(),
-          //          MethodSampleMapper.forNativeMethodSample()
+          new ValhallaVBCDetector(),
+                    MethodSampleMapper.forExecutionSample(),
+                    MethodSampleMapper.forNativeMethodSample()
           );
 
   private final List<EventToEvent> mappers;
