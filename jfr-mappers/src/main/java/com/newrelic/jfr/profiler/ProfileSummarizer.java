@@ -50,7 +50,6 @@ public class ProfileSummarizer implements EventToEventSummary {
       return;
     }
 
-    long timestamp = ev.getStartTime().toEpochMilli();
     Map<String, String> jfrStackTrace = new HashMap<>();
     RecordedThread sampledThread = ev.getThread("sampledThread");
     jfrStackTrace.put("thread.name", sampledThread == null ? null : sampledThread.getJavaName());
@@ -60,13 +59,14 @@ public class ProfileSummarizer implements EventToEventSummary {
     //change into JvmStackTraceEvent
     JvmStackTraceEvent event = makeEvent(jfrStackTrace);
     
-    //exisiting thread? Add to list. New Thread? Create map key and new list
+    //TODO: These lists are being modified in place. Should they be immutable and replaced when event is added?
+    //exisiting thread? Add event to list.
     stackTraceEventPerThread.computeIfPresent(event.getThreadName(), (k, list) -> {
       list.add(event);
       return list;
     });
+    // event of New Thread? Add new map entry. key and new list <StackTraceEvent>
     stackTraceEventPerThread.computeIfAbsent(event.getThreadName(), k -> new ArrayList<>(Arrays.asList(event)));
-    
   }
 
   @Override
@@ -85,22 +85,26 @@ public class ProfileSummarizer implements EventToEventSummary {
                     e -> flattener.flatten(e.getValue())
             ));
     
-    //<thread, List<Framelevel> to List<Event>
+    //transform <thread, List<Framelevel> to List<Event>. Events also have thread.name attribute
     List<Event> events = flameLevelsPerThread.entrySet().stream()
-            .flatMap(e -> e.getValue().stream())
-            .map(this::flameLevelToEvent)
+            .flatMap(e -> flameLevelToEvent(e.getValue(), e.getKey()).stream())
             .collect(Collectors.toList());
     return events.stream();
   }
 
-  private Event flameLevelToEvent(FlameLevel flameLevel) {
-    Attributes attr = new Attributes();
-    attr.put("name", flameLevel.getName());
-    attr.put("value", flameLevel.getCount());
-    attr.put("id", flameLevel.getId());
-    attr.put("parentId", flameLevel.getParentId());
-    long timestamp = System.currentTimeMillis();;
-    return new Event("testJFRFlameLevel", attr, timestamp);
+  private List<Event> flameLevelToEvent(List<FlameLevel> flameLevels, String threadName) {
+    List<Event> events = new ArrayList<>();
+    for(FlameLevel flameLevel: flameLevels) {
+      Attributes attr = new Attributes();
+      attr.put("thread", threadName);
+      attr.put("name", flameLevel.getName());
+      attr.put("value", flameLevel.getCount());
+      attr.put("id", flameLevel.getId());
+      attr.put("parentId", flameLevel.getParentId());
+      long timestamp = System.currentTimeMillis();;
+      events.add(new Event("testJFRFlameLevel", attr, timestamp));
+    }
+    return events;
   }
 
   //this approach didn't work

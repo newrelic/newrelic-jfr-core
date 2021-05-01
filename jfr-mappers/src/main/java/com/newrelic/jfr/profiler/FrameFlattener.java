@@ -22,7 +22,9 @@ public class FrameFlattener {
             return emptyList();
         }
 
-        String parentId = parent == null ? null : parent.getId();
+        //can't be null, will blow up Telemetry Client mapToJson in EventBatchMarshaller. NPE. 
+        //The exception might be from the EventAPI itself. There are NR integration errors.
+        String parentId = parent == null ? "null" : parent.getId();
 //        String id = String.valueOf(idGenerator.incrementAndGet());
         String id = current.getName();
         FlameLevel currentNewFlameLevel = new FlameLevel(current.getName(), current.getValue(), parentId, id);

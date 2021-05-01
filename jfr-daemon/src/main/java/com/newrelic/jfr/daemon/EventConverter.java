@@ -75,7 +75,6 @@ public class EventConverter {
     profilerRegistry.all().forEach(s -> s.summarize().forEach(batches::addEvent));
     profilerRegistry.all().forEach(EventToEventSummary::reset);
     
-
     toSummaryRegistry.all().forEach(s -> s.summarize().forEach(batches::addMetric));
     toSummaryRegistry.all().forEach(EventToSummary::reset);
 

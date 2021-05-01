@@ -70,8 +70,8 @@ public class SetupUtils {
     builder.maybeEnv(
         EnvironmentVars.USE_LICENSE_KEY,
         Boolean::parseBoolean,
-        useLicenseKey -> builder.useLicenseKey(useLicenseKey));
-
+            builder::useLicenseKey);
+    
     return builder.build();
   }
 
