@@ -31,7 +31,7 @@ dependencies {
 
 tasks.jar {
 // Create shadowJar instead of jar
-    archiveClassifier.set("real")
+//    archiveClassifier.set("real")
     enabled = true
 }
 

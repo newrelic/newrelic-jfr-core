@@ -18,24 +18,24 @@ import jdk.jfr.consumer.RecordedThread;
 public class ProfileSummarizer implements EventToEventSummary {
   public static final String EVENT_NAME = "jdk.ExecutionSample";
   public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
+  private final FrameFlattener flattener;
 
   private final String eventName;
-
-//  private final List<Map<String, String>> raw = new ArrayList<>();
   
   // key is thread.name
   private final Map<String, List<StackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
 
-  private ProfileSummarizer(final String eventName) {
+  private ProfileSummarizer(final String eventName, FrameFlattener frameFlattener) {
     this.eventName = eventName;
+    this.flattener = frameFlattener;
   }
 
   public static ProfileSummarizer forExecutionSample() {
-    return new ProfileSummarizer(EVENT_NAME);
+    return new ProfileSummarizer(EVENT_NAME, new FrameFlattener());
   }
 
   public static ProfileSummarizer forNativeMethodSample() {
-    return new ProfileSummarizer(NATIVE_EVENT_NAME);
+    return new ProfileSummarizer(NATIVE_EVENT_NAME, new FrameFlattener());
   }
 
   @Override
@@ -71,33 +71,48 @@ public class ProfileSummarizer implements EventToEventSummary {
 
   @Override
   public Stream<Event> summarize() {
-    //old way, not by thread result. probably delete this
-//    List<StackFrame> stackFrames = stackTraceEventPerThread.values().stream().map(this::tracesToStackFrame).collect(Collectors.toList());
-
     //Transform <threadName, List<StackTrace>> into <threadname, StackFrame>
     Map<String, StackFrame> stackFramePerThread = stackTraceEventPerThread.entrySet().stream()
             .collect(Collectors.toMap(
                     e -> e.getKey(),
-                    e -> tracesToStackFrame(e.getValue())
+                    e -> tracesToFlameGraphStackFrame(e.getValue())
             ));
     
-    //Transform <threadname, StackFrame> into List<Event>. 
-    List<Event> events = stackFramePerThread.entrySet().stream()
-            .map(e -> stackFrameToEvent(e))
-            .collect(Collectors.toList());
+    //Transform <threadname, StackFrame> into <thread, List<FrameLevel>>.  A stack frame is many many FrameLevels.
+    Map<String, List<FlameLevel>> flameLevelsPerThread = stackFramePerThread.entrySet().stream()
+            .collect(Collectors.toMap(
+                    e -> e.getKey(),
+                    e -> flattener.flatten(e.getValue())
+            ));
     
+    //<thread, List<Framelevel> to List<Event>
+    List<Event> events = flameLevelsPerThread.entrySet().stream()
+            .flatMap(e -> e.getValue().stream())
+            .map(this::flameLevelToEvent)
+            .collect(Collectors.toList());
     return events.stream();
   }
 
-  private Event stackFrameToEvent(Map.Entry<String, StackFrame> e) {
+  private Event flameLevelToEvent(FlameLevel flameLevel) {
     Attributes attr = new Attributes();
-    attr.put("thread.name", e.getKey());
-    attr.put("aggregate.stackTrace", e.getValue().toString());
+    attr.put("name", flameLevel.getName());
+    attr.put("value", flameLevel.getCount());
+    attr.put("id", flameLevel.getId());
+    attr.put("parentId", flameLevel.getParentId());
     long timestamp = System.currentTimeMillis();;
-    return new Event("JfrAggMethodSample", attr, timestamp);
+    return new Event("testJFRFlameLevel", attr, timestamp);
   }
 
-  private StackFrame tracesToStackFrame(List<StackTraceEvent> traces) {
+  //this approach didn't work
+//  private Event stackFrameToEvent(Map.Entry<String, StackFrame> e) {
+//    Attributes attr = new Attributes();
+//    attr.put("thread.name", e.getKey());
+//    //this throws exception in the Stats Makers, out of Memory
+//    attr.put("aggregate.stackTrace", e.getValue().toString());
+//    return new Event("testJFRAggregateMethodSample", attr, timestamp);
+//  }
+
+  private StackFrame tracesToFlameGraphStackFrame(List<StackTraceEvent> traces) {
     //Setup a new marshaller
     FlamegraphMarshaller out = new FlamegraphMarshaller();
 
@@ -163,5 +178,7 @@ public class ProfileSummarizer implements EventToEventSummary {
   }
 
   @Override
-  public void reset() {}
+  public void reset() {
+    stackTraceEventPerThread.clear();
+  }
 }

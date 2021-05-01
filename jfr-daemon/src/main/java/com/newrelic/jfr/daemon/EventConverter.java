@@ -11,6 +11,7 @@ import com.newrelic.jfr.ProfilerRegistry;
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
+import com.newrelic.jfr.profiler.EventToEventSummary;
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.telemetry.Attributes;
 import java.util.HashMap;
@@ -71,8 +72,9 @@ public class EventConverter {
         .filter(Objects::nonNull)
         .forEach(recordedEvent -> convertAndBuffer(batches, recordedEvent));
     
-//    profilerRegistry.all().forEach(s -> s.summarize().forEach(batches::addEvent));
-    profilerRegistry.all().forEach(s -> s.summarize().forEach(e -> System.out.println(e.getAttributes().toString())));
+    profilerRegistry.all().forEach(s -> s.summarize().forEach(batches::addEvent));
+    profilerRegistry.all().forEach(EventToEventSummary::reset);
+    
 
     toSummaryRegistry.all().forEach(s -> s.summarize().forEach(batches::addMetric));
     toSummaryRegistry.all().forEach(EventToSummary::reset);
