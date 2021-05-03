@@ -26,7 +26,7 @@ subprojects {
 
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
-        "testImplementation"("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
+        "testImplementation"("org.mockito:mockito-inline:${mockitoVersion}")
         "testRuntimeOnly"("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     }
 

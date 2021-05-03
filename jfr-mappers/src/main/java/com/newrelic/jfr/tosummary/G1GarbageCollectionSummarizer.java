@@ -17,8 +17,9 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates the duration of G1 Garbage Collection JFR events */
 public final class G1GarbageCollectionSummarizer implements EventToSummary {
-
   public static final String EVENT_NAME = "jdk.G1GarbageCollection";
+  public static final String JFR_G1_GARBAGE_COLLECTION_DURATION =
+      "jfr.G1GarbageCollection.duration";
 
   private final SimpleDurationSummarizer summarizer;
   private int count = 0;
@@ -55,7 +56,7 @@ public final class G1GarbageCollectionSummarizer implements EventToSummary {
     Attributes attr = new Attributes();
     Summary out =
         new Summary(
-            "jfr.G1GarbageCollection.duration",
+            JFR_G1_GARBAGE_COLLECTION_DURATION,
             count,
             summarizer.getDurationMillis(),
             summarizer.getMinDurationMillis(),

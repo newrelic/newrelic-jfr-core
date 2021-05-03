@@ -1,5 +1,7 @@
 package com.newrelic.jfr.toevent;
 
+import static com.newrelic.jfr.RecordedObjectValidators.hasField;
+
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
@@ -19,9 +21,15 @@ import jdk.jfr.consumer.RecordedThread;
 //        ]
 //        }
 public class ValhallaVBCDetector implements EventToEvent {
+  public static final String SIMPLE_CLASS_NAME = ValhallaVBCDetector.class.getSimpleName();
   // Is this going to change to SyncOnValueBasedClass ?
   public static final String OLD_EVENT_NAME = "jdk.SyncOnPrimitiveWrapper";
   public static final String EVENT_NAME = "jdk.SyncOnValueBasedClass";
+  public static final String BOX_CLASS = "boxClass";
+  public static final String EVENT_THREAD = "eventThread";
+  public static final String THREAD_NAME = "thread.name";
+  public static final String STACK_TRACE = "stackTrace";
+  public static final String JFR_VALHALLA_VBC_SYNC = "JfrValhallaVBCSync";
 
   @Override
   public String getEventName() {
@@ -38,12 +46,17 @@ public class ValhallaVBCDetector implements EventToEvent {
   public List<Event> apply(RecordedEvent event) {
     long timestamp = event.getStartTime().toEpochMilli();
     Attributes attr = new Attributes();
-    RecordedThread eventThread = event.getThread("eventThread");
-    RecordedClass boxClass = event.getClass("boxClass");
-
-    attr.put("thread.name", eventThread == null ? null : eventThread.getJavaName());
-    attr.put("boxClass", boxClass == null ? null : boxClass.getName());
-    attr.put("stackTrace", MethodSupport.serialize(event.getStackTrace()));
-    return Collections.singletonList(new Event("JfrValhallaVBCSync", attr, timestamp));
+    RecordedThread eventThread = null;
+    if (hasField(event, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+      eventThread = event.getThread(EVENT_THREAD);
+    }
+    RecordedClass boxClass = null;
+    if (hasField(event, BOX_CLASS, SIMPLE_CLASS_NAME)) {
+      boxClass = event.getClass(BOX_CLASS);
+    }
+    attr.put(THREAD_NAME, eventThread == null ? null : eventThread.getJavaName());
+    attr.put(BOX_CLASS, boxClass == null ? null : boxClass.getName());
+    attr.put(STACK_TRACE, MethodSupport.serialize(event.getStackTrace()));
+    return Collections.singletonList(new Event(JFR_VALHALLA_VBC_SYNC, attr, timestamp));
   }
 }

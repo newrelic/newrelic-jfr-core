@@ -1,10 +1,25 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.CONCURRENT_MARK_SWEEP;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.DEF_NEW;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.DURATION;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.G1_FULL;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.G1_NEW;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.G1_OLD;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.NAME;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.PARALLEL_OLD;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.PARALLEL_SCAVENGE;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.PAR_NEW;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.PS_MARK_SWEEP;
+import static com.newrelic.jfr.tosummary.BasicGarbageCollectionSummarizer.SERIAL_OLD;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Metric;
 import com.newrelic.telemetry.metrics.Summary;
@@ -13,8 +28,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class BasicGarbageCollectionSummarizerTest {
   private static Summary defaultMinorGcSummary;
@@ -27,6 +46,7 @@ class BasicGarbageCollectionSummarizerTest {
   private static final long DEFAULT_END_TIME_MS = 0L;
   private static final String MINOR_GC_DURATION_METRIC_NAME = "jfr.GarbageCollection.minorDuration";
   private static final String MAJOR_GC_DURATION_METRIC_NAME = "jfr.GarbageCollection.majorDuration";
+  private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
 
   @BeforeAll
   static void init() {
@@ -51,6 +71,27 @@ class BasicGarbageCollectionSummarizerTest {
             DEFAULT_START_TIME_MS,
             DEFAULT_END_TIME_MS,
             new Attributes());
+
+    recordedObjectValidatorsMockedStatic = Mockito.mockStatic(RecordedObjectValidators.class);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.hasField(
+                    any(RecordedObject.class), anyString(), anyString()))
+        .thenReturn(true);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.isRecordedObjectNull(
+                    any(RecordedObject.class), anyString()))
+        .thenReturn(false);
+  }
+
+  @AfterAll
+  static void teardown() {
+    recordedObjectValidatorsMockedStatic.close();
   }
 
   @Test
@@ -75,9 +116,9 @@ class BasicGarbageCollectionSummarizerTest {
     List<Metric> expected = List.of(expectedMinorGcSummaryMetric, defaultMajorGcSummary);
     var testClass = new BasicGarbageCollectionSummarizer(DEFAULT_START_TIME_MS);
 
-    when(event.getValue("name")).thenReturn("G1New");
+    when(event.getValue(NAME)).thenReturn(G1_NEW);
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
@@ -115,9 +156,9 @@ class BasicGarbageCollectionSummarizerTest {
     List<Metric> expected = List.of(defaultMinorGcSummary, expectedMajorGcSummaryMetric);
     var testClass = new BasicGarbageCollectionSummarizer(DEFAULT_START_TIME_MS);
 
-    when(event.getValue("name")).thenReturn("G1Old");
+    when(event.getValue(NAME)).thenReturn(G1_OLD);
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
@@ -187,38 +228,38 @@ class BasicGarbageCollectionSummarizerTest {
     var testClass = new BasicGarbageCollectionSummarizer(DEFAULT_START_TIME_MS);
 
     // minor GC events
-    when(minorGcEvent1.getValue("name")).thenReturn("ParNew");
+    when(minorGcEvent1.getValue(NAME)).thenReturn(PAR_NEW);
     when(minorGcEvent1.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent1.get()));
-    when(minorGcEvent1.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent1.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
-    when(minorGcEvent2.getValue("name")).thenReturn("DefNew");
+    when(minorGcEvent2.getValue(NAME)).thenReturn(DEF_NEW);
     when(minorGcEvent2.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent2.get()));
-    when(minorGcEvent2.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent2.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
-    when(minorGcEvent3.getValue("name")).thenReturn("PSMarkSweep");
+    when(minorGcEvent3.getValue(NAME)).thenReturn(PS_MARK_SWEEP);
     when(minorGcEvent3.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent3.get()));
-    when(minorGcEvent3.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent3.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
-    when(minorGcEvent4.getValue("name")).thenReturn("ParallelScavenge");
+    when(minorGcEvent4.getValue(NAME)).thenReturn(PARALLEL_SCAVENGE);
     when(minorGcEvent4.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent4.get()));
-    when(minorGcEvent4.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(minorGcEvent4.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     // major GC events
-    when(majorGcEvent5.getValue("name")).thenReturn("ParallelOld");
+    when(majorGcEvent5.getValue(NAME)).thenReturn(PARALLEL_OLD);
     when(majorGcEvent5.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent5.get()));
-    when(majorGcEvent5.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent5.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
-    when(majorGcEvent6.getValue("name")).thenReturn("SerialOld");
+    when(majorGcEvent6.getValue(NAME)).thenReturn(SERIAL_OLD);
     when(majorGcEvent6.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent6.get()));
-    when(majorGcEvent6.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent6.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
-    when(majorGcEvent7.getValue("name")).thenReturn("ConcurrentMarkSweep");
+    when(majorGcEvent7.getValue(NAME)).thenReturn(CONCURRENT_MARK_SWEEP);
     when(majorGcEvent7.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent7.get()));
-    when(majorGcEvent7.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent7.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
-    when(majorGcEvent8.getValue("name")).thenReturn("G1Full");
+    when(majorGcEvent8.getValue(NAME)).thenReturn(G1_FULL);
     when(majorGcEvent8.getStartTime()).thenReturn(Instant.ofEpochMilli(startTimeEvent8.get()));
-    when(majorGcEvent8.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(majorGcEvent8.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(minorGcEvent1);
     testClass.accept(minorGcEvent2);
@@ -266,9 +307,9 @@ class BasicGarbageCollectionSummarizerTest {
     List<Metric> expected = List.of(defaultMinorGcSummary, defaultMajorGcSummary);
     var testClass = new BasicGarbageCollectionSummarizer(DEFAULT_START_TIME_MS);
 
-    when(event.getValue("name")).thenReturn("FOO");
+    when(event.getValue(NAME)).thenReturn("FOO");
     when(event.getStartTime()).thenReturn(Instant.ofEpochMilli(eventStartTime));
-    when(event.getDuration("duration")).thenReturn(Duration.ofNanos(eventDurationNanos));
+    when(event.getDuration(DURATION)).thenReturn(Duration.ofNanos(eventDurationNanos));
 
     testClass.accept(event);
     final List<Summary> result = testClass.summarize().collect(toList());
