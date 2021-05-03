@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.2.0 (2021-05-03)
+* The JFR daemon has been refactored to better support running with the New Relic Java agent. [#178](https://github.com/newrelic/newrelic-jfr-core/pull/178)
+* README improvements [#176](https://github.com/newrelic/newrelic-jfr-core/pull/176), [#178](https://github.com/newrelic/newrelic-jfr-core/pull/178), [#180](https://github.com/newrelic/newrelic-jfr-core/pull/180)
+* Add new config options to support HTTP proxy configuration. Note: [HTTPS proxy is not currently supported by OkHttp](https://github.com/square/okhttp/issues/6561). [#178](https://github.com/newrelic/newrelic-jfr-core/pull/178)
+* Added validation to guard against illegal access to `RecordedObject` fields that may not exist. [#186](https://github.com/newrelic/newrelic-jfr-core/pull/186)
+
 ## Version 1.1.0 (2021-03-12)
 * The JFR daemon has been back-ported to run with Java 8 (`version 8u262+`) or higher. [#143](https://github.com/newrelic/newrelic-jfr-core/pull/143)
 * Update telemetry sdk to `0.12.0`.
