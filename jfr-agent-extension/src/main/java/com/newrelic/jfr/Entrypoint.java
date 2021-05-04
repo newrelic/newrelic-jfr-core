@@ -101,7 +101,8 @@ public class Entrypoint {
   static DaemonConfig buildConfig(Config agentConfig) throws URISyntaxException {
     String daemonVersion = VersionFinder.getVersion();
 
-    DaemonConfig.Builder builder = DaemonConfig.builder()
+    DaemonConfig.Builder builder =
+        DaemonConfig.builder()
             .apiKey(agentConfig.getValue(LICENSE_KEY))
             .monitoredAppName(agentConfig.getValue(APP_NAME))
             .useLicenseKey(true)
