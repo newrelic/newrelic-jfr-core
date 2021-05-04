@@ -32,9 +32,6 @@ dependencies {
 }
 
 tasks.jar {
-    // Create a standard jar as well as a shadowJar, add a classifier to differentiate
-//    enabled = true
-//    archiveClassifier.set("regular")
 // Create shadowJar instead of jar
     enabled = false
 }
@@ -99,5 +96,4 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
 }
-
 
