@@ -111,9 +111,6 @@ public class Entrypoint {
             .eventsUri(new URI(agentConfig.getValue(EVENTS_URI)))
             .daemonVersion(daemonVersion);
 
-    //    builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean,
-    // builder::auditLogging);
-
     return builder.build();
   }
 
