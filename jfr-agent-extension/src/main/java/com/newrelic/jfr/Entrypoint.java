@@ -64,7 +64,9 @@ public class Entrypoint {
     Attributes commonAttrs = SetupUtils.buildCommonAttributes(config);
     JFRUploader uploader = buildUploader(config);
     String threadNamePattern =
-            agent.getConfig().getValue("thread_sampler.name_pattern", ThreadNameNormalizer.DEFAULT_PATTERN);
+        agent
+            .getConfig()
+            .getValue("thread_sampler.name_pattern", ThreadNameNormalizer.DEFAULT_PATTERN);
 
     fetchRemoteEntityIdAsync(agent)
         .thenAccept(
