@@ -13,12 +13,19 @@ import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 
 public class PerThreadNetworkWriteSummarizer implements EventToSummary {
+  public static final String SIMPLE_CLASS_NAME =
+      PerThreadNetworkWriteSummarizer.class.getSimpleName();
+  public static final String BYTES_WRITTEN = "bytesWritten";
+  public static final String THREAD_NAME = "thread.name";
+  public static final String JFR_SOCKET_WRITE_BYTES_WRITTEN = "jfr.SocketWrite.bytesWritten";
+  public static final String JFR_SOCKET_WRITE_DURATION = "jfr.SocketWrite.duration";
+
   private final String threadName;
   private final LongSummarizer bytesSummary;
   private final SimpleDurationSummarizer duration;
 
   public PerThreadNetworkWriteSummarizer(String threadName, long startTimeMs) {
-    this(threadName, new LongSummarizer("bytesWritten"), new SimpleDurationSummarizer(startTimeMs));
+    this(threadName, new LongSummarizer(BYTES_WRITTEN), new SimpleDurationSummarizer(startTimeMs));
   }
 
   public PerThreadNetworkWriteSummarizer(
@@ -41,10 +48,10 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    Attributes attr = new Attributes().put("thread.name", threadName);
+    Attributes attr = new Attributes().put(THREAD_NAME, threadName);
     Summary outWritten =
         new Summary(
-            "jfr.SocketWrite.bytesWritten",
+            JFR_SOCKET_WRITE_BYTES_WRITTEN,
             bytesSummary.getCount(),
             bytesSummary.getSum(),
             bytesSummary.getMin(),
@@ -54,7 +61,7 @@ public class PerThreadNetworkWriteSummarizer implements EventToSummary {
             attr);
     Summary outDuration =
         new Summary(
-            "jfr.SocketWrite.duration",
+            JFR_SOCKET_WRITE_DURATION,
             bytesSummary.getCount(),
             duration.getDurationMillis(),
             duration.getMinDurationMillis(),

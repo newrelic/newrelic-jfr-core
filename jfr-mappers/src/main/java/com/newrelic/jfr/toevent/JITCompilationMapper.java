@@ -7,6 +7,8 @@
 
 package com.newrelic.jfr.toevent;
 
+import static com.newrelic.jfr.RecordedObjectValidators.*;
+
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
@@ -30,20 +32,32 @@ import jdk.jfr.consumer.RecordedThread;
 //        eventThread = "C2 CompilerThread0" (javaThreadId = 5)
 //        }
 public class JITCompilationMapper implements EventToEvent {
+  public static final String SIMPLE_CLASS_NAME = JITCompilationMapper.class.getSimpleName();
   public static final String EVENT_NAME = "jdk.Compilation";
+  public static final String METHOD = "method";
+  public static final String DESC = "desc";
+  public static final String DURATION = "duration";
+  public static final String SUCCEEDED = "succeeded";
+  public static final String EVENT_THREAD = "eventThread";
+  public static final String THREAD_NAME = "thread.name";
+  public static final String JFR_COMPILATION = "JfrCompilation";
 
   @Override
   public List<Event> apply(RecordedEvent event) {
     long timestamp = event.getStartTime().toEpochMilli();
     Duration duration = event.getDuration();
     Attributes attr = new Attributes();
-    attr.put("desc", MethodSupport.describeMethod(event.getValue("method")));
-    attr.put("duration", duration.toMillis());
-    attr.put("succeeded", Workarounds.getSucceeded(event));
-
-    RecordedThread threadId = event.getThread("eventThread");
-    attr.put("thread.name", threadId == null ? null : threadId.getJavaName());
-    return Collections.singletonList(new Event("JfrCompilation", attr, timestamp));
+    if (hasField(event, METHOD, SIMPLE_CLASS_NAME)) {
+      attr.put(DESC, MethodSupport.describeMethod(event.getValue(METHOD)));
+    }
+    attr.put(DURATION, duration.toMillis());
+    attr.put(SUCCEEDED, Workarounds.getSucceeded(event));
+    RecordedThread threadId = null;
+    if (hasField(event, EVENT_THREAD, SIMPLE_CLASS_NAME)) {
+      threadId = event.getThread(EVENT_THREAD);
+    }
+    attr.put(THREAD_NAME, threadId == null ? null : threadId.getJavaName());
+    return Collections.singletonList(new Event(JFR_COMPILATION, attr, timestamp));
   }
 
   @Override

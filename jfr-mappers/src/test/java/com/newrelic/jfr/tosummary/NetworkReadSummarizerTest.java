@@ -1,21 +1,59 @@
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.tosummary.PerThreadNetworkReadSummarizer.BYTES_READ;
+import static com.newrelic.jfr.tosummary.PerThreadNetworkReadSummarizer.JFR_SOCKET_READ_BYTES_READ;
+import static com.newrelic.jfr.tosummary.PerThreadNetworkReadSummarizer.JFR_SOCKET_READ_DURATION;
+import static com.newrelic.jfr.tosummary.PerThreadNetworkReadSummarizer.THREAD_NAME;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
 import jdk.jfr.consumer.RecordedThread;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 class NetworkReadSummarizerTest {
+  private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static final String EVENT_THREAD = "eventThread";
+
+  @BeforeAll
+  static void init() {
+    recordedObjectValidatorsMockedStatic = Mockito.mockStatic(RecordedObjectValidators.class);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.hasField(
+                    any(RecordedObject.class), anyString(), anyString()))
+        .thenReturn(true);
+
+    recordedObjectValidatorsMockedStatic
+        .when(
+            () ->
+                RecordedObjectValidators.isRecordedObjectNull(
+                    any(RecordedObject.class), anyString()))
+        .thenReturn(false);
+  }
+
+  @AfterAll
+  static void teardown() {
+    recordedObjectValidatorsMockedStatic.close();
+  }
 
   @Test
   void testApplyWithThreadName() {
@@ -27,44 +65,44 @@ class NetworkReadSummarizerTest {
 
     var summary1bytes =
         new Summary(
-            "jfr.SocketRead.bytesRead",
+            JFR_SOCKET_READ_BYTES_READ,
             2,
             13 + 17,
             13,
             17,
             time1.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName1));
+            new Attributes().put(THREAD_NAME, threadName1));
     var summary1duration =
         new Summary(
-            "jfr.SocketRead.duration",
+            JFR_SOCKET_READ_DURATION,
             2,
             Duration.between(time1, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
             Duration.between(time1, time2).toMillis(),
             time1.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName1));
+            new Attributes().put(THREAD_NAME, threadName1));
     var summary2bytes =
         new Summary(
-            "jfr.SocketRead.bytesRead",
+            JFR_SOCKET_READ_BYTES_READ,
             1,
             12,
             12,
             12,
             time2.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName2));
+            new Attributes().put(THREAD_NAME, threadName2));
     var summary2duration =
         new Summary(
-            "jfr.SocketRead.duration",
+            JFR_SOCKET_READ_DURATION,
             1,
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
             Duration.between(time2, time3).toMillis(),
             time2.toEpochMilli(),
             time3.toEpochMilli(),
-            new Attributes().put("thread.name", threadName2));
+            new Attributes().put(THREAD_NAME, threadName2));
     List<Summary> expected =
         List.of(summary2bytes, summary2duration, summary1bytes, summary1duration);
 
@@ -108,8 +146,8 @@ class NetworkReadSummarizerTest {
     when(recordedThread.getJavaName()).thenReturn(threadName);
 
     var event = mock(RecordedEvent.class);
-    when(event.getValue("eventThread")).thenReturn(recordedThread);
-    when(event.getLong("bytesRead")).thenReturn(bytes);
+    when(event.getValue(EVENT_THREAD)).thenReturn(recordedThread);
+    when(event.getLong(BYTES_READ)).thenReturn(bytes);
     when(event.getStartTime()).thenReturn(startTime);
     when(event.getDuration()).thenReturn(Duration.between(startTime, endTime));
     return event;

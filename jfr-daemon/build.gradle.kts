@@ -2,6 +2,7 @@ val gsonVersion: String by project
 val newRelicTelemetryVersion: String by project
 val okhttpVersion: String by project
 val slf4jVersion: String by project
+val newRelicAgentApiVersion: String by project
 
 plugins {
     id("com.github.johnrengelman.shadow") version ("5.2.0")
@@ -25,6 +26,7 @@ dependencies {
     api(project(":jfr-mappers"))
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
     api("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
+    implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
 }
@@ -39,7 +41,7 @@ tasks.shadowJar {
 
     manifest {
         attributes(
-                // Agent-Class ?
+                "Agent-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
                 "Premain-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
                 "Main-Class" to "com.newrelic.jfr.daemon.app.JFRDaemon",
                 "Implementation-Version" to project.version
@@ -94,5 +96,4 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
 }
-
 
