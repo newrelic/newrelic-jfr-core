@@ -41,7 +41,7 @@ tasks.shadowJar {
 
     manifest {
         attributes(
-                // Agent-Class ?
+                "Agent-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
                 "Premain-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
                 "Main-Class" to "com.newrelic.jfr.daemon.app.JFRDaemon",
                 "Implementation-Version" to project.version
@@ -96,5 +96,4 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
 }
-
 

@@ -28,6 +28,9 @@ tasks.shadowJar {
                 "Implementation-Vendor" to "New Relic, Inc."
         )
     }
+    // Ensure module-info.class files from dependencies don't erroneously make it into the jar
+    exclude("**/module-info.class")
+    exclude("module-info.class")
 }
 
 tasks.named("build") {

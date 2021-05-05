@@ -20,8 +20,8 @@ public class DaemonConfig {
   private static final String DEFAULT_DAEMON_VERSION = "UNKNOWN-VERSION";
   private static final String DEFAULT_JMX_HOST = "localhost";
   private static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
-  private static final boolean DEFAULT_AUDIT_LOGGING = false;
   private static final boolean DEFAULT_USE_LICENSE_KEY = false;
+  private static final boolean DEFAULT_AUDIT_LOGGING = false;
   private static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
   private static final String DEFAULT_MONITORED_APP_NAME = "My Application";
   private static final String DEFAULT_PROXY_HOST = null;
@@ -94,7 +94,7 @@ public class DaemonConfig {
     return useSharedFilesystem;
   }
 
-  public boolean isUseLicenseKey() {
+  public boolean useLicenseKey() {
     return useLicenseKey;
   }
 
@@ -288,6 +288,8 @@ public class DaemonConfig {
         + jmxPort
         + ", useSharedFilesystem="
         + useSharedFilesystem
+        + ", useLicenseKey="
+        + useLicenseKey
         + ", harvestInterval="
         + harvestInterval
         + ", daemonVersion='"

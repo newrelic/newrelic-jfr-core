@@ -11,12 +11,7 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.URI;
-import java.net.URL;
+import java.net.*;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.BlockingQueue;
@@ -81,14 +76,45 @@ public class SetupUtils {
     builder.maybeEnv(EnvironmentVars.EVENTS_INGEST_URI, URI::create, builder::eventsUri);
     builder.maybeEnv(
         EnvironmentVars.JFR_SHARED_FILESYSTEM, Boolean::parseBoolean, builder::useSharedFilesystem);
-    builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
     builder.maybeEnv(
         EnvironmentVars.USE_LICENSE_KEY, Boolean::parseBoolean, builder::useLicenseKey);
+    builder.maybeEnv(EnvironmentVars.AUDIT_LOGGING, Boolean::parseBoolean, builder::auditLogging);
     builder.maybeEnv(EnvironmentVars.PROXY_HOST, identity(), builder::proxyHost);
     builder.maybeEnv(EnvironmentVars.PROXY_PORT, Integer::parseInt, builder::proxyPort);
     builder.maybeEnv(EnvironmentVars.PROXY_USER, identity(), builder::proxyUser);
     builder.maybeEnv(EnvironmentVars.PROXY_PASSWORD, identity(), builder::proxyPassword);
     builder.maybeEnv(EnvironmentVars.PROXY_SCHEME, identity(), builder::proxyScheme);
+
+    return builder.build();
+  }
+
+  public static DaemonConfig buildDynamicAttachConfig(String agentArgs) {
+    String daemonVersion = VersionFinder.getVersion();
+    DaemonConfig.Builder builder =
+        DaemonConfig.builder()
+            .useLicenseKey(true) // dynamic attach only works with license key
+            .daemonVersion(daemonVersion);
+
+    // key | app_name | metrics_uri | events_uri
+    String[] args = agentArgs.split("|");
+    String apiKey;
+    if (args.length == 4) {
+      try {
+        builder.apiKey(args[0]);
+        builder.monitoredAppName(args[1]);
+        builder.metricsUri(new URI(args[2]));
+        builder.eventsUri(new URI(args[3]));
+      } catch (URISyntaxException urix) {
+        throw new RuntimeException("Bad URI in config", urix);
+      }
+    }
+    if (args.length == 2) {
+      builder.apiKey(args[0]);
+      builder.monitoredAppName(args[1]);
+    } else {
+      throw new RuntimeException("Wrong number of arguments to config: " + agentArgs);
+    }
+
     return builder.build();
   }
 
@@ -121,6 +147,7 @@ public class SetupUtils {
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
+    System.out.println(config.toString());
     Supplier<HttpPoster> httpPosterCreator =
         () ->
             new OkHttpPoster(
@@ -138,11 +165,12 @@ public class SetupUtils {
         EventBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .auditLoggingEnabled(config.auditLogging())
-            .secondaryUserAgent(makeUserAgent(config));
+            .secondaryUserAgent(makeUserAgent(config))
+            .useLicenseKey(config.useLicenseKey());
     if (config.getEventsUri() != null) {
       eventsConfig = eventsConfig.endpoint(toURL(config.getEventsUri()));
     }
-    if (config.isUseLicenseKey()) {
+    if (config.useLicenseKey()) {
       eventsConfig = eventsConfig.useLicenseKey(true);
     }
     return EventBatchSender.create(eventsConfig.build());
@@ -154,11 +182,12 @@ public class SetupUtils {
         MetricBatchSenderFactory.fromHttpImplementation(httpPosterCreator)
             .configureWith(config.getApiKey())
             .secondaryUserAgent(makeUserAgent(config))
-            .auditLoggingEnabled(config.auditLogging());
+            .auditLoggingEnabled(config.auditLogging())
+            .useLicenseKey(config.useLicenseKey());
     if (config.getMetricsUri() != null) {
       metricConfig = metricConfig.endpoint(toURL(config.getMetricsUri()));
     }
-    if (config.isUseLicenseKey()) {
+    if (config.useLicenseKey()) {
       metricConfig = metricConfig.useLicenseKey(true);
     }
     return MetricBatchSender.create(metricConfig.build());
