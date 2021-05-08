@@ -1,6 +1,5 @@
 package org.slf4j.impl;
 
-import com.newrelic.api.agent.Agent;
 import com.newrelic.api.agent.Logger;
 import com.newrelic.api.agent.NewRelic;
 import java.util.logging.Level;
@@ -26,9 +25,8 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
   private final ILoggerFactory loggerFactory;
 
   private StaticLoggerBinder() {
-    Agent newRelicAgent = NewRelic.getAgent();
-    if (!newRelicAgent.getClass().getName().contains("NoOpAgent")) {
-      Logger agentLogger = newRelicAgent.getLogger();
+    if (isNewRelicAgentApiPresent()) {
+      Logger agentLogger = NewRelic.getAgent().getLogger();
       loggerFactory = new AgentLoggerFactory(new AgentLoggerAdapter(agentLogger));
     } else {
       loggerFactory = new SimpleLoggerFactory();
@@ -231,6 +229,20 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
     @Override
     public void error(String s, Throwable throwable) {
       formatAndLog(Level.SEVERE, s, throwable);
+    }
+  }
+
+  /**
+   * Check if the NewRelic API is present.
+   *
+   * @return true if the NewRelic API present, else false
+   */
+  private boolean isNewRelicAgentApiPresent() {
+    try {
+      Class.forName("com.newrelic.api.agent.NewRelic");
+      return true;
+    } catch (ClassNotFoundException __) {
+      return false;
     }
   }
 }
