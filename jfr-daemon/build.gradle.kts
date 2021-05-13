@@ -40,7 +40,7 @@ dependencies {
 }
 
 tasks.jar {
-// Create shadowJar instead of jar
+    // Create shadowJar instead of jar when set to true
     enabled = false
 }
 
