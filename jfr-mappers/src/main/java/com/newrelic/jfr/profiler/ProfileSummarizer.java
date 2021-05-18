@@ -71,7 +71,7 @@ public class ProfileSummarizer implements EventToEventSummary {
 
   @Override
   public Stream<Event> summarize() {
-    //Transform <threadName, List<StackTrace>> into <threadname, StackFrame>
+    //Transform <threadName, List<StackTraceEvent>> into <threadname, StackFrame>
     Map<String, StackFrame> stackFramePerThread = stackTraceEventPerThread.entrySet().stream()
             .collect(Collectors.toMap(
                     e -> e.getKey(),
@@ -96,25 +96,17 @@ public class ProfileSummarizer implements EventToEventSummary {
     List<Event> events = new ArrayList<>();
     for(FlameLevel flameLevel: flameLevels) {
       Attributes attr = new Attributes();
-      attr.put("thread", threadName);
-      attr.put("name", flameLevel.getName());
-      attr.put("value", flameLevel.getCount());
-      attr.put("id", flameLevel.getId());
-      attr.put("parentId", flameLevel.getParentId());
+      attr.put("thread.name", threadName);
+      attr.put("flamelevel.name", flameLevel.getName());
+      attr.put("flamelevel.value", flameLevel.getCount());
+      //this is redundant, alreaady sending up name which is exaclty the same as id
+//      attr.put("id", flameLevel.getId());
+      attr.put("flamelevel.parentId", flameLevel.getParentId());
       long timestamp = System.currentTimeMillis();;
-      events.add(new Event("testJFRFlameLevel", attr, timestamp));
+      events.add(new Event("JfrFlameLevel", attr, timestamp));
     }
     return events;
   }
-
-  //this approach didn't work
-//  private Event stackFrameToEvent(Map.Entry<String, StackFrame> e) {
-//    Attributes attr = new Attributes();
-//    attr.put("thread.name", e.getKey());
-//    //this throws exception in the Stats Makers, out of Memory
-//    attr.put("aggregate.stackTrace", e.getValue().toString());
-//    return new Event("testJFRAggregateMethodSample", attr, timestamp);
-//  }
 
   private StackFrame tracesToFlameGraphStackFrame(List<StackTraceEvent> traces) {
     //Setup a new marshaller
