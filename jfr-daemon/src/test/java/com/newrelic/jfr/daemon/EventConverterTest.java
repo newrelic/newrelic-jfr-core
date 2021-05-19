@@ -66,7 +66,9 @@ class EventConverterTest {
     when(eventToSummary.test(e3)).thenReturn(true);
     doReturn(Stream.of(summary)).when(eventToSummary).summarize();
 
-    var testClass = new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, toEventRegistry, profilerRegistry);
+    var testClass =
+        new EventConverter(
+            attrs, toMetricRegistry, toSummaryRegistry, toEventRegistry, profilerRegistry);
 
     var result = testClass.convert(buffer);
     var eventBatch = result.createEventBatch();
@@ -93,7 +95,8 @@ class EventConverterTest {
 
     when(toMetricRegistry.all()).thenThrow(new RuntimeException("Whoops"));
 
-    var testClass = new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, null, profilerRegistry);
+    var testClass =
+        new EventConverter(attrs, toMetricRegistry, toSummaryRegistry, null, profilerRegistry);
 
     var result = testClass.convert(buffer);
     assertNotNull(result);

@@ -39,9 +39,7 @@ public class EventConverter {
         ToMetricRegistry.createDefault(),
         ToSummaryRegistry.createDefault(),
         ToEventRegistry.createDefault(),
-    ProfilerRegistry.createDefault()
-    );
-    
+        ProfilerRegistry.createDefault());
   }
 
   EventConverter(
@@ -71,10 +69,10 @@ public class EventConverter {
         .drainToStream()
         .filter(Objects::nonNull)
         .forEach(recordedEvent -> convertAndBuffer(batches, recordedEvent));
-    
+
     profilerRegistry.all().forEach(s -> s.summarize().forEach(batches::addEvent));
     profilerRegistry.all().forEach(EventToEventSummary::reset);
-    
+
     toSummaryRegistry.all().forEach(s -> s.summarize().forEach(batches::addMetric));
     toSummaryRegistry.all().forEach(EventToSummary::reset);
 
@@ -102,7 +100,6 @@ public class EventConverter {
           .flatMap(m -> m.apply(event).stream())
           .forEach(batches::addEvent);
 
-      
       toSummaryRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
       profilerRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
 

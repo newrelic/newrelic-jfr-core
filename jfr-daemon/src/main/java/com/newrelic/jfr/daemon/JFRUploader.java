@@ -90,9 +90,10 @@ public final class JFRUploader {
       logger.info(String.format("Sending events batch of size %s", eventBatch.size()));
       telemetrySender.sendBatch(eventBatch);
 
-      //toJson on the batch, then length() the json.
+      // toJson on the batch, then length() the json.
       BatchSizeMeasurer batchSizeMeasurer = new BatchSizeMeasurer();
-      double eventBatchMBSize = (double) batchSizeMeasurer.toJson(eventBatch).length() / (1024 * 1024);
+      double eventBatchMBSize =
+          (double) batchSizeMeasurer.toJson(eventBatch).length() / (1024 * 1024);
       logger.info(String.format("Events batch size in MB: %4.3f", eventBatchMBSize));
     }
   }

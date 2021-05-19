@@ -17,8 +17,6 @@ package com.newrelic.jfr.profiler;
 import static java.util.Collections.emptyList;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonWriter;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
