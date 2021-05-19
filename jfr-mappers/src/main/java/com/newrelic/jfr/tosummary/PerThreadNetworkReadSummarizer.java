@@ -16,9 +16,13 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
   private final String threadName;
   private final LongSummarizer bytesSummary;
   private final SimpleDurationSummarizer duration;
+  public static final String JFR_SOCKET_READ_DURATION = "jfr.SocketRead.duration";
+  public static final String JFR_SOCKET_READ_BYTES_READ = "jfr.SocketRead.bytesRead";
+  public static final String BYTES_READ = "bytesRead";
+  public static final String THREAD_NAME = "thread.name";
 
   public PerThreadNetworkReadSummarizer(String threadName, long startTimeMs) {
-    this(threadName, new LongSummarizer("bytesRead"), new SimpleDurationSummarizer(startTimeMs));
+    this(threadName, new LongSummarizer(BYTES_READ), new SimpleDurationSummarizer(startTimeMs));
   }
 
   public PerThreadNetworkReadSummarizer(
@@ -41,10 +45,10 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
 
   @Override
   public Stream<Summary> summarize() {
-    Attributes attr = new Attributes().put("thread.name", threadName);
+    Attributes attr = new Attributes().put(THREAD_NAME, threadName);
     Summary outRead =
         new Summary(
-            "jfr.SocketRead.bytesRead",
+            JFR_SOCKET_READ_BYTES_READ,
             bytesSummary.getCount(),
             bytesSummary.getSum(),
             bytesSummary.getMin(),
@@ -54,7 +58,7 @@ public class PerThreadNetworkReadSummarizer implements EventToSummary {
             attr);
     Summary outDuration =
         new Summary(
-            "jfr.SocketRead.duration",
+            JFR_SOCKET_READ_DURATION,
             bytesSummary.getCount(),
             duration.getDurationMillis(),
             duration.getMinDurationMillis(),

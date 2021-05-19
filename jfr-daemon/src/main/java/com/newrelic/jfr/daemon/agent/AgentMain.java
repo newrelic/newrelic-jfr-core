@@ -16,6 +16,14 @@ public class AgentMain {
   private static final Logger logger = LoggerFactory.getLogger(AgentMain.class);
 
   public static void premain(String agentArgs, Instrumentation inst) {
+    realstart(SetupUtils.buildConfig());
+  }
+
+  public static void agentmain(String agentArgs, Instrumentation inst) {
+    realstart(SetupUtils.buildDynamicAttachConfig(agentArgs));
+  }
+
+  public static void realstart(DaemonConfig config) {
     try {
       Class.forName("jdk.jfr.Recording");
       Class.forName("jdk.jfr.FlightRecorder");
@@ -26,15 +34,14 @@ public class AgentMain {
 
     try {
       logger.info("Attaching JFR Monitor");
-      new AgentMain().start();
+      new AgentMain().start(config);
     } catch (Throwable t) {
       logger.error("Unable to attach JFR Monitor", t);
     }
   }
 
-  private void start() {
-    DaemonConfig config = SetupUtils.buildConfig();
-    Attributes commonAttrs = SetupUtils.buildCommonAttributes();
+  private void start(DaemonConfig config) {
+    Attributes commonAttrs = SetupUtils.buildCommonAttributes(config);
     JFRUploader uploader = SetupUtils.buildUploader(config);
     uploader.readyToSend(new EventConverter(commonAttrs));
     FileJfrRecorderFactory recorderFactory =

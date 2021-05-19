@@ -15,6 +15,10 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates all TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationOutsideTLABSummarizer implements EventToSummary {
+  public static final String JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION =
+      "jfr.ObjectAllocationOutsideTLAB.allocation";
+  public static final String ALLOCATION_SIZE = "allocationSize";
+  public static final String THREAD_NAME = "thread.name";
 
   private final String threadName;
   private final LongSummarizer summarizer;
@@ -22,7 +26,7 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
   private long endTimeMs = 0L;
 
   public PerThreadObjectAllocationOutsideTLABSummarizer(String threadName, long startTimeMs) {
-    this(threadName, startTimeMs, new LongSummarizer("allocationSize"));
+    this(threadName, startTimeMs, new LongSummarizer(ALLOCATION_SIZE));
   }
 
   public PerThreadObjectAllocationOutsideTLABSummarizer(
@@ -47,10 +51,10 @@ public final class PerThreadObjectAllocationOutsideTLABSummarizer implements Eve
 
   @Override
   public Stream<Summary> summarize() {
-    Attributes attr = new Attributes().put("thread.name", threadName);
+    Attributes attr = new Attributes().put(THREAD_NAME, threadName);
     Summary out =
         new Summary(
-            "jfr.ObjectAllocationOutsideTLAB.allocation",
+            JFR_OBJECT_ALLOCATION_OUTSIDE_TLAB_ALLOCATION,
             summarizer.getCount(),
             summarizer.getSum(),
             summarizer.getMin(),

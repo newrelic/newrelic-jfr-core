@@ -2,6 +2,7 @@ val gsonVersion: String by project
 val newRelicTelemetryVersion: String by project
 val okhttpVersion: String by project
 val slf4jVersion: String by project
+val newRelicAgentApiVersion: String by project
 
 plugins {
     id("com.github.johnrengelman.shadow") version ("5.2.0")
@@ -27,12 +28,20 @@ dependencies {
     api("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
+    /*
+     * Only require the newrelic-api to compile but do not include the classes in the jfr-daemon jar.
+     * The newrelic-api will be provided on the classpath when the jfr-daemon jar is used in the agent.
+     * In other jfr-daemon use cases the newrelic-api shouldn't be necessary.
+     */
+    compileOnly("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
+
+    // Provide the newrelic-api on the runtime classpath for tests.
+    testRuntimeOnly("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
 }
 
 tasks.jar {
-// Create shadowJar instead of jar
-//    archiveClassifier.set("real")
-    enabled = true
+    // Create shadowJar instead of jar when set to true
+    enabled = false
 }
 
 tasks.shadowJar {
@@ -40,7 +49,7 @@ tasks.shadowJar {
 
     manifest {
         attributes(
-                // Agent-Class ?
+                "Agent-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
                 "Premain-Class" to "com.newrelic.jfr.daemon.agent.AgentMain",
                 "Main-Class" to "com.newrelic.jfr.daemon.app.JFRDaemon",
                 "Implementation-Version" to project.version

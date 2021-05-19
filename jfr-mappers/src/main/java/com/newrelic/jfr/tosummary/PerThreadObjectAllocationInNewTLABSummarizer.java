@@ -15,14 +15,17 @@ import jdk.jfr.consumer.RecordedEvent;
 
 /** This class aggregates all TLAB allocation JFR events for a single thread */
 public final class PerThreadObjectAllocationInNewTLABSummarizer implements EventToSummary {
-
   private final String threadName;
   private final LongSummarizer summarizer;
   private long startTimeMs;
   private long endTimeMs = 0L;
+  public static final String JFR_OBJECT_ALLOCATION_IN_NEW_TLAB_ALLOCATION =
+      "jfr.ObjectAllocationInNewTLAB.allocation";
+  public static final String THREAD_NAME = "thread.name";
+  public static final String TLAB_SIZE = "tlabSize";
 
   public PerThreadObjectAllocationInNewTLABSummarizer(String threadName, long startTimeMs) {
-    this(threadName, startTimeMs, new LongSummarizer("tlabSize"));
+    this(threadName, startTimeMs, new LongSummarizer(TLAB_SIZE));
   }
 
   public PerThreadObjectAllocationInNewTLABSummarizer(
@@ -47,10 +50,10 @@ public final class PerThreadObjectAllocationInNewTLABSummarizer implements Event
 
   @Override
   public Stream<Summary> summarize() {
-    Attributes attr = new Attributes().put("thread.name", threadName);
+    Attributes attr = new Attributes().put(THREAD_NAME, threadName);
     Summary out =
         new Summary(
-            "jfr.ObjectAllocationInNewTLAB.allocation",
+            JFR_OBJECT_ALLOCATION_IN_NEW_TLAB_ALLOCATION,
             summarizer.getCount(),
             summarizer.getSum(),
             summarizer.getMin(),

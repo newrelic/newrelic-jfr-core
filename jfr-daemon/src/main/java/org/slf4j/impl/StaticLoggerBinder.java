@@ -25,8 +25,12 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
   private final ILoggerFactory loggerFactory;
 
   private StaticLoggerBinder() {
-    Logger agentLogger = NewRelic.getAgent().getLogger();
-    loggerFactory = new AgentLoggerFactory(new AgentLoggerAdapter(agentLogger));
+    if (isNewRelicAgentApiPresent()) {
+      Logger agentLogger = NewRelic.getAgent().getLogger();
+      loggerFactory = new AgentLoggerFactory(new AgentLoggerAdapter(agentLogger));
+    } else {
+      loggerFactory = new SimpleLoggerFactory();
+    }
   }
 
   @Override
@@ -225,6 +229,20 @@ public class StaticLoggerBinder implements LoggerFactoryBinder {
     @Override
     public void error(String s, Throwable throwable) {
       formatAndLog(Level.SEVERE, s, throwable);
+    }
+  }
+
+  /**
+   * Check if the NewRelic API is present.
+   *
+   * @return true if the NewRelic API present, else false
+   */
+  private boolean isNewRelicAgentApiPresent() {
+    try {
+      Class.forName("com.newrelic.api.agent.NewRelic");
+      return true;
+    } catch (ClassNotFoundException __) {
+      return false;
     }
   }
 }

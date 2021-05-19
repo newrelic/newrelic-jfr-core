@@ -1,4 +1,4 @@
-package com.newrelic.jfr;
+package com.newrelic.jfr.tools;
 // FIXME Just in this package for now...
 
 import com.newrelic.jfr.daemon.*;
@@ -19,6 +19,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import jdk.jfr.consumer.RecordedEvent;
 
+/**
+ * StatsMaker is a tool that reads a JFR recording file and generates statistics about the amount of
+ * metric and event data that is sent by the JFR daemon after processing the recording.
+ */
 public class StatsMaker implements TelemetrySender {
 
   private final MetricBatchMarshaller metricMarshaller =
@@ -30,6 +34,11 @@ public class StatsMaker implements TelemetrySender {
   private String metricJson;
   private String eventJson;
 
+  /**
+   * StatsMaker entry point.
+   *
+   * @param args absolute path to the JFR recording file to be analyzed
+   */
   public static void main(String[] args) {
     Path fileName = null;
     try {
@@ -55,7 +64,8 @@ public class StatsMaker implements TelemetrySender {
     BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(250_000);
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     JFRUploader uploader = new JFRUploader(this, recordedEventBuffer);
-    uploader.readyToSend(new EventConverter(SetupUtils.buildCommonAttributes()));
+    DaemonConfig config = SetupUtils.buildConfig();
+    uploader.readyToSend(new EventConverter(SetupUtils.buildCommonAttributes(config)));
 
     uploader.handleFile(fileName);
     long lengthMillis = Duration.between(uploader.fileStart(), uploader.fileEnd()).toMillis();
@@ -76,12 +86,22 @@ public class StatsMaker implements TelemetrySender {
     System.out.println("Monthly events data (GB): " + 30 * 24 * eventSize / (lengthHours * 1024));
   }
 
+  /**
+   * Overrides TelemetrySender#sendBatch
+   *
+   * @param batch MetricBatch to send
+   */
   @Override
   public void sendBatch(MetricBatch batch) {
     System.out.println("Metrics to be sent: " + batch.size());
     metricJson = metricMarshaller.toJson(batch);
   }
 
+  /**
+   * Overrides TelemetrySender#sendBatch
+   *
+   * @param batch EventBatch to send
+   */
   @Override
   public void sendBatch(EventBatch batch) {
     System.out.println("Events to be sent: " + batch.size());

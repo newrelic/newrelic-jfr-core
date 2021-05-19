@@ -7,6 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
+import static com.newrelic.jfr.RecordedObjectValidators.*;
 import static com.newrelic.jfr.tosummary.BaseDurationSummarizer.DEFAULT_CLOCK;
 
 import com.newrelic.telemetry.Attributes;
@@ -23,11 +24,28 @@ import org.slf4j.LoggerFactory;
 
 /** This class aggregates the duration of Garbage Collection JFR events */
 public final class BasicGarbageCollectionSummarizer implements EventToSummary {
+  public static final String SIMPLE_CLASS_NAME =
+      BasicGarbageCollectionSummarizer.class.getSimpleName();
+  public static final String EVENT_NAME = "jdk.GarbageCollection";
+  public static final String NAME = "name";
+  public static final String JFR_GARBAGE_COLLECTION_MINOR_DURATION =
+      "jfr.GarbageCollection.minorDuration";
+  public static final String JFR_GARBAGE_COLLECTION_MAJOR_DURATION =
+      "jfr.GarbageCollection.majorDuration";
+  public static final String DURATION = "duration";
+  public static final String DEF_NEW = "DefNew";
+  public static final String G1_NEW = "G1New";
+  public static final String PARALLEL_SCAVENGE = "ParallelScavenge";
+  public static final String PAR_NEW = "ParNew";
+  public static final String PS_MARK_SWEEP = "PSMarkSweep";
+  public static final String CONCURRENT_MARK_SWEEP = "ConcurrentMarkSweep";
+  public static final String G1_FULL = "G1Full";
+  public static final String G1_OLD = "G1Old";
+  public static final String PARALLEL_OLD = "ParallelOld";
+  public static final String SERIAL_OLD = "SerialOld";
+
   private static final Logger logger =
       LoggerFactory.getLogger(BasicGarbageCollectionSummarizer.class);
-
-  public static final String EVENT_NAME = "jdk.GarbageCollection";
-
   private final SimpleDurationSummarizer minorGcDurationSummarizer;
   private final SimpleDurationSummarizer majorGcDurationSummarizer;
   private final AtomicInteger minorGcCount = new AtomicInteger(0);
@@ -40,11 +58,11 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
       Collections.unmodifiableSet(
           new HashSet<String>() {
             {
-              add("DefNew");
-              add("G1New");
-              add("ParallelScavenge");
-              add("ParNew");
-              add("PSMarkSweep");
+              add(DEF_NEW);
+              add(G1_NEW);
+              add(PARALLEL_SCAVENGE);
+              add(PAR_NEW);
+              add(PS_MARK_SWEEP);
             }
           });
 
@@ -52,11 +70,11 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
       Collections.unmodifiableSet(
           new HashSet<String>() {
             {
-              add("ConcurrentMarkSweep");
-              add("G1Full");
-              add("G1Old");
-              add("ParallelOld");
-              add("SerialOld");
+              add(CONCURRENT_MARK_SWEEP);
+              add(G1_FULL);
+              add(G1_OLD);
+              add(PARALLEL_OLD);
+              add(SERIAL_OLD);
             }
           });
 
@@ -67,8 +85,8 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
   public BasicGarbageCollectionSummarizer(long startTimeMs) {
     this(
         startTimeMs,
-        new SimpleDurationSummarizer(startTimeMs, DEFAULT_CLOCK, "duration"),
-        new SimpleDurationSummarizer(startTimeMs, DEFAULT_CLOCK, "duration"));
+        new SimpleDurationSummarizer(startTimeMs, DEFAULT_CLOCK, DURATION),
+        new SimpleDurationSummarizer(startTimeMs, DEFAULT_CLOCK, DURATION));
   }
 
   public BasicGarbageCollectionSummarizer(
@@ -87,7 +105,10 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
 
   @Override
   public void accept(RecordedEvent ev) {
-    final String name = ev.getValue("name");
+    String name = null;
+    if (hasField(ev, NAME, SIMPLE_CLASS_NAME)) {
+      name = ev.getValue(NAME);
+    }
     if (name != null) {
       if (MINOR_GC_NAMES.contains(name)) {
         minorGcEndTimeMs = ev.getStartTime().toEpochMilli();
@@ -108,7 +129,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
     Attributes attr = new Attributes();
     Summary minorGcDuration =
         new Summary(
-            "jfr.GarbageCollection.minorDuration",
+            JFR_GARBAGE_COLLECTION_MINOR_DURATION,
             minorGcCount.get(),
             minorGcDurationSummarizer.getDurationMillis(),
             minorGcDurationSummarizer.getMinDurationMillis(),
@@ -119,7 +140,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
 
     Summary majorGcDuration =
         new Summary(
-            "jfr.GarbageCollection.majorDuration",
+            JFR_GARBAGE_COLLECTION_MAJOR_DURATION,
             majorGcCount.get(),
             majorGcDurationSummarizer.getDurationMillis(),
             majorGcDurationSummarizer.getMinDurationMillis(),
