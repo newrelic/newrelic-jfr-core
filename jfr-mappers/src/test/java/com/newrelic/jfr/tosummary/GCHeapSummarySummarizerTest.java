@@ -14,6 +14,7 @@ import java.util.List;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class GCHeapSummarySummarizerTest {
@@ -94,6 +95,7 @@ class GCHeapSummarySummarizerTest {
     assertEquals(defaultSummary.getMax(), resetResultSummary.getMax());
   }
 
+  @Disabled // FIXME should this test be deleted? The JFR recording seems to be missing.
   @Test
   void read_real_event() throws Exception {
     final var dumpFile =
