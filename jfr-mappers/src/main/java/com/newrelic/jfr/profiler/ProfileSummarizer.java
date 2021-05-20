@@ -24,6 +24,11 @@ public class ProfileSummarizer implements EventToEventSummary {
   // key is thread.name
   private final Map<String, List<StackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
 
+  //For tests
+  public Map<String, List<StackTraceEvent>> getStackTraceEventPerThread() {
+    return stackTraceEventPerThread;
+  }
+
   private ProfileSummarizer(final String eventName, FrameFlattener frameFlattener) {
     this.eventName = eventName;
     this.flattener = frameFlattener;
