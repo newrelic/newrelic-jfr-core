@@ -7,22 +7,35 @@ import com.google.gson.JsonParser;
 import com.newrelic.jfr.profiler.FlamegraphMarshaller.StackFrame;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedStackTrace;
 import jdk.jfr.consumer.RecordedThread;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class ProfileSummarizer implements EventToEventSummary {
   public static final String EVENT_NAME = "jdk.ExecutionSample";
   public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
+  public static final String SIMPLE_CLASS_NAME = ProfileSummarizer.class.getSimpleName();
+  public static final String THREAD_STATE = "thread.state";
+  public static final String STATE = "state";
+  public static final String THREAD_NAME = "thread.name";
+  public static final String SAMPLED_THREAD = "sampledThread";
+  public static final String STACK_TRACE = "stackTrace";
+  public static final String JFR_FLAMELEVEL = "JfrFlameLevel";
+  public static final String FLAME_NAME = "flamelevel.name";
+  public static final String FLAME_VALUE = "flamelevel.value";
+  public static final String FLAME_PARENT_ID = "flamelevel.parentId";
   private final FrameFlattener flattener;
 
   private final String eventName;
 
   // key is thread.name
   private final Map<String, List<StackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
+  private AtomicLong timestamp = new AtomicLong(Long.MAX_VALUE);
 
   //For tests
   public Map<String, List<StackTraceEvent>> getStackTraceEventPerThread() {
@@ -53,26 +66,24 @@ public class ProfileSummarizer implements EventToEventSummary {
     if (trace == null) {
       return;
     }
-
+    //event with earliest timestamp in this batch, sets timestamp for all batch events
+    timestamp.updateAndGet(current -> Math.min(current, ev.getStartTime().toEpochMilli()));
+    
     Map<String, String> jfrStackTrace = new HashMap<>();
-    RecordedThread sampledThread = ev.getThread("sampledThread");
-    jfrStackTrace.put("thread.name", sampledThread == null ? null : sampledThread.getJavaName());
-    jfrStackTrace.put("thread.state", ev.getString("state"));
-    jfrStackTrace.put("stackTrace", MethodSupport.serialize(ev.getStackTrace()));
-
-    // change into JvmStackTraceEvent
+    RecordedThread sampledThread = ev.getThread(SAMPLED_THREAD);
+    jfrStackTrace.put(THREAD_NAME, sampledThread == null ? null : sampledThread.getJavaName());
+    jfrStackTrace.put(THREAD_STATE, ev.getString(STATE));
+    jfrStackTrace.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
     JvmStackTraceEvent event = makeEvent(jfrStackTrace);
-
-    // TODO: These lists are being modified in place. Should they be immutable and replaced when
-    // event is added?
-    // exisiting thread? Add event to list.
+    
+    //event of an existing thread
     stackTraceEventPerThread.computeIfPresent(
         event.getThreadName(),
         (k, list) -> {
           list.add(event);
           return list;
         });
-    // event of New Thread? Add new map entry. key and new list <StackTraceEvent>
+    // First event of a new thread.
     stackTraceEventPerThread.computeIfAbsent(
         event.getThreadName(), k -> new ArrayList<>(Arrays.asList(event)));
   }
@@ -109,15 +120,12 @@ public class ProfileSummarizer implements EventToEventSummary {
     List<Event> events = new ArrayList<>();
     for (FlameLevel flameLevel : flameLevels) {
       Attributes attr = new Attributes();
-      attr.put("thread.name", threadName);
-      attr.put("flamelevel.name", flameLevel.getName());
-      attr.put("flamelevel.value", flameLevel.getCount());
-      // this is redundant, alreaady sending up name which is exaclty the same as id
-      //      attr.put("id", flameLevel.getId());
-      attr.put("flamelevel.parentId", flameLevel.getParentId());
-      long timestamp = System.currentTimeMillis();
+      attr.put(THREAD_NAME, threadName);
+      attr.put(FLAME_NAME, flameLevel.getName());
+      attr.put(FLAME_VALUE, flameLevel.getCount());
+      attr.put(FLAME_PARENT_ID, flameLevel.getParentId());
       ;
-      events.add(new Event("JfrFlameLevel", attr, timestamp));
+      events.add(new Event(JFR_FLAMELEVEL, attr, timestamp.longValue()));
     }
     return events;
   }
@@ -152,9 +160,9 @@ public class ProfileSummarizer implements EventToEventSummary {
   }
 
   private static JvmStackTraceEvent makeEvent(Map<String, String> jfrStackTrace) {
-    String name = jfrStackTrace.get("thread.name").toString();
-    String state = jfrStackTrace.get("thread.state").toString();
-    JsonElement jsonTree = JsonParser.parseString(jfrStackTrace.get("stackTrace").toString());
+    String name = jfrStackTrace.get(THREAD_NAME).toString();
+    String state = jfrStackTrace.get(THREAD_STATE).toString();
+    JsonElement jsonTree = JsonParser.parseString(jfrStackTrace.get(STACK_TRACE).toString());
     if (jsonTree.isJsonObject()) {
       JsonObject json = jsonTree.getAsJsonObject();
       //      var version = json.get("version").getAsString();
@@ -190,5 +198,6 @@ public class ProfileSummarizer implements EventToEventSummary {
   @Override
   public void reset() {
     stackTraceEventPerThread.clear();
+    timestamp.set(0);
   }
 }

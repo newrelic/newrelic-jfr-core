@@ -6,15 +6,13 @@ import jdk.jfr.consumer.RecordedStackTrace;
 import jdk.jfr.consumer.RecordedThread;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.newrelic.jfr.profiler.ProfileSummarizer.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -23,9 +21,9 @@ class ProfileSummarizerTest {
 
     private final String stackTrace = "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":[{\"desc\":\"java.net.PlainSocketImpl.socketAccept(Ljava/net/SocketImpl;)V\",\"line\":\"-1\",\"bytecodeIndex\":\"0\"},{\"desc\":\"java.net.AbstractPlainSocketImpl.accept(Ljava/net/SocketImpl;)V\",\"line\":\"458\",\"bytecodeIndex\":\"7\"},{\"desc\":\"java.net.ServerSocket.implAccept(Ljava/net/Socket;)V\",\"line\":\"551\",\"bytecodeIndex\":\"60\"},{\"desc\":\"java.net.ServerSocket.accept()Ljava/net/Socket;\",\"line\":\"519\",\"bytecodeIndex\":\"48\"},{\"desc\":\"sun.rmi.transport.tcp.TCPTransport$AcceptLoop.executeAcceptLoop()V\",\"line\":\"394\",\"bytecodeIndex\":\"42\"},{\"desc\":\"sun.rmi.transport.tcp.TCPTransport$AcceptLoop.run()V\",\"line\":\"366\",\"bytecodeIndex\":\"1\"},{\"desc\":\"java.lang.Thread.run()V\",\"line\":\"834\",\"bytecodeIndex\":\"11\"}]}";
     
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RecordedEvent mockEvent;
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private RecordedEvent mockEvent2;
     @Mock
     private RecordedThread mockThread;
@@ -39,15 +37,18 @@ class ProfileSummarizerTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        when(mockEvent.getThread("sampledThread")).thenReturn(mockThread);
+        when(mockEvent.getThread(SAMPLED_THREAD)).thenReturn(mockThread);
         when(mockThread.getJavaName()).thenReturn("thread-1");
-        when(mockEvent.getString("state")).thenReturn("running");
+        when(mockEvent.getString(ProfileSummarizer.STATE)).thenReturn("running");
         when(mockEvent.getStackTrace()).thenReturn(mockStackTrace);
+        when(mockEvent.getStartTime().toEpochMilli()).thenReturn(1L);
 
-        when(mockEvent2.getThread("sampledThread")).thenReturn(mockThread2);
+        when(mockEvent2.getThread(SAMPLED_THREAD)).thenReturn(mockThread2);
         when(mockThread2.getJavaName()).thenReturn("thread-2");
-        when(mockEvent2.getString("state")).thenReturn("running");
+        when(mockEvent2.getString(STATE)).thenReturn("running");
         when(mockEvent2.getStackTrace()).thenReturn(mockStackTrace2);
+        when(mockEvent2.getStartTime().toEpochMilli()).thenReturn(2L);
+
     }
 
     @Test
@@ -68,7 +69,6 @@ class ProfileSummarizerTest {
             assertEquals(result.size(), 2);
             assertEquals(result.get("thread-1").size(), 2);
             assertEquals(result.get("thread-2").size(), 2);
-
         }
     }
     
@@ -88,27 +88,31 @@ class ProfileSummarizerTest {
             List<Event> resultEvents = testClass.summarize().collect(Collectors.toList());
             
             assertEquals(16, resultEvents.size());
-            
-            assertEquals(8, resultEvents.stream().filter(e -> {
-                var threadname = (String) e.getAttributes().asMap().get("thread.name");
-                return threadname.equals("thread-1");
-            }).collect(Collectors.toList()).size());
-            
-            assertEquals(16, resultEvents.stream().filter(e -> {
-                var threadname = (String) e.getAttributes().asMap().get("thread.name");
-                return threadname.equals("thread-1");
-            }).mapToInt(e -> {
-                return (int) e.getAttributes().asMap().get("flamelevel.value");
-            }).sum());
-
+            assertEquals(8, (int) resultEvents.stream().filter(e ->
+                    e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-1")).count());
+            assertEquals(16, resultEvents.stream().filter(e ->
+                    e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-1"))
+                    .mapToInt(e -> (int) e.getAttributes().asMap().get(FLAME_VALUE)).sum());
         }
-        /* java.net.PlainSocketImpl.socketAccept(Ljava/net/SocketImpl;)V
-         * java.net.AbstractPlainSocketImpl.accept(Ljava/net/SocketImpl;)V
-         * java.net.ServerSocket.implAccept(Ljava/net/Socket;)V
-         * java.net.ServerSocket.accept()Ljava/net/Socket;
-         * sun.rmi.transport.tcp.TCPTransport$AcceptLoop.executeAcceptLoop()V
-         * sun.rmi.transport.tcp.TCPTransport$AcceptLoop.run()V
-         */
     }
+
+    @Test
+    public void earliestEventTimestampIsSet() {
+        ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample();
+
+        try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
+            methodSupport.when(() -> MethodSupport.serialize(any()))
+                    .thenReturn(stackTrace);
+
+            testClass.accept(mockEvent2);
+            testClass.accept(mockEvent);
+
+            List<Event> resultEvents = testClass.summarize().collect(Collectors.toList());
+
+            assertEquals(16, resultEvents.size());
+            assertEquals(16, resultEvents.stream().filter(e -> e.getTimestamp() == 1L).count());
+        }
+    }
+    
 }
 
