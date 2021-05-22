@@ -74,7 +74,7 @@ public class ProfileSummarizer implements EventToEventSummary {
     jfrStackTrace.put(THREAD_NAME, sampledThread == null ? null : sampledThread.getJavaName());
     jfrStackTrace.put(THREAD_STATE, ev.getString(STATE));
     jfrStackTrace.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
-    JvmStackTraceEvent event = makeEvent(jfrStackTrace);
+    JvmStackTraceEvent event = stackTraceToStackFrames(jfrStackTrace);
     
     //event of an existing thread
     stackTraceEventPerThread.computeIfPresent(
@@ -90,25 +90,24 @@ public class ProfileSummarizer implements EventToEventSummary {
 
   @Override
   public Stream<Event> summarize() {
-    // Transform <threadName, List<StackTraceEvent>> into <threadname, StackFrame>
-    Map<String, StackFrame> stackFramePerThread =
+    //<thread, List<StackTraceEvent>> into Map <thread, StackFrame>
+    Map<String, StackFrame> stackFrameByThread =
         stackTraceEventPerThread
             .entrySet()
             .stream()
             .collect(
-                Collectors.toMap(e -> e.getKey(), e -> tracesToFlameGraphStackFrame(e.getValue())));
+                Collectors.toMap(Map.Entry::getKey, event -> stackTraceToStackFrame(event.getValue())));
 
-    // Transform <threadname, StackFrame> into <thread, List<FrameLevel>>.  A stack frame is many
-    // many FrameLevels.
-    Map<String, List<FlameLevel>> flameLevelsPerThread =
-        stackFramePerThread
+    //Map <thread, StackFrame> into Map <thread, List<FrameLevel>>  
+    Map<String, List<FlameLevel>> flameLevelsByThread =
+        stackFrameByThread
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(e -> e.getKey(), e -> flattener.flatten(e.getValue())));
+            .collect(Collectors.toMap(Map.Entry::getKey, stackframe -> flattener.flatten(stackframe.getValue())));
 
-    // transform <thread, List<Framelevel> to List<Event>. Events also have thread.name attribute
+    //Map <thread, List<Framelevel> to List <Event>
     List<Event> events =
-        flameLevelsPerThread
+        flameLevelsByThread
             .entrySet()
             .stream()
             .flatMap(e -> flameLevelToEvent(e.getValue(), e.getKey()).stream())
@@ -124,13 +123,12 @@ public class ProfileSummarizer implements EventToEventSummary {
       attr.put(FLAME_NAME, flameLevel.getName());
       attr.put(FLAME_VALUE, flameLevel.getCount());
       attr.put(FLAME_PARENT_ID, flameLevel.getParentId());
-      ;
       events.add(new Event(JFR_FLAMELEVEL, attr, timestamp.longValue()));
     }
     return events;
   }
 
-  private StackFrame tracesToFlameGraphStackFrame(List<StackTraceEvent> traces) {
+  private StackFrame stackTraceToStackFrame(List<StackTraceEvent> traces) {
     // Setup a new marshaller
     FlamegraphMarshaller out = new FlamegraphMarshaller();
 
@@ -155,24 +153,19 @@ public class ProfileSummarizer implements EventToEventSummary {
     entryBuilder.append(frame.getDesc());
     entryBuilder.append(":");
     entryBuilder.append(frame.getLine());
-
     return entryBuilder.toString();
   }
 
-  private static JvmStackTraceEvent makeEvent(Map<String, String> jfrStackTrace) {
-    String name = jfrStackTrace.get(THREAD_NAME).toString();
-    String state = jfrStackTrace.get(THREAD_STATE).toString();
-    JsonElement jsonTree = JsonParser.parseString(jfrStackTrace.get(STACK_TRACE).toString());
+  private static JvmStackTraceEvent stackTraceToStackFrames(Map<String, String> jfrStackTrace) {
+    String name = jfrStackTrace.get(THREAD_NAME);
+    String state = jfrStackTrace.get(THREAD_STATE);
+    JsonElement jsonTree = JsonParser.parseString(jfrStackTrace.get(STACK_TRACE));
     if (jsonTree.isJsonObject()) {
       JsonObject json = jsonTree.getAsJsonObject();
-      //      var version = json.get("version").getAsString();
-      //      var truncated = json.get("truncated").getAsBoolean();
-
-      // this payload comes from stackTrace
       JsonArray payload = json.getAsJsonArray("payload");
       List<JvmStackTraceEvent.JvmStackFrame> out = new ArrayList<>();
 
-      // every element of payload aka strackTrace
+      // every element of payload is a stackframe
       for (JsonElement element : payload) {
         if (element.isJsonObject()) {
           JsonObject jFrame = element.getAsJsonObject();
@@ -180,17 +173,17 @@ public class ProfileSummarizer implements EventToEventSummary {
           int line = jFrame.get("line").getAsInt();
           int bytecodeIndex = jFrame.get("bytecodeIndex").getAsInt();
 
-          // creates individual frames and adds to list
+          // creates and adds frames to list
           out.add(new JvmStackTraceEvent.JvmStackFrame(desc, line, bytecodeIndex));
         } else {
-          // log error
+          // todo: log error
         }
       }
 
-      // adds all frames as list belonging to this event.
+      // adds all frames belonging to this event.
       return new JvmStackTraceEvent(name, state, out);
     } else {
-      // log error
+      // todo: log error, empty list isn't error
       return new JvmStackTraceEvent(name, state, Collections.emptyList());
     }
   }
