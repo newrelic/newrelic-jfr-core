@@ -191,6 +191,6 @@ public class ProfileSummarizer implements EventToEventSummary {
   @Override
   public void reset() {
     stackTraceEventPerThread.clear();
-    timestamp.set(0);
+    timestamp.set(Long.MAX_VALUE);
   }
 }
