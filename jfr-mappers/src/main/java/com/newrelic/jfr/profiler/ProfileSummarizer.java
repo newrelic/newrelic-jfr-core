@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.newrelic.jfr.RecordedObjectValidators.hasField;
+
 public class ProfileSummarizer implements EventToEventSummary {
   public static final String EVENT_NAME = "jdk.ExecutionSample";
   public static final String NATIVE_EVENT_NAME = "jdk.NativeMethodSample";
@@ -70,9 +72,14 @@ public class ProfileSummarizer implements EventToEventSummary {
     timestamp.updateAndGet(current -> Math.min(current, ev.getStartTime().toEpochMilli()));
     
     Map<String, String> jfrStackTrace = new HashMap<>();
-    RecordedThread sampledThread = ev.getThread(SAMPLED_THREAD);
+    RecordedThread sampledThread = null;
+    if (hasField(ev, SAMPLED_THREAD, SIMPLE_CLASS_NAME)) {
+      sampledThread = ev.getThread(SAMPLED_THREAD);
+    }
     jfrStackTrace.put(THREAD_NAME, sampledThread == null ? null : sampledThread.getJavaName());
-    jfrStackTrace.put(THREAD_STATE, ev.getString(STATE));
+    if (hasField(ev, STATE, SIMPLE_CLASS_NAME)) {
+      jfrStackTrace.put(THREAD_STATE, ev.getString(STATE));
+    }
     jfrStackTrace.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
     JvmStackTraceEvent event = stackTraceToStackFrames(jfrStackTrace);
     

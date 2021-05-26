@@ -1,5 +1,6 @@
 package com.newrelic.jfr.profiler;
 
+import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.telemetry.events.Event;
 import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedStackTrace;
@@ -59,16 +60,21 @@ class ProfileSummarizerTest {
         try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
             methodSupport.when(() -> MethodSupport.serialize(any()))
                     .thenReturn(stackTrace);
-            
-            testClass.accept(mockEvent);
-            testClass.accept(mockEvent);
-            testClass.accept(mockEvent2);
-            testClass.accept(mockEvent2);
 
+            try (MockedStatic<RecordedObjectValidators> recordedObjectValidator = Mockito.mockStatic(RecordedObjectValidators.class)) {
+                recordedObjectValidator.when(() -> RecordedObjectValidators.hasField(any(), any(), any())).thenReturn(true);
+         
+                testClass.accept(mockEvent);
+                testClass.accept(mockEvent);
+                testClass.accept(mockEvent2);
+                testClass.accept(mockEvent2);
+            }
+            
             Map<String, List<StackTraceEvent>> result = testClass.getStackTraceEventPerThread();
-            assertEquals(result.size(), 2);
-            assertEquals(result.get("thread-1").size(), 2);
-            assertEquals(result.get("thread-2").size(), 2);
+            
+            assertEquals(2, result.size());
+            assertEquals(2,result.get("thread-1").size());
+            assertEquals(2, result.get("thread-2").size());
         }
     }
     
@@ -80,11 +86,14 @@ class ProfileSummarizerTest {
             methodSupport.when(() -> MethodSupport.serialize(any()))
                     .thenReturn(stackTrace);
 
-            testClass.accept(mockEvent);
-            testClass.accept(mockEvent);
-            testClass.accept(mockEvent2);
-            testClass.accept(mockEvent2);
-
+            try (MockedStatic<RecordedObjectValidators> recordedObjectValidator = Mockito.mockStatic(RecordedObjectValidators.class)) {
+                recordedObjectValidator.when(() -> RecordedObjectValidators.hasField(any(), any(), any())).thenReturn(true);
+                testClass.accept(mockEvent);
+                testClass.accept(mockEvent);
+                testClass.accept(mockEvent2);
+                testClass.accept(mockEvent2);
+            }
+            
             List<Event> resultEvents = testClass.summarize().collect(Collectors.toList());
             
             assertEquals(16, resultEvents.size());
@@ -103,12 +112,15 @@ class ProfileSummarizerTest {
         try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
             methodSupport.when(() -> MethodSupport.serialize(any()))
                     .thenReturn(stackTrace);
-
-            testClass.accept(mockEvent2);
-            testClass.accept(mockEvent);
-
+            
+            try (MockedStatic<RecordedObjectValidators> recordedObjectValidator = Mockito.mockStatic(RecordedObjectValidators.class)) {
+                recordedObjectValidator.when(() -> RecordedObjectValidators.hasField(any(), any(), any())).thenReturn(true);
+                testClass.accept(mockEvent2);
+                testClass.accept(mockEvent);
+            }
+            
             List<Event> resultEvents = testClass.summarize().collect(Collectors.toList());
-
+            
             assertEquals(16, resultEvents.size());
             assertEquals(16, resultEvents.stream().filter(e -> e.getTimestamp() == 1L).count());
         }
