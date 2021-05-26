@@ -73,8 +73,7 @@ public class MethodSupportTest {
         }
       }
     }
-    // FIXME Counts are wrong, need to be adapted to the shape of the public file when this is
-    // re-enabled
+    // FIXME Counts are wrong, need to be adapted to the shape of the public file when this is re-enabled
     assertEquals(218684, count);
     assertEquals(16860, max);
     assertEquals(159, histo[0]);

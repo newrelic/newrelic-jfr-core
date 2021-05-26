@@ -35,7 +35,6 @@ public class ProfileSummarizer implements EventToEventSummary {
 
   private final String eventName;
 
-  // key is thread.name
   private final Map<String, List<StackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
   private AtomicLong timestamp = new AtomicLong(Long.MAX_VALUE);
 
@@ -68,7 +67,6 @@ public class ProfileSummarizer implements EventToEventSummary {
     if (trace == null) {
       return;
     }
-    //event with earliest timestamp in this batch, sets timestamp for all batch events
     timestamp.updateAndGet(current -> Math.min(current, ev.getStartTime().toEpochMilli()));
     
     Map<String, String> jfrStackTrace = new HashMap<>();
@@ -83,21 +81,19 @@ public class ProfileSummarizer implements EventToEventSummary {
     jfrStackTrace.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
     JvmStackTraceEvent event = stackTraceToStackFrames(jfrStackTrace);
     
-    //event of an existing thread
     stackTraceEventPerThread.computeIfPresent(
         event.getThreadName(),
         (k, list) -> {
           list.add(event);
           return list;
         });
-    // First event of a new thread.
+    
     stackTraceEventPerThread.computeIfAbsent(
         event.getThreadName(), k -> new ArrayList<>(Arrays.asList(event)));
   }
 
   @Override
   public Stream<Event> summarize() {
-    //<thread, List<StackTraceEvent>> into Map <thread, StackFrame>
     Map<String, StackFrame> stackFrameByThread =
         stackTraceEventPerThread
             .entrySet()
@@ -105,14 +101,12 @@ public class ProfileSummarizer implements EventToEventSummary {
             .collect(
                 Collectors.toMap(Map.Entry::getKey, event -> stackTraceToStackFrame(event.getValue())));
 
-    //Map <thread, StackFrame> into Map <thread, List<FrameLevel>>  
     Map<String, List<FlameLevel>> flameLevelsByThread =
         stackFrameByThread
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, stackframe -> flattener.flatten(stackframe.getValue())));
 
-    //Map <thread, List<Framelevel> to List <Event>
     List<Event> events =
         flameLevelsByThread
             .entrySet()
@@ -136,9 +130,7 @@ public class ProfileSummarizer implements EventToEventSummary {
   }
 
   private StackFrame stackTraceToStackFrame(List<StackTraceEvent> traces) {
-    // Setup a new marshaller
     FlamegraphMarshaller out = new FlamegraphMarshaller();
-
     for (StackTraceEvent event : traces) {
       if (event instanceof JvmStackTraceEvent) {
         JvmStackTraceEvent trace = (JvmStackTraceEvent) event;
@@ -172,7 +164,6 @@ public class ProfileSummarizer implements EventToEventSummary {
       JsonArray payload = json.getAsJsonArray("payload");
       List<JvmStackTraceEvent.JvmStackFrame> out = new ArrayList<>();
 
-      // every element of payload is a stackframe
       for (JsonElement element : payload) {
         if (element.isJsonObject()) {
           JsonObject jFrame = element.getAsJsonObject();
@@ -180,17 +171,13 @@ public class ProfileSummarizer implements EventToEventSummary {
           int line = jFrame.get("line").getAsInt();
           int bytecodeIndex = jFrame.get("bytecodeIndex").getAsInt();
 
-          // creates and adds frames to list
           out.add(new JvmStackTraceEvent.JvmStackFrame(desc, line, bytecodeIndex));
         } else {
-          // todo: log error
+          //log error
         }
       }
-
-      // adds all frames belonging to this event.
       return new JvmStackTraceEvent(name, state, out);
     } else {
-      // todo: log error, empty list isn't error
       return new JvmStackTraceEvent(name, state, Collections.emptyList());
     }
   }

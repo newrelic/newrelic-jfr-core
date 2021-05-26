@@ -27,7 +27,6 @@ public final class MethodSupport {
     return method.getType().getName() + "." + method.getName() + method.getDescriptor();
   }
 
-  // {"type":"stacktrace","language":"java","version":1,"truncated":false,"payload":[]}
   public static String empty() {
     List<Map<String, String>> payload = Collections.emptyList();
     try {
@@ -85,7 +84,6 @@ public final class MethodSupport {
     String out = strOut.toString();
     int length = out.length();
     if (length > HEADROOM_75PC) {
-      // Truncate the stack frame and try again
       double percentageOfFramesToTry = ((double) HEADROOM_75PC) / length;
       int numFrames = (int) (frameCount * percentageOfFramesToTry);
       if (numFrames < frameCount) {
