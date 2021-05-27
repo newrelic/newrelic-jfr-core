@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import jdk.jfr.consumer.RecordingFile;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class MethodSupportTest {
@@ -51,7 +50,7 @@ public class MethodSupportTest {
     var max = 0;
     var histo = new int[32];
     try (var recordingFile = loadFile("startup3.jfr")) {
-      LOOP: 
+      LOOP:
       while (recordingFile.hasMoreEvents()) {
         var event = recordingFile.readEvent();
         if (event != null) {
@@ -60,7 +59,9 @@ public class MethodSupportTest {
               || eventType.equals("jdk.NativeMethodSample")) {
             var trace = event.getStackTrace();
             var b64 = MethodSupport.serialize(trace);
-            assertTrue(b64.startsWith("{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":"));
+            assertTrue(
+                b64.startsWith(
+                    "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":"));
             count = count + 1;
             if (max < b64.length()) {
               max = b64.length();
@@ -71,7 +72,7 @@ public class MethodSupportTest {
         }
       }
     }
-    // FIXME Counts are wrong, need to be adapted to the shape of the public file when this is re-enabled
+
     assertEquals(3113, count);
     assertEquals(2986, max);
     assertEquals(1627, histo[0]);

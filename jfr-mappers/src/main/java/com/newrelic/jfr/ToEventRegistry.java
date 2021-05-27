@@ -24,8 +24,7 @@ public class ToEventRegistry {
           new JVMInformationMapper(),
           new JVMSystemPropertyMapper(new AttributeValueSplitter()),
           new ThreadLockEventMapper(),
-          new ValhallaVBCDetector()
-          );
+          new ValhallaVBCDetector());
 
   private final List<EventToEvent> mappers;
 

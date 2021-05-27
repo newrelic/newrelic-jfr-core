@@ -1,5 +1,7 @@
 package com.newrelic.jfr.profiler;
 
+import static com.newrelic.jfr.RecordedObjectValidators.hasField;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,16 +9,13 @@ import com.google.gson.JsonParser;
 import com.newrelic.jfr.profiler.FlamegraphMarshaller.StackFrame;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
-import jdk.jfr.consumer.RecordedEvent;
-import jdk.jfr.consumer.RecordedStackTrace;
-import jdk.jfr.consumer.RecordedThread;
-
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.newrelic.jfr.RecordedObjectValidators.hasField;
+import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedStackTrace;
+import jdk.jfr.consumer.RecordedThread;
 
 public class ProfileSummarizer implements EventToEventSummary {
   public static final String EVENT_NAME = "jdk.ExecutionSample";
@@ -38,7 +37,7 @@ public class ProfileSummarizer implements EventToEventSummary {
   private final Map<String, List<StackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
   private AtomicLong timestamp = new AtomicLong(Long.MAX_VALUE);
 
-  //For tests
+  // For tests
   public Map<String, List<StackTraceEvent>> getStackTraceEventPerThread() {
     return stackTraceEventPerThread;
   }
@@ -68,7 +67,7 @@ public class ProfileSummarizer implements EventToEventSummary {
       return;
     }
     timestamp.updateAndGet(current -> Math.min(current, ev.getStartTime().toEpochMilli()));
-    
+
     Map<String, String> jfrStackTrace = new HashMap<>();
     RecordedThread sampledThread = null;
     if (hasField(ev, SAMPLED_THREAD, SIMPLE_CLASS_NAME)) {
@@ -80,14 +79,14 @@ public class ProfileSummarizer implements EventToEventSummary {
     }
     jfrStackTrace.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
     JvmStackTraceEvent event = stackTraceToStackFrames(jfrStackTrace);
-    
+
     stackTraceEventPerThread.computeIfPresent(
         event.getThreadName(),
         (k, list) -> {
           list.add(event);
           return list;
         });
-    
+
     stackTraceEventPerThread.computeIfAbsent(
         event.getThreadName(), k -> new ArrayList<>(Arrays.asList(event)));
   }
@@ -99,13 +98,16 @@ public class ProfileSummarizer implements EventToEventSummary {
             .entrySet()
             .stream()
             .collect(
-                Collectors.toMap(Map.Entry::getKey, event -> stackTraceToStackFrame(event.getValue())));
+                Collectors.toMap(
+                    Map.Entry::getKey, event -> stackTraceToStackFrame(event.getValue())));
 
     Map<String, List<FlameLevel>> flameLevelsByThread =
         stackFrameByThread
             .entrySet()
             .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, stackframe -> flattener.flatten(stackframe.getValue())));
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey, stackframe -> flattener.flatten(stackframe.getValue())));
 
     List<Event> events =
         flameLevelsByThread
@@ -173,7 +175,7 @@ public class ProfileSummarizer implements EventToEventSummary {
 
           out.add(new JvmStackTraceEvent.JvmStackFrame(desc, line, bytecodeIndex));
         } else {
-          //log error
+          // log error
         }
       }
       return new JvmStackTraceEvent(name, state, out);

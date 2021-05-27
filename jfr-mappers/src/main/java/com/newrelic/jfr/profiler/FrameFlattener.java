@@ -22,7 +22,8 @@ public class FrameFlattener {
       return emptyList();
     }
 
-    // parentId is set to "null" string because null type will cause an NPE in mapToJson in EventBatchMarshaller of TelemetryClient. 
+    // parentId is set to "null" string because null type will cause an NPE in mapToJson in
+    // EventBatchMarshaller of TelemetryClient.
     String parentId = parent == null ? "null" : parent.getId();
     String id = current.getName();
     FlameLevel currentNewFlameLevel =
