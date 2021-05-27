@@ -46,13 +46,12 @@ public class MethodSupportTest {
   }
 
   @Test
-  @Disabled
   public void simple_encode() throws Exception {
     var count = 0;
     var max = 0;
     var histo = new int[32];
-    try (var recordingFile = loadFile("need-file.jfr")) {
-      LOOP:
+    try (var recordingFile = loadFile("startup3.jfr")) {
+      LOOP: 
       while (recordingFile.hasMoreEvents()) {
         var event = recordingFile.readEvent();
         if (event != null) {
@@ -61,8 +60,7 @@ public class MethodSupportTest {
               || eventType.equals("jdk.NativeMethodSample")) {
             var trace = event.getStackTrace();
             var b64 = MethodSupport.serialize(trace);
-            // FIXME Base-64 is not currently supported, use unencoded instead
-            assertTrue(b64.startsWith("eyJ0eXBlIjoic3RhY2t0cmFjZSIsImxhbmd1YWdlIjoiamF2Y"));
+            assertTrue(b64.startsWith("{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":"));
             count = count + 1;
             if (max < b64.length()) {
               max = b64.length();
@@ -74,16 +72,16 @@ public class MethodSupportTest {
       }
     }
     // FIXME Counts are wrong, need to be adapted to the shape of the public file when this is re-enabled
-    assertEquals(218684, count);
-    assertEquals(16860, max);
-    assertEquals(159, histo[0]);
-    assertEquals(65435, histo[1]);
-    assertEquals(116643, histo[2]);
-    assertEquals(24899, histo[3]); // 94.72% fit under the 4k limit
-    assertEquals(6303, histo[4]);
-    assertEquals(3994, histo[5]);
-    assertEquals(766, histo[6]);
-    assertEquals(195, histo[7]); // 99.87% fit in 2 * 4k
+    assertEquals(3113, count);
+    assertEquals(2986, max);
+    assertEquals(1627, histo[0]);
+    assertEquals(1484, histo[1]);
+    assertEquals(2, histo[2]);
+    assertEquals(0, histo[3]); // 94.72% fit under the 4k limit
+    assertEquals(0, histo[4]);
+    assertEquals(0, histo[5]);
+    assertEquals(0, histo[6]);
+    assertEquals(0, histo[7]); // 99.87% fit in 2 * 4k
   }
 
   @Test
