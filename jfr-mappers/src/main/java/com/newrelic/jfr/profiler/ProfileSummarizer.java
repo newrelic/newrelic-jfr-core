@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.profiler.FlamegraphMarshaller.StackFrame;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;

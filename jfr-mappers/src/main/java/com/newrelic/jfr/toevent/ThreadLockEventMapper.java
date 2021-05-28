@@ -9,7 +9,7 @@ package com.newrelic.jfr.toevent;
 
 import static com.newrelic.jfr.RecordedObjectValidators.hasField;
 
-import com.newrelic.jfr.profiler.MethodSupport;
+import com.newrelic.jfr.MethodSupport;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.time.Duration;

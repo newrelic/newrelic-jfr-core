@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.telemetry.events.Event;
 import java.util.List;

@@ -5,7 +5,7 @@
  *
  */
 
-package com.newrelic.jfr.profiler;
+package com.newrelic.jfr;
 
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public final class MethodSupport {
     }
   }
 
-  static String jsonWrite(final List<Map<String, String>> frames, final Optional<Integer> limit)
+  public static String jsonWrite(final List<Map<String, String>> frames, final Optional<Integer> limit)
       throws IOException {
     StringWriter strOut = new StringWriter();
     JsonWriter jsonWriter = new JsonWriter(strOut);
