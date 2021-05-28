@@ -58,8 +58,8 @@ public final class MethodSupport {
     }
   }
 
-  public static String jsonWrite(final List<Map<String, String>> frames, final Optional<Integer> limit)
-      throws IOException {
+  public static String jsonWrite(
+      final List<Map<String, String>> frames, final Optional<Integer> limit) throws IOException {
     StringWriter strOut = new StringWriter();
     JsonWriter jsonWriter = new JsonWriter(strOut);
     int frameCount = Math.min(limit.orElse(frames.size()), frames.size());

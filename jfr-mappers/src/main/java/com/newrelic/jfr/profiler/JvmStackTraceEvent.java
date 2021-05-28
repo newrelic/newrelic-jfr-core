@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** This class holds the elements of a stack trace event */
-public final class JvmStackTraceEvent implements StackTraceEvent {
+public final class JvmStackTraceEvent {
   private final String threadName;
   private final String threadState;
   private final List<JvmStackFrame> frames;

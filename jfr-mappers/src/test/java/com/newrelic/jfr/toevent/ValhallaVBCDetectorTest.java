@@ -11,8 +11,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.jfr.MethodSupport;
+import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
 import java.time.Instant;

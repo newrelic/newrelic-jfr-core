@@ -70,7 +70,7 @@ class ProfileSummarizerTest {
         testClass.accept(mockEvent2);
       }
 
-      Map<String, List<StackTraceEvent>> result = testClass.getStackTraceEventPerThread();
+      Map<String, List<JvmStackTraceEvent>> result = testClass.getStackTraceEventPerThread();
 
       assertEquals(2, result.size());
       assertEquals(2, result.get("thread-1").size());

@@ -35,11 +35,11 @@ public class ProfileSummarizer implements EventToEventSummary {
 
   private final String eventName;
 
-  private final Map<String, List<StackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
+  private final Map<String, List<JvmStackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
   private AtomicLong timestamp = new AtomicLong(Long.MAX_VALUE);
 
   // For tests
-  public Map<String, List<StackTraceEvent>> getStackTraceEventPerThread() {
+  public Map<String, List<JvmStackTraceEvent>> getStackTraceEventPerThread() {
     return stackTraceEventPerThread;
   }
 
@@ -132,15 +132,12 @@ public class ProfileSummarizer implements EventToEventSummary {
     return events;
   }
 
-  private StackFrame stackTraceToStackFrame(List<StackTraceEvent> traces) {
+  private StackFrame stackTraceToStackFrame(List<JvmStackTraceEvent> traces) {
     FlamegraphMarshaller out = new FlamegraphMarshaller();
-    for (StackTraceEvent event : traces) {
-      if (event instanceof JvmStackTraceEvent) {
-        JvmStackTraceEvent trace = (JvmStackTraceEvent) event;
-        Stack<String> stack = new Stack<>();
-        trace.getFrames().forEach(f -> stack.push(getFrameName(f)));
-        out.processEvent(stack, getValue());
-      }
+    for (JvmStackTraceEvent trace : traces) {
+      Stack<String> stack = new Stack<>();
+      trace.getFrames().forEach(f -> stack.push(getFrameName(f)));
+      out.processEvent(stack, getValue());
     }
     return out.getStackFrame();
   }

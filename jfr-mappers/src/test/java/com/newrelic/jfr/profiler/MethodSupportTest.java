@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.newrelic.jfr.MethodSupport;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -15,8 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import com.newrelic.jfr.MethodSupport;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Test;
 

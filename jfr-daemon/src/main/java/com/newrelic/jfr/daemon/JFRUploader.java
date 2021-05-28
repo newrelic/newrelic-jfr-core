@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import jdk.jfr.consumer.RecordingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,25 +94,51 @@ public final class JFRUploader {
     if (!eventBatch.isEmpty()) {
       logger.info(String.format("Sending events batch of size %s", eventBatch.size()));
 
-      List<Event> methodSampleEvents = eventBatch.getTelemetry().stream()
+      List<Event> methodSampleEvents =
+          eventBatch
+              .getTelemetry()
+              .stream()
               .filter(event -> event.getEventType().contains("MethodSample"))
               .collect(Collectors.toList());
 
-      List<Event> flameLevelEvents = eventBatch.getTelemetry().stream()
+      List<Event> flameLevelEvents =
+          eventBatch
+              .getTelemetry()
+              .stream()
               .filter(event -> event.getEventType().contains("Flame"))
               .collect(Collectors.toList());
-      
-      int methodSampleThreadRunCount =  eventBatch.getTelemetry().stream()
+
+      int methodSampleThreadRunCount =
+          eventBatch
+              .getTelemetry()
+              .stream()
               .filter(event -> event.getEventType().contains("MethodSample"))
-              .mapToInt(event -> countMatches(event.getAttributes().asMap().get("stackTrace").toString(), "java.lang.Thread.run()"))
+              .mapToInt(
+                  event ->
+                      countMatches(
+                          event.getAttributes().asMap().get("stackTrace").toString(),
+                          "java.lang.Thread.run()"))
               .sum();
 
-      int flamelevelThreadCount=  eventBatch.getTelemetry().stream()
+      int flamelevelThreadCount =
+          eventBatch
+              .getTelemetry()
+              .stream()
               .filter(event -> event.getEventType().contains("Flame"))
-              .filter(event -> event.getAttributes().asMap().get("flamelevel.name").toString().contains("Thread.run"))
-              .mapToInt(event -> Integer.parseInt(event.getAttributes().asMap().get("flamelevel.value").toString())).sum();
+              .filter(
+                  event ->
+                      event
+                          .getAttributes()
+                          .asMap()
+                          .get("flamelevel.name")
+                          .toString()
+                          .contains("Thread.run"))
+              .mapToInt(
+                  event ->
+                      Integer.parseInt(
+                          event.getAttributes().asMap().get("flamelevel.value").toString()))
+              .sum();
       telemetrySender.sendBatch(eventBatch);
-
     }
   }
 
@@ -128,7 +153,7 @@ public final class JFRUploader {
 
     return count;
   }
-  
+
   RecordingFile openRecordingFile(Path file) {
     try {
       return new RecordingFile(file);
