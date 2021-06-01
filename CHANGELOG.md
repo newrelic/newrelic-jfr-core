@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.3.0 (2021-06-01)
+* The JFR daemon aggregates JfrMethodSample events into JfrFlamelevel events. It does not report JfrMethodSample events anymore and does report JfrFlamelevel events. [#196](https://github.com/newrelic/newrelic-jfr-core/pull/196)
+* Refactor jfr-agent-extension module into jfr-tools [#190](https://github.com/newrelic/newrelic-jfr-core/pull/190)
+* Refactor newrelic-api to compileOnly dependency [#189](https://github.com/newrelic/newrelic-jfr-core/pull/189)
+
 ## Version 1.2.0 (2021-05-03)
 * The JFR daemon has been refactored to better support running with the New Relic Java agent. [#178](https://github.com/newrelic/newrelic-jfr-core/pull/178)
 * README improvements [#176](https://github.com/newrelic/newrelic-jfr-core/pull/176), [#178](https://github.com/newrelic/newrelic-jfr-core/pull/178), [#180](https://github.com/newrelic/newrelic-jfr-core/pull/180)
