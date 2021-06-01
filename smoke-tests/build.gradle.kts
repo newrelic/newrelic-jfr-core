@@ -1,7 +1,7 @@
 import de.undercouch.gradle.tasks.download.Download
 
 plugins {
-    id("org.springframework.boot") version "2.4.3"
+    id("org.springframework.boot") version "2.4.6"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id("de.undercouch.download") version "4.1.1"
 }
@@ -30,7 +30,10 @@ configurations {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-web") {
+        //snyk issue with no patch option - https://github.com/newrelic/newrelic-jfr-core/pull/196/checks?check_run_id=2687253977
+        exclude(group = "org.glassfish", module = "jakarta.el")
+    }
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     testImplementation("org.testcontainers:testcontainers:1.15.1")
     testImplementation("com.squareup.okhttp3:okhttp:3.12.12")
