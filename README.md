@@ -160,7 +160,7 @@ The `jfr-daemon` standalone process has the following requirements:
 
 #### Usage for standalone process
 
-The minimum requirements to use the `jfr-daemon` as standalone Java agent are as follows.
+The minimum requirements to use the `jfr-daemon` as standalone process are as follows.
 
 Set the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`):
 
