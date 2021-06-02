@@ -1,28 +1,23 @@
 [![Community Plus header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/Community_Plus.png)](https://opensource.newrelic.com/oss-category/#community-plus)
 
-# JFR Core
+# JFR core
 
 ![build badge](https://github.com/newrelic/newrelic-jfr-core/workflows/main%20build/badge.svg)
 
-This repository contains the core New Relic JFR components. It can be used 
-to acquire JFR events, transform them into New Relic telemetry, and then 
-send them to New Relic 
-(with the [New Relic Telemetry SDK](https://github.com/newrelic/newrelic-telemetry-sdk-java)).
+This repository contains the core New Relic JFR components. It is used 
+to consume JFR events, transform them into New Relic telemetry, and send them to New Relic 
+(with the [New Relic Telemetry SDK](https://github.com/newrelic/newrelic-telemetry-sdk-java)) where they
+can be [visualized](#visualizing-jfr-data) in a number of ways.
 
 This repository contains the following modules:
+* [jfr-daemon](#jfr-daemon) - A monitoring tool that uses a rotating fileset to consume JFR events and near-continuously send telemetry data to New Relic.
+* [jfr-mappers](#jfr-mappers) - Mappers that transform JFR `RecordedEvent` objects into New Relic telemetry data. Also 
+contains registries of all supported mappers. This is used as an implementation library by `jfr-daemon`.
+* [jfr-jlink](#jfr-jlink) - A module that produces jlink binaries of `jfr-daemon` that include a bundled JRE.
+* [jfr-tools](#jfr-tools) - Tools that can be used to analyze `jfr-daemon`.
+* [smoke-tests](#smoke-tests) - Smoke tests for the different `jfr-daemon` usage scenarios.
 
-* [jfr-mappers](#jfr-mappers) - Mappers that transform JFR `RecordedEvent` objects into telemetry.  Also 
-contains registries of all supported mappers.
-* [jfr-daemon](#jfr-daemon) - An out-of-process daemon tool that uses a rotating fileset to near-continuously
-send telemetry to New Relic. 
-
-## Installation
-
-For general usage of the produced artifacts see [JFR Mappers](#jfr-mappers) and [JFR Daemon](#jfr-daemon).
-
-## Getting Started
-
-To build the project see [Building](#building).
+---
 
 ## Building
 
@@ -38,6 +33,8 @@ The resulting jars of interest are:
  * `jfr-mappers/build/libs/jfr-mappers-<version>.jar`
  * `jfr-daemon/build/libs/jfr-daemon-<version>.jar`
 
+---
+
 ## Running tests
 
 Unit tests are run with gradlew:
@@ -48,68 +45,192 @@ $ ./gradlew test
 
 ---
 
-## JFR Mappers
+## JFR daemon
 
-This module is a library of reusable JFR (Java Flight Recorder) mappers 
-used to transform JFR `RecordedEvent` instances into New Relic telemetry collections 
-that are compatible with the 
-[telemetry SDK](https://github.com/newrelic/newrelic-telemetry-sdk-java).
+There are three different usage scenarios for the `jfr-daemon`: 
+* [New Relic Java agent JFR service](#new-relic-java-agent-jfr-service) (RECOMMENDED) - JFR monitoring built into the flagship New Relic Java agent.
+* [Standalone process](#standalone-process) - Run the `jfr-daemon` in a standalone process and monitor existing Java processes over remote JMX.
+* [Standalone Java agent](#standalone-java-agent) - Attach the `jfr-daemon` to your Java process as a Java agent. A lightweight alternative to the 
+  New Relic Java agent.
 
-We don't intend this library to be used directly. Instead, leverage tools
-like the [JFR daemon](#jfr-daemon) that are built upon this library.
+For additional details see:
+* [Real-time profiling for Java using JFR metrics](https://docs.newrelic.com/docs/agents/java-agent/features/real-time-profiling-java-using-jfr-metrics/)
+* [Java agent configuration](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/)
 
-### As a dependency
+### Supported Java versions
 
-_Note: SNAPSHOT artifact is still preliminary._
+While the `jfr-daemon` supports any version of Java 11 and above, and specific versions of Java 8, we do not recommend
+using any non-LTS version of Java in production environments.
 
-#### maven dependency
+The currently supported Java LTS versions for all usage scenarios are as follows:
+* Java 8 (specifically version `8u262`+)
+* Java 11
+
+### New Relic Java agent JFR service
+
+The recommended way to get JFR data is to use the New Relic Java agent with builtin JFR monitoring. 
+This will provide the richest experience by combining data collected by the New Relic Java agent with JFR data together in a single New Relic One entity.
+
+#### Requirements for New Relic Java agent JFR service
+
+The New Relic Java agent JFR monitoring has the following requirements:
+* [New Relic Java agent version 7.0.0+](https://docs.newrelic.com/docs/release-notes/agent-release-notes/java-release-notes/java-agent-700/)
+* [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key)
+* JFR must be enabled in the agent config
+* Uses a [supported Java version](#supported-java-versions)
+
+#### Usage for New Relic Java agent JFR service
+
+[Install the New Relic Java agent](https://docs.newrelic.com/docs/agents/java-agent/installation/install-java-agent/#install-agent)
+by adding the `-javaagent` parameter to your JVM properties and enable JFR monitoring using one of the following mechanisms:
+
+Agent yaml config (the following should be nested under the `common` stanza):
+
+```yaml
+  # Real-time profiling using Java Flight Recorder (JFR).
+  # This feature reports dimensional metrics to the ingest endpoint configured by
+  # metric_ingest_uri and events to the ingest endpoint configured by event_ingest_uri.
+  # Both ingest endpoints default to US production but they will be automatically set to EU
+  # production when using an EU license key. Other ingest endpoints can be configured manually.
+  # Requires a JVM that provides the JFR library.
+  jfr:
+
+    # Set to true to enable Real-time profiling with JFR.
+    # Default is false.
+    enabled: true
+
+    # Set to true to enable audit logging which will display all JFR metrics and events in each harvest batch.
+    # Audit logging is extremely verbose and should only be used for troubleshooting purposes.
+    # Default is false.
+    audit_logging: false
 ```
-<dependency>
-    <groupId>com.newrelic</groupId>
-    <artifactId>jfr-mappers</artifactId>
-    <version>1.2.0</version>
-</dependency>
-```
 
-#### gradle dependency
+System property:
 
 ```
-compile group: 'com.newrelic', name: 'jfr-mappers', version: '1.2.0'
+-Dnewrelic.config.jfr.enabled=true
 ```
 
-## JFR Daemon
-
-This module builds a stand-alone process that consumes JFR events
-from an existing java process and sends telemetry to New Relic.  This daemon
-process issues commands over JMX to periodically generate a series of rolling 
-JFR files.  It uses these files to build a "pseudo stream" of telemetry events.
-
-### Requirements
-
-* Java 8 (`version 8u262+`) or higher for both the JFR daemon process, and the application process
-* An [Insights insert API key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or an [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key).
-* JFR daemon jar
-
-### How To Use
-
-#### JFR daemon configuration
-
-After building or downloading the JFR daemon jar, you should first export the `INSIGHTS_INSERT_KEY` variable
-with [your insights key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key). To use an APM license key you will need to configure the JFR daemon with `USE_LICENSE_KEY=true`.
+Environment variable:
 
 ```
-$ export INSIGHTS_INSERT_KEY=abc123youractualkeyhere
+export NEW_RELIC_JFR_ENABLED=true
 ```
 
-After that, you can run the JFR daemon as follows (where `<version>` is the actual version number).:
+By default, the New Relic Java agent will send JFR data to New Relic US production metric and event ingest endpoints.
+JFR data will be associated with the APM entity generated by the New Relic Java agent as defined by your `app_name` and `license_key`. 
+To change this or other behavior see [configuration for New Relic Java agent JFR service](#configuration-for-new-relic-java-agent-jfr-service).
+
+#### Configuration for New Relic Java agent JFR service
+
+When using the New Relic Java agent, the JFR service fully respects agent configuration settings.
+
+The New Relic Java agent is configurable via a
+[yaml configuration file](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/),
+[system properties](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#System_Properties),
+and [environment variables](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#Environment_Variables).
+
+The following agent configuration options affect how and where JFR data is reported:
+* [app_name](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-app_name)
+* [license_key](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-license_key)
+* [jfr.enabled]()
+* [jfr.audit_logging]()
+* [metric_ingest_uri]()
+* [event_ingest_uri]()
+* [proxy_host](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-proxy_host)
+* [proxy_password](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-proxy_password)
+* [proxy_port](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-proxy_port)
+* [proxy_user](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-proxy_user)
+* [proxy_scheme](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#cfg-proxy_scheme)
+
+### Standalone process
+
+The `jfr-daemon` can be used as a stand-alone process that consumes JFR events
+from an existing java process and sends telemetry to New Relic. This daemon
+process issues commands over JMX to periodically generate a series of rolling
+JFR files. It uses these files to build a "pseudo stream" of telemetry events.
+
+#### Requirements for standalone process
+
+The `jfr-daemon` standalone process has the following requirements:
+* An [Insights insert API key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or
+  an [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key).
+  To use an APM license key you will need to configure the JFR daemon with `USE_LICENSE_KEY=true`.
+* Uses a [supported Java version](#supported-java-versions)
+
+#### Usage for standalone process
+
+The minimum requirements to use the `jfr-daemon` as standalone Java agent are as follows.
+
+Set the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`):
 
 ```
-$ java -jar jfr-daemon-<version>.jar 
+export NEW_RELIC_APP_NAME=<NAME>
+export INSIGHTS_INSERT_KEY=<KEY>
 ```
 
-By default, the JFR daemon will connect JMX to `localhost` on port 1099 and send data to 
-New Relic US production metric and event ingest endpoints.  If you need to change this
-default behavior, the following environment variables are recognized:
+Start the `jfr-daemon` standalone process, it will attempt to connect to your application's remote JMX MBean server:
+
+```
+java -jar jfr-daemon-<version>.jar
+```
+
+By default, the JFR daemon will connect JMX to `localhost` on port `1099` and send data to New Relic US production metric and event ingest endpoints.
+To change this or other behavior see [configuration for standalone usage](#configuration-for-standalone-usage).
+
+#### Target application configuration
+
+The target application that you wish to monitor must be configured to expose JFR data over remote JMX by adding the following system properties:
+
+```
+-Dcom.sun.management.jmxremote 
+-Dcom.sun.management.jmxremote.port=1099 
+-Dcom.sun.management.jmxremote.ssl=false 
+-Dcom.sun.management.jmxremote.authenticate=false
+```
+
+### Standalone Java agent
+
+The `jfr-daemon` can be used as a Java agent that consumes JFR events
+by attaching to a java process and sending telemetry to New Relic.
+This can be used as a lightweight alternative to the New Relic Java agent JFR service,
+if you do not need the additional data captured by the New Relic Java agent, or you require a solution with less overhead.
+
+#### Requirements for standalone Java agent
+
+The `jfr-daemon` standalone Java agent has the following requirements:
+* An [Insights insert API key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/types-new-relic-api-keys#event-insert-key) or
+  an [APM license key](https://docs.newrelic.com/docs/apis/get-started/intro-apis/new-relic-api-keys#ingest-license-key).
+  To use an APM license key you will need to configure the JFR daemon with `USE_LICENSE_KEY=true`.
+* Uses a [supported Java version](#supported-java-versions)
+
+#### Usage for standalone Java agent
+
+The minimum requirements to use the `jfr-daemon` as standalone Java agent are as follows.
+
+Set the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`): 
+
+```
+export NEW_RELIC_APP_NAME=<NAME>
+export INSIGHTS_INSERT_KEY=<KEY>
+```
+
+Add the `-javaagent` parameter to your JVM properties:
+
+```
+-javaagent:/path/to/jfr-daemon-<version>.jar
+```
+
+By default, the JFR daemon will send data to New Relic US production metric and event ingest endpoints.
+To change this or other behavior see [configuration for standalone usage](#configuration-for-standalone-usage).
+
+### Configuration for standalone usage
+
+The environment variables in this section apply when using the `jfr-daemon` as a [standalone process](#standalone-process)
+or [standalone Java agent](#standalone-java-agent), though the JMX settings only apply to the [standalone process](#standalone-process). 
+
+When using the [New Relic Java agent JFR service](#new-relic-java-agent-jfr-service)
+the configuration is done through the agent config mechanisms (see [configuration for New Relic Java agent JFR service](#configuration-for-new-relic-java-agent-jfr-service)).
 
 | env var name            | required? | default               | description  |
 |-------------------------|-----------|-----------------------|--------------|
@@ -128,9 +249,11 @@ default behavior, the following environment variables are recognized:
 | `PROXY_PASSWORD`        |     N     |  `null`               | Proxy password  |
 | `PROXY_SCHEME`          |     N     |  `null`               | Proxy scheme (`http` or `https`) |
 
-##### Logging
+#### Logging
 
-The JFR daemon and the underlying Telemetry SDK logs with the Slf4j-Simple implementation at the default `Info` level. To increase the logging level, you can configure Slf4j with system properties or a simplelogger.properties file. For example, set this on the command line to log at the debug level.
+The JFR daemon and the underlying Telemetry SDK logs with the Slf4j-Simple implementation at the default `Info` level.
+To increase the logging level, you can configure Slf4j with system properties, or a `simplelogger.properties` file.
+For example, set this on the command line to log at the `debug` level:
 
 `-Dorg.slf4j.simpleLogger.defaultLogLevel=debug`
 
@@ -145,18 +268,99 @@ Here is a sample of debug level logs.
 [JfrController] INFO com.newrelic.jfr.daemon.JFRUploader - Sending events batch of size 25
 ```
 
-For audit logging from the underlying Telemetry SDK, you'll need Slf4j to be set at `debug` level and enable audit logging via environment variable as described above. 
+---
 
-#### Target application configuration
+## JFR jlink
 
-The target application that you wish to monitor must be configured to expose JFR data over remote JMX by adding the following system properties:
+This module produces executable [jlink](https://docs.oracle.com/en/java/javase/11/tools/jlink.html) binaries that bundle the `jfr-daemon` with a JRE that
+provides all required libraries. This allows you to run the `jfr-daemon` as a [standalone process](#standalone-process) without needing to explicitly 
+provide a separate JRE for the daemon.
+
+The produced binaries can be found in `newrelic-jfr-core/jfr-jlink/build/jlink/jfr-jlink-<version>/bin/`.
+
+This has the same configuration and requirements as the `jfr-daemon` [standalone process](#standalone-process) with the 
+lone exception being that the binaries can be directly executed without explicitly starting a JVM (e.g. `./jfr-daemon`).
+
+---
+
+## JFR mappers
+
+This module is a library of reusable JFR (Java Flight Recorder) mappers
+used to transform JFR `RecordedEvent` instances into New Relic telemetry collections
+that are compatible with the
+[telemetry SDK](https://github.com/newrelic/newrelic-telemetry-sdk-java).
+
+We don't intend this library to be used directly. Instead, leverage tools
+like the [JFR daemon](#jfr-daemon) that are built upon this library.
+
+### Maven dependency
 
 ```
--Dcom.sun.management.jmxremote 
--Dcom.sun.management.jmxremote.port=1099 
--Dcom.sun.management.jmxremote.ssl=false 
--Dcom.sun.management.jmxremote.authenticate=false
+<dependency>
+    <groupId>com.newrelic</groupId>
+    <artifactId>jfr-mappers</artifactId>
+    <version>1.3.0</version>
+</dependency>
 ```
+
+### Gradle dependency
+
+```
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '1.3.0'
+```
+
+---
+
+## JFR tools
+
+A module providing tools that can be used to analyze `jfr-daemon`. See [jfr-tools/README.md](./jfr-tools/README.md) for details.
+
+---
+
+## Smoke tests
+
+Consists of a `SmokeTestApp` and a suite of tests to verify that the jfr-daemon attaches and sends data for the various usage scenarios.
+
+Requirements:
+* Java 11
+* Docker
+
+---
+
+## Visualizing JFR data
+
+New Relic One provides a detail rich user experience designed to provide immediate value from
+[Realtime profiling with JFR metrics](https://docs.newrelic.com/docs/agents/java-agent/features/real-time-profiling-java-using-jfr-metrics/).
+Additionally, all JFR events and dimensional metrics reported by the `jfr-daemon` are queryable and facilitate building
+[custom dashboards](https://docs.newrelic.com/docs/query-your-data/explore-query-data/dashboards/introduction-dashboards/) and
+[New Relic One applications](https://developer.newrelic.com/explore-docs/intro-to-sdk/).
+
+### Realtime Profiling Java UI
+
+To view your data in the Realtime Profiling Java UI, go to [one.newrelic.com](https://one.newrelic.com) and navigate to the following:  
+`Explorer > All entities (select the entity) > More Views > Realtime Profiling Java`
+
+The JVM cluster timeline view shows the JVM behavior across the cluster.
+![](./doc-resources/1-new-relic-one-java-flight-record-ui.jpeg)
+
+Select How is JVM health determined? for a detailed breakdown of how JVM health is calculated.
+![](./doc-resources/2-new-relic-one-JVM-health.jpeg)
+
+Detailed view for individual JVMs.
+![](./doc-resources/3-new-relic-one-java-flight-recorder-details-ui_0.jpeg)
+
+The flamegraph view for individual JVMs (currently only available when JFR data is linked to an APM entity generated by New Relic Java agent).
+![](./doc-resources/4-jfr_flamegraphs.png)
+
+### Explore JFR data
+
+Use the Data explorer to dig into JFR data.
+
+JFR events.
+![](./doc-resources/5-jfr-events.png)
+
+JFR dimensional metrics.
+![](./doc-resources/6-jfr-dimensional-metrics.png)
 
 ---
 
