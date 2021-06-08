@@ -79,6 +79,8 @@ The New Relic Java agent JFR monitoring has the following requirements:
 * JFR must be enabled in the agent config
 * Uses a [supported Java version](#supported-java-versions)
 
+Notice: If you were previously using the [jfr-daemon](https://github.com/newrelic/newrelic-jfr-core) as an agent extension or standalone process you should remove that option to avoid potential conflicts with the JFR service that is now built into the agent.
+
 #### Usage for New Relic Java agent JFR service
 
 Note: If you were previously using the `jfr-daemon` jar as an agent extension or standalone process you should remove that
