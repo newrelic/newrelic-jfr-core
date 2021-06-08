@@ -48,8 +48,8 @@ $ ./gradlew test
 ## JFR daemon
 
 There are three different usage scenarios for the `jfr-daemon`: 
-* [New Relic Java agent JFR service](#new-relic-java-agent-jfr-service) (RECOMMENDED) - JFR monitoring built into the flagship New Relic Java agent.
-* [Standalone process](#standalone-process) - Run the `jfr-daemon` in a standalone process and monitor existing Java processes over remote JMX.
+* [New Relic Java agent JFR service](#new-relic-java-agent-jfr-service) (RECOMMENDED) - JFR monitoring built into the flagship New Relic Java agent. No additional setup needed, simply [install the Java agent](https://docs.newrelic.com/docs/agents/java-agent/installation/install-java-agent/), make sure that the [JFR service is enabled](https://docs.newrelic.com/docs/agents/java-agent/configuration/java-agent-configuration-config-file/#jfr-real-time-profiling), and JFR data will flow into the same APM application as the Java agent.
+* [Standalone process](#standalone-process) - Run the `jfr-daemon` as a standalone process and configure it to monitor an existing Java process using remote JMX.
 * [Standalone Java agent](#standalone-java-agent) - Attach the `jfr-daemon` to your Java process as a Java agent. A lightweight alternative to the 
   New Relic Java agent.
 
