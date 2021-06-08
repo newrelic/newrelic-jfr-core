@@ -81,6 +81,9 @@ The New Relic Java agent JFR monitoring has the following requirements:
 
 #### Usage for New Relic Java agent JFR service
 
+Note: If you were previously using the `jfr-daemon` jar as an agent extension or standalone process you should remove that
+option to avoid potential conflicts with the JFR monitoring that is built into the agent.
+
 [Install the New Relic Java agent](https://docs.newrelic.com/docs/agents/java-agent/installation/install-java-agent/#install-agent)
 by adding the `-javaagent` parameter to your JVM properties and enable JFR monitoring using one of the following mechanisms:
 
