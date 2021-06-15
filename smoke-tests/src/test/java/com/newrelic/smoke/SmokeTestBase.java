@@ -33,9 +33,7 @@ public abstract class SmokeTestBase {
 
   static String PROJECT_ROOT_DIR;
   static String SMOKE_TEST_BUILD_LIBS_DIR;
-  static String NEW_RELIC_JAVA_AGENT_DIR;
   static String JFR_DAEMON_BUILD_LIBS_DIR;
-  static String JFR_AGENT_EXTENSION_BUILD_LIBS_DIR;
 
   static Network NETWORK;
   static GenericContainer<?> EDGE_CONTAINER;
@@ -47,9 +45,7 @@ public abstract class SmokeTestBase {
   static void setupNetworkAndEdge() {
     PROJECT_ROOT_DIR = System.getProperty("PROJECT_ROOT_DIR");
     SMOKE_TEST_BUILD_LIBS_DIR = System.getProperty("SMOKE_TESTS_BUILD_LIBS_DIR");
-    NEW_RELIC_JAVA_AGENT_DIR = System.getProperty("NEW_RELIC_JAVA_AGENT_DIR");
     JFR_DAEMON_BUILD_LIBS_DIR = System.getProperty("JFR_DAEMON_BUILD_LIBS_DIR");
-    JFR_AGENT_EXTENSION_BUILD_LIBS_DIR = System.getProperty("JFR_AGENT_EXTENSION_BUILD_LIBS_DIR");
 
     NETWORK = Network.newNetwork();
     EDGE_CONTAINER = buildEdgeContainer();

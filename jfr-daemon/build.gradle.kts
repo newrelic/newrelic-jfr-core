@@ -26,13 +26,21 @@ dependencies {
     api(project(":jfr-mappers"))
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
     api("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
-    implementation("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
     implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
     implementation("com.google.code.gson:gson:${gsonVersion}")
+    /*
+     * Only require the newrelic-api to compile but do not include the classes in the jfr-daemon jar.
+     * The newrelic-api will be provided on the classpath when the jfr-daemon jar is used in the agent.
+     * In other jfr-daemon use cases the newrelic-api shouldn't be necessary.
+     */
+    compileOnly("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
+
+    // Provide the newrelic-api on the runtime classpath for tests.
+    testRuntimeOnly("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
 }
 
 tasks.jar {
-// Create shadowJar instead of jar
+    // Create shadowJar instead of jar when set to true
     enabled = false
 }
 
@@ -96,4 +104,5 @@ signing {
     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     this.sign(publishing.publications["maven"])
 }
+
 
