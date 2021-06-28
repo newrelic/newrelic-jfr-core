@@ -9,12 +9,13 @@ package com.newrelic.jfr.tosummary;
 
 import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.ThreadNameNormalizer;
+import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.metrics.Summary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
-import jdk.jfr.consumer.RecordedThread;
 
 public abstract class AbstractThreadDispatchingSummarizer implements EventToSummary {
   protected final Map<String, EventToSummary> perThread = new HashMap<>();
@@ -23,10 +24,6 @@ public abstract class AbstractThreadDispatchingSummarizer implements EventToSumm
 
   public AbstractThreadDispatchingSummarizer(ThreadNameNormalizer nameNormalizer) {
     this.nameNormalizer = nameNormalizer;
-  }
-
-  public AbstractThreadDispatchingSummarizer() {
-    nameNormalizer = null;
   }
 
   @Override
@@ -41,15 +38,30 @@ public abstract class AbstractThreadDispatchingSummarizer implements EventToSumm
 
   public abstract String getEventName();
 
-  public abstract void accept(RecordedEvent ev);
+  public abstract EventToSummary createPerThreadSummarizer(String threadName, long startTimeMs);
 
-  protected String groupedName(RecordedEvent ev, String threadName) {
-    if (nameNormalizer == null) {
-      return threadName;
-    } else {
-      // This is safe, as this method is only called after a successful detection in Workarounds
-      RecordedThread rt = ev.getValue("eventThread");
-      return nameNormalizer.getNormalizedThreadName(new BasicThreadInfo(rt));
+  @Override
+  public void accept(RecordedEvent ev) {
+    final Optional<String> possibleGroupedThreadName = groupedName(ev);
+    possibleGroupedThreadName.ifPresent(
+        groupedThreadName -> {
+          if (perThread.get(groupedThreadName) == null) {
+            perThread.put(
+                groupedThreadName,
+                createPerThreadSummarizer(groupedThreadName, ev.getStartTime().toEpochMilli()));
+          }
+          perThread.get(groupedThreadName).accept(ev);
+        });
+  }
+
+  protected Optional<String> groupedName(RecordedEvent ev) {
+    Optional<BasicThreadInfo> possibleBasicThreadInfo = Workarounds.getBasicThreadInfo(ev);
+
+    if (possibleBasicThreadInfo.isPresent()) {
+      BasicThreadInfo basicThreadInfo = possibleBasicThreadInfo.get();
+      String normalizedThreadName = nameNormalizer.getNormalizedThreadName(basicThreadInfo);
+      return Optional.ofNullable(normalizedThreadName);
     }
+    return Optional.empty();
   }
 }

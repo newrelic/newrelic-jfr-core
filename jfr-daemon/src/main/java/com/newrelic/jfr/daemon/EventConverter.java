@@ -34,15 +34,6 @@ public class EventConverter {
   private final Map<String, Integer> eventCount = new HashMap<>();
   private final ProfilerRegistry profilerRegistry;
 
-  public EventConverter(Attributes commonAttributes) {
-    this(
-        commonAttributes,
-        ToMetricRegistry.createDefault(),
-        ToSummaryRegistry.createDefault(),
-        ToEventRegistry.createDefault(),
-        ProfilerRegistry.createDefault());
-  }
-
   public EventConverter(Attributes commonAttributes, String pattern) {
     this(
         commonAttributes,

@@ -39,15 +39,12 @@ public class ToSummaryRegistry {
     this.mappers = mappers;
   }
 
-  public static ToSummaryRegistry createDefault() {
-    return new ToSummaryRegistry(allMappers());
-  }
-
   public static ToSummaryRegistry create(ThreadNameNormalizer nameNormalizer) {
     return new ToSummaryRegistry(allMappers(nameNormalizer));
   }
 
-  public static ToSummaryRegistry create(Collection<String> eventNames) {
+  /* For testing */
+  static ToSummaryRegistry create(Collection<String> eventNames) {
     List<EventToSummary> filtered =
         allMappers()
             .stream()

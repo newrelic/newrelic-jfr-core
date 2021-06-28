@@ -8,9 +8,6 @@
 package com.newrelic.jfr.tosummary;
 
 import com.newrelic.jfr.ThreadNameNormalizer;
-import com.newrelic.jfr.Workarounds;
-import java.util.Optional;
-import jdk.jfr.consumer.RecordedEvent;
 
 // jdk.SocketWrite {
 //        startTime = 20:22:57.161
@@ -37,28 +34,13 @@ public class NetworkWriteSummarizer extends AbstractThreadDispatchingSummarizer 
     super(nameNormalizer);
   }
 
-  public NetworkWriteSummarizer() {
-    super();
-  }
-
-  @Override
-  public void accept(RecordedEvent ev) {
-    Optional<String> possibleThreadName = Workarounds.getThreadName(ev);
-    possibleThreadName.ifPresent(
-        threadName -> {
-          final String groupedThreadName = groupedName(ev, threadName);
-          if (perThread.get(groupedThreadName) == null) {
-            perThread.put(
-                groupedThreadName,
-                new PerThreadNetworkWriteSummarizer(
-                    groupedThreadName, ev.getStartTime().toEpochMilli()));
-          }
-          perThread.get(groupedThreadName).accept(ev);
-        });
-  }
-
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public EventToSummary createPerThreadSummarizer(String threadName, long startTimeMs) {
+    return new PerThreadNetworkWriteSummarizer(threadName, startTimeMs);
   }
 }

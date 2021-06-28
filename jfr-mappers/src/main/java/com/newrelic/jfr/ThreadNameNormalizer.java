@@ -55,12 +55,8 @@ public class ThreadNameNormalizer {
 
   private final Pattern replacementPattern;
 
-  //    public ThreadNameNormalizer(AgentConfig config, ThreadNames threadNames) {
-  //        this(config.getValue("thread_sampler.name_pattern", DEFAULT_PATTERN), threadNames);
-  //    }
-
   /** For testing. */
-  public ThreadNameNormalizer() {
+  ThreadNameNormalizer() {
     this(DEFAULT_PATTERN);
   }
 

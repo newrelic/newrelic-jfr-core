@@ -65,7 +65,9 @@ public class StatsMaker implements TelemetrySender {
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     JFRUploader uploader = new JFRUploader(this, recordedEventBuffer);
     DaemonConfig config = SetupUtils.buildConfig();
-    uploader.readyToSend(new EventConverter(SetupUtils.buildCommonAttributes(config)));
+    uploader.readyToSend(
+        new EventConverter(
+            SetupUtils.buildCommonAttributes(config), config.getThreadNamePattern()));
 
     uploader.handleFile(fileName);
     long lengthMillis = Duration.between(uploader.fileStart(), uploader.fileEnd()).toMillis();

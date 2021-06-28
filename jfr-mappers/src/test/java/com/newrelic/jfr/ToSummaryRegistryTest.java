@@ -3,6 +3,7 @@ package com.newrelic.jfr;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.jfr.tosummary.G1GarbageCollectionSummarizer;
@@ -32,13 +33,13 @@ class ToSummaryRegistryTest {
 
   @Test
   void testGetUnknown() {
-    ToSummaryRegistry registry = ToSummaryRegistry.createDefault();
+    ToSummaryRegistry registry = ToSummaryRegistry.create(mock(ThreadNameNormalizer.class));
     assertTrue(registry.get("NOT gonna find me").isEmpty());
   }
 
   @Test
   void testGetKnown() {
-    ToSummaryRegistry registry = ToSummaryRegistry.createDefault();
+    ToSummaryRegistry registry = ToSummaryRegistry.create(mock(ThreadNameNormalizer.class));
     assertTrue(registry.get(NetworkReadSummarizer.EVENT_NAME).isPresent());
   }
 }

@@ -12,7 +12,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.RecordedObjectValidators;
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
 import java.time.Duration;
@@ -22,6 +24,7 @@ import jdk.jfr.consumer.RecordedEvent;
 import jdk.jfr.consumer.RecordedObject;
 import jdk.jfr.consumer.RecordedThread;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -29,6 +32,7 @@ import org.mockito.Mockito;
 
 class NetworkReadSummarizerTest {
   private static MockedStatic<RecordedObjectValidators> recordedObjectValidatorsMockedStatic;
+  private static ThreadNameNormalizer tnn;
   private static final String EVENT_THREAD = "eventThread";
 
   @BeforeAll
@@ -48,11 +52,18 @@ class NetworkReadSummarizerTest {
                 RecordedObjectValidators.isRecordedObjectNull(
                     any(RecordedObject.class), anyString()))
         .thenReturn(false);
+
+    tnn = Mockito.mock(ThreadNameNormalizer.class);
   }
 
   @AfterAll
   static void teardown() {
     recordedObjectValidatorsMockedStatic.close();
+  }
+
+  @AfterEach
+  public void resetMocks() {
+    Mockito.reset(tnn);
   }
 
   @Test
@@ -62,6 +73,12 @@ class NetworkReadSummarizerTest {
     final Instant time1 = Instant.now();
     final Instant time2 = time1.plus(3, SECONDS);
     final Instant time3 = time2.plus(1, SECONDS);
+    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class)))
+        .thenAnswer(
+            invocation -> {
+              BasicThreadInfo threadInfo = invocation.getArgument(0, BasicThreadInfo.class);
+              return threadInfo.getName();
+            });
 
     var summary1bytes =
         new Summary(
@@ -110,7 +127,55 @@ class NetworkReadSummarizerTest {
     var event2 = buildEvent(threadName2, 12, time2, time3);
     var event3 = buildEvent(threadName1, 17, time2, time3);
 
-    NetworkReadSummarizer summarizer = new NetworkReadSummarizer();
+    NetworkReadSummarizer summarizer = new NetworkReadSummarizer(tnn);
+    summarizer.accept(event1);
+    summarizer.accept(event2);
+    summarizer.accept(event3);
+
+    var result = summarizer.summarize();
+
+    assertEquals(expected, result.collect(toList()));
+  }
+
+  @Test
+  void testApplyWithNormalizedThreadName() {
+    var threadName1 = "thread1";
+    var threadName2 = "thread2";
+    var groupedThreadName = "thread#";
+    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class))).thenReturn(groupedThreadName);
+
+    final Instant time1 = Instant.now();
+    final Instant time2 = time1.plus(3, SECONDS);
+    final Instant time3 = time2.plus(1, SECONDS);
+
+    var summary1bytes =
+        new Summary(
+            JFR_SOCKET_READ_BYTES_READ,
+            3,
+            13 + 12 + 17,
+            12,
+            17,
+            time1.toEpochMilli(),
+            time3.toEpochMilli(),
+            new Attributes().put(THREAD_NAME, groupedThreadName));
+    var summary1duration =
+        new Summary(
+            JFR_SOCKET_READ_DURATION,
+            3,
+            Duration.between(time1, time3).toMillis() // event1 + event2
+                + Duration.between(time2, time3).toMillis(), // event3
+            Duration.between(time2, time3).toMillis(),
+            Duration.between(time1, time2).toMillis(),
+            time1.toEpochMilli(),
+            time3.toEpochMilli(),
+            new Attributes().put(THREAD_NAME, groupedThreadName));
+    List<Summary> expected = List.of(summary1bytes, summary1duration);
+
+    var event1 = buildEvent(threadName1, 13, time1, time2);
+    var event2 = buildEvent(threadName2, 12, time2, time3);
+    var event3 = buildEvent(threadName1, 17, time2, time3);
+
+    NetworkReadSummarizer summarizer = new NetworkReadSummarizer(tnn);
     summarizer.accept(event1);
     summarizer.accept(event2);
     summarizer.accept(event3);
@@ -126,9 +191,16 @@ class NetworkReadSummarizerTest {
     final Instant time1 = Instant.now();
     final Instant time2 = time1.plus(3, SECONDS);
 
+    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class)))
+        .thenAnswer(
+            invocation -> {
+              BasicThreadInfo threadInfo = invocation.getArgument(0, BasicThreadInfo.class);
+              return threadInfo.getName();
+            });
+
     var event1 = buildEvent(threadName1, 13, time1, time2);
 
-    NetworkReadSummarizer summarizer = new NetworkReadSummarizer();
+    NetworkReadSummarizer summarizer = new NetworkReadSummarizer(tnn);
     summarizer.accept(event1);
 
     var summaries = summarizer.summarize();
