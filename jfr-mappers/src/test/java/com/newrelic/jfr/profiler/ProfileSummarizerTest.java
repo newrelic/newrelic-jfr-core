@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.RecordedObjectValidators;
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.telemetry.events.Event;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,8 @@ class ProfileSummarizerTest {
 
   @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private RecordedEvent mockEvent2;
+
+  @Mock private ThreadNameNormalizer nameNormalizer;
 
   @Mock private RecordedThread mockThread;
   @Mock private RecordedThread mockThread2;
@@ -52,8 +56,9 @@ class ProfileSummarizerTest {
 
   @Test
   public void acceptReturnsTwoThreadsFourEvents() {
-
-    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample();
+    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, BasicThreadInfo.class).getName());
+    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
       methodSupport.when(() -> MethodSupport.serialize(any())).thenReturn(stackTrace);
@@ -80,7 +85,9 @@ class ProfileSummarizerTest {
 
   @Test
   public void summarizesCorrectly() {
-    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample();
+    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, BasicThreadInfo.class).getName());
+    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
       methodSupport.when(() -> MethodSupport.serialize(any())).thenReturn(stackTrace);
@@ -118,8 +125,50 @@ class ProfileSummarizerTest {
   }
 
   @Test
+  public void summarizesGroupedThreadsCorrectly() {
+    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class))).thenReturn("thread-#");
+    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
+
+    try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
+      methodSupport.when(() -> MethodSupport.serialize(any())).thenReturn(stackTrace);
+
+      try (MockedStatic<RecordedObjectValidators> recordedObjectValidator =
+          Mockito.mockStatic(RecordedObjectValidators.class)) {
+        recordedObjectValidator
+            .when(() -> RecordedObjectValidators.hasField(any(), any(), any()))
+            .thenReturn(true);
+        testClass.accept(mockEvent);
+        testClass.accept(mockEvent);
+        testClass.accept(mockEvent2);
+        testClass.accept(mockEvent2);
+      }
+
+      List<Event> resultEvents = testClass.summarize().collect(Collectors.toList());
+
+      assertEquals(8, resultEvents.size());
+      assertEquals(
+          8,
+          (int)
+              resultEvents
+                  .stream()
+                  .filter(
+                      e -> e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-#"))
+                  .count());
+      assertEquals(
+          32,
+          resultEvents
+              .stream()
+              .filter(e -> e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-#"))
+              .mapToInt(e -> (int) e.getAttributes().asMap().get(FLAME_VALUE))
+              .sum());
+    }
+  }
+
+  @Test
   public void earliestEventTimestampIsSet() {
-    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample();
+    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, BasicThreadInfo.class).getName());
+    ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
       methodSupport.when(() -> MethodSupport.serialize(any())).thenReturn(stackTrace);

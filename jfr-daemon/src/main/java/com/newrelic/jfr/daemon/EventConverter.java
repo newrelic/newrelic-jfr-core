@@ -35,12 +35,16 @@ public class EventConverter {
   private final ProfilerRegistry profilerRegistry;
 
   public EventConverter(Attributes commonAttributes, String pattern) {
+    this(commonAttributes, new ThreadNameNormalizer(pattern));
+  }
+
+  private EventConverter(Attributes commonAttributes, ThreadNameNormalizer nameNormalizer) {
     this(
         commonAttributes,
         ToMetricRegistry.createDefault(),
-        ToSummaryRegistry.create(new ThreadNameNormalizer(pattern)),
+        ToSummaryRegistry.create(nameNormalizer),
         ToEventRegistry.createDefault(),
-        ProfilerRegistry.createDefault());
+        ProfilerRegistry.createDefault(nameNormalizer));
   }
 
   EventConverter(

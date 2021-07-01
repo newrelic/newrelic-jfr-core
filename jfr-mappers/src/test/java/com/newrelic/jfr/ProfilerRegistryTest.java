@@ -29,13 +29,13 @@ class ProfilerRegistryTest {
 
   @Test
   void testGetUnknown() {
-    ProfilerRegistry registry = ProfilerRegistry.createDefault();
+    ProfilerRegistry registry = ProfilerRegistry.createDefault(null);
     assertTrue(registry.get("NOT gonna find me").isEmpty());
   }
 
   @Test
   void testGetKnown() {
-    ProfilerRegistry registry = ProfilerRegistry.createDefault();
+    ProfilerRegistry registry = ProfilerRegistry.createDefault(null);
     assertTrue(registry.get(ProfileSummarizer.NATIVE_EVENT_NAME).isPresent());
   }
 }

@@ -6,7 +6,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.MethodSupport;
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.profiler.FlamegraphMarshaller.StackFrame;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
@@ -32,6 +34,7 @@ public class ProfileSummarizer implements EventToEventSummary {
   public static final String FLAME_VALUE = "flamelevel.value";
   public static final String FLAME_PARENT_ID = "flamelevel.parentId";
   private final FrameFlattener flattener;
+  private final ThreadNameNormalizer nameNormalizer;
 
   private final String eventName;
 
@@ -43,17 +46,19 @@ public class ProfileSummarizer implements EventToEventSummary {
     return stackTraceEventPerThread;
   }
 
-  private ProfileSummarizer(final String eventName, FrameFlattener frameFlattener) {
+  private ProfileSummarizer(
+      final String eventName, FrameFlattener frameFlattener, ThreadNameNormalizer nameNormalizer) {
     this.eventName = eventName;
     this.flattener = frameFlattener;
+    this.nameNormalizer = nameNormalizer;
   }
 
-  public static ProfileSummarizer forExecutionSample() {
-    return new ProfileSummarizer(EVENT_NAME, new FrameFlattener());
+  public static ProfileSummarizer forExecutionSample(ThreadNameNormalizer nameNormalizer) {
+    return new ProfileSummarizer(EVENT_NAME, new FrameFlattener(), nameNormalizer);
   }
 
-  public static ProfileSummarizer forNativeMethodSample() {
-    return new ProfileSummarizer(NATIVE_EVENT_NAME, new FrameFlattener());
+  public static ProfileSummarizer forNativeMethodSample(ThreadNameNormalizer nameNormalizer) {
+    return new ProfileSummarizer(NATIVE_EVENT_NAME, new FrameFlattener(), nameNormalizer);
   }
 
   @Override
@@ -70,11 +75,15 @@ public class ProfileSummarizer implements EventToEventSummary {
     timestamp.updateAndGet(current -> Math.min(current, ev.getStartTime().toEpochMilli()));
 
     Map<String, String> jfrStackTrace = new HashMap<>();
-    RecordedThread sampledThread = null;
+
+    String threadName = null;
     if (hasField(ev, SAMPLED_THREAD, SIMPLE_CLASS_NAME)) {
-      sampledThread = ev.getThread(SAMPLED_THREAD);
+      RecordedThread sampledThread = ev.getThread(SAMPLED_THREAD);
+      BasicThreadInfo basicThreadInfo = new BasicThreadInfo(sampledThread);
+      threadName = nameNormalizer.getNormalizedThreadName(basicThreadInfo);
     }
-    jfrStackTrace.put(THREAD_NAME, sampledThread == null ? null : sampledThread.getJavaName());
+    jfrStackTrace.put(THREAD_NAME, threadName);
+
     if (hasField(ev, STATE, SIMPLE_CLASS_NAME)) {
       jfrStackTrace.put(THREAD_STATE, ev.getString(STATE));
     }
