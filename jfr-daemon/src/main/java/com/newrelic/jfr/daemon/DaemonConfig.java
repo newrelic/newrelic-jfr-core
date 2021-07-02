@@ -9,6 +9,7 @@ package com.newrelic.jfr.daemon;
 
 import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
 
+import com.newrelic.jfr.ThreadNameNormalizer;
 import java.net.URI;
 import java.time.Duration;
 import java.util.function.Function;
@@ -46,6 +47,7 @@ public class DaemonConfig {
   private final String proxyUser;
   private final String proxyPassword;
   private final String proxyScheme;
+  private final String threadNamePattern;
 
   public DaemonConfig(Builder builder) {
     this.auditLogging = builder.auditLogging;
@@ -64,6 +66,7 @@ public class DaemonConfig {
     this.proxyUser = builder.proxyUser;
     this.proxyPassword = builder.proxyPassword;
     this.proxyScheme = builder.proxyScheme;
+    this.threadNamePattern = builder.threadNamePattern;
   }
 
   public boolean auditLogging() {
@@ -134,6 +137,10 @@ public class DaemonConfig {
     return proxyScheme;
   }
 
+  public String getThreadNamePattern() {
+    return threadNamePattern;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -155,6 +162,7 @@ public class DaemonConfig {
     private String proxyUser = DEFAULT_PROXY_USER;
     private String proxyPassword = DEFAULT_PROXY_PASSWORD;
     private String proxyScheme = DEFAULT_PROXY_SCHEME;
+    private String threadNamePattern = ThreadNameNormalizer.DEFAULT_PATTERN;
 
     public Builder auditLogging(boolean auditLogging) {
       this.auditLogging = auditLogging;
@@ -233,6 +241,11 @@ public class DaemonConfig {
 
     public Builder proxyScheme(String proxyScheme) {
       this.proxyScheme = proxyScheme;
+      return this;
+    }
+
+    public Builder threadNamePattern(String threadNamePattern) {
+      this.threadNamePattern = threadNamePattern;
       return this;
     }
 

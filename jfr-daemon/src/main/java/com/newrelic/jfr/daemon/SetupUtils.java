@@ -84,6 +84,7 @@ public class SetupUtils {
     builder.maybeEnv(EnvironmentVars.PROXY_USER, identity(), builder::proxyUser);
     builder.maybeEnv(EnvironmentVars.PROXY_PASSWORD, identity(), builder::proxyPassword);
     builder.maybeEnv(EnvironmentVars.PROXY_SCHEME, identity(), builder::proxyScheme);
+    builder.maybeEnv(EnvironmentVars.THREAD_NAME_PATTERN, identity(), builder::threadNamePattern);
 
     return builder.build();
   }

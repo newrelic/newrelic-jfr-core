@@ -7,9 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
-import com.newrelic.jfr.Workarounds;
-import java.util.Optional;
-import jdk.jfr.consumer.RecordedEvent;
+import com.newrelic.jfr.ThreadNameNormalizer;
 
 // jdk.SocketRead {
 //        startTime = 15:47:41.648
@@ -34,22 +32,17 @@ import jdk.jfr.consumer.RecordedEvent;
 public class NetworkReadSummarizer extends AbstractThreadDispatchingSummarizer {
   public static final String EVENT_NAME = "jdk.SocketRead";
 
-  @Override
-  public void accept(RecordedEvent ev) {
-    Optional<String> possibleThreadName = Workarounds.getThreadName(ev);
-    possibleThreadName.ifPresent(
-        threadName -> {
-          if (perThread.get(threadName) == null) {
-            perThread.put(
-                threadName,
-                new PerThreadNetworkReadSummarizer(threadName, ev.getStartTime().toEpochMilli()));
-          }
-          perThread.get(threadName).accept(ev);
-        });
+  public NetworkReadSummarizer(ThreadNameNormalizer nameNormalizer) {
+    super(nameNormalizer);
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public EventToSummary createPerThreadSummarizer(String threadName, long startTimeMs) {
+    return new PerThreadNetworkReadSummarizer(threadName, startTimeMs);
   }
 }

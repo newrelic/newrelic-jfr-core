@@ -7,9 +7,7 @@
 
 package com.newrelic.jfr.tosummary;
 
-import com.newrelic.jfr.Workarounds;
-import java.util.Optional;
-import jdk.jfr.consumer.RecordedEvent;
+import com.newrelic.jfr.ThreadNameNormalizer;
 
 /**
  * This class handles all TLAB allocation JFR events, and delegates them to the actual aggregators,
@@ -20,23 +18,17 @@ public final class ObjectAllocationOutsideTLABSummarizer
 
   public static final String EVENT_NAME = "jdk.ObjectAllocationOutsideTLAB";
 
-  @Override
-  public void accept(RecordedEvent ev) {
-    Optional<String> threadName = Workarounds.getThreadName(ev);
-    threadName.ifPresent(
-        thread -> {
-          if (perThread.get(thread) == null) {
-            perThread.put(
-                thread,
-                new PerThreadObjectAllocationOutsideTLABSummarizer(
-                    thread, ev.getStartTime().toEpochMilli()));
-          }
-          perThread.get(thread).accept(ev);
-        });
+  public ObjectAllocationOutsideTLABSummarizer(ThreadNameNormalizer nameNormalizer) {
+    super(nameNormalizer);
   }
 
   @Override
   public String getEventName() {
     return EVENT_NAME;
+  }
+
+  @Override
+  public EventToSummary createPerThreadSummarizer(String threadName, long startTimeMs) {
+    return new PerThreadObjectAllocationOutsideTLABSummarizer(threadName, startTimeMs);
   }
 }

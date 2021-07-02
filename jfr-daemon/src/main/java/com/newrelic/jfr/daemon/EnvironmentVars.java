@@ -23,6 +23,7 @@ public class EnvironmentVars {
   public static final String PROXY_USER = "PROXY_USER";
   public static final String PROXY_PASSWORD = "PROXY_PASSWORD";
   public static final String PROXY_SCHEME = "PROXY_SCHEME";
+  public static final String THREAD_NAME_PATTERN = "THREAD_NAME_PATTERN";
 
   private EnvironmentVars() {}
 }

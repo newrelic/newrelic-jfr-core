@@ -20,9 +20,11 @@ import java.util.stream.Stream;
 
 public class ProfilerRegistry {
 
-  private static final List<EventToEventSummary> ALL_MAPPERS =
-      Arrays.asList(
-          ProfileSummarizer.forExecutionSample(), ProfileSummarizer.forNativeMethodSample());
+  private static List<EventToEventSummary> allMappers(ThreadNameNormalizer nameNormalizer) {
+    return Arrays.asList(
+        ProfileSummarizer.forExecutionSample(nameNormalizer),
+        ProfileSummarizer.forNativeMethodSample(nameNormalizer));
+  }
 
   private final List<EventToEventSummary> mappers;
 
@@ -30,21 +32,19 @@ public class ProfilerRegistry {
     this.mappers = mappers;
   }
 
-  public static ProfilerRegistry createDefault() {
-    return new ProfilerRegistry(ALL_MAPPERS);
+  /** @param nameNormalizer is required to process most metrics and flame levels. */
+  public static ProfilerRegistry createDefault(ThreadNameNormalizer nameNormalizer) {
+    return new ProfilerRegistry(allMappers(nameNormalizer));
   }
 
-  public static ProfilerRegistry create(Collection<String> eventNames) {
+  /** For testing */
+  static ProfilerRegistry create(Collection<String> eventNames) {
     List<EventToEventSummary> filtered =
-        ALL_MAPPERS
+        allMappers(null)
             .stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
             .collect(toList());
     return new ProfilerRegistry(filtered);
-  }
-
-  private static List<String> allEventNames() {
-    return ALL_MAPPERS.stream().map(EventToEventSummary::getEventName).collect(toList());
   }
 
   public Stream<EventToEventSummary> all() {

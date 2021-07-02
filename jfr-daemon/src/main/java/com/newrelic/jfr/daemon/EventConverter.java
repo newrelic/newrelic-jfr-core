@@ -8,6 +8,7 @@
 package com.newrelic.jfr.daemon;
 
 import com.newrelic.jfr.ProfilerRegistry;
+import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
@@ -33,13 +34,17 @@ public class EventConverter {
   private final Map<String, Integer> eventCount = new HashMap<>();
   private final ProfilerRegistry profilerRegistry;
 
-  public EventConverter(Attributes commonAttributes) {
+  public EventConverter(Attributes commonAttributes, String pattern) {
+    this(commonAttributes, new ThreadNameNormalizer(pattern));
+  }
+
+  private EventConverter(Attributes commonAttributes, ThreadNameNormalizer nameNormalizer) {
     this(
         commonAttributes,
         ToMetricRegistry.createDefault(),
-        ToSummaryRegistry.createDefault(),
+        ToSummaryRegistry.create(nameNormalizer),
         ToEventRegistry.createDefault(),
-        ProfilerRegistry.createDefault());
+        ProfilerRegistry.createDefault(nameNormalizer));
   }
 
   EventConverter(

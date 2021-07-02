@@ -59,7 +59,8 @@ public class JFRDaemon {
                   commonAttrs.put(SERVICE_NAME, remoteAppName);
                   commonAttrs.put(APP_NAME, remoteAppName);
                 }
-                uploader.readyToSend(new EventConverter(commonAttrs));
+                uploader.readyToSend(
+                    new EventConverter(commonAttrs, config.getThreadNamePattern()));
               });
 
       controller.loop();
