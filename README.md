@@ -98,7 +98,7 @@ Agent yaml config (the following should be nested under the `common` stanza):
   jfr:
 
     # Set to true to enable Real-time profiling with JFR.
-    # Default is false.
+    # Default is true.
     enabled: true
 
     # Set to true to enable audit logging which will display all JFR metrics and events in each harvest batch.

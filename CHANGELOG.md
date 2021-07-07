@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.4.0 (2021-07-02)
+* The JFR daemon aggregates some metrics and events based on the thread name. For instance thread-1 and thread-2 will have their data in a single metric with a threadName of thread-#. [#152](https://github.com/newrelic/newrelic-jfr-core/pull/152)
+
 ## Version 1.3.0 (2021-06-01)
 * The JFR daemon aggregates JfrMethodSample events into JfrFlamelevel events. It does not report JfrMethodSample events anymore and does report JfrFlamelevel events. [#196](https://github.com/newrelic/newrelic-jfr-core/pull/196)
 * Refactor jfr-agent-extension module into jfr-tools [#190](https://github.com/newrelic/newrelic-jfr-core/pull/190)
