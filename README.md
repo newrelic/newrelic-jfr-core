@@ -61,7 +61,7 @@ For additional details see:
 
 While the `jfr-daemon` supports any version of Java 11 and above, we do not recommend using any non-LTS version of Java in production environments.
 
-Some vendors have backported JFR to some of their Java 8 versions. For instance, OpenJDK backported JFR on version 8u262. The `jfr-daemon` is compatible with those Java versions.
+Some vendors have backported JFR to their Java 8 binaries. For instance, OpenJDK backported JFR on version 8u262. The `jfr-daemon` is compatible with those Java versions.
 
 ### New Relic Java agent JFR service
 
