@@ -36,6 +36,11 @@ dependencies {
     }
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     testImplementation("org.testcontainers:testcontainers:1.15.1")
+    constraints {
+        testImplementation("org.apache.commons:commons-compress:1.21") {
+            because("snyk violations")
+        }
+    }
     testImplementation("com.squareup.okhttp3:okhttp:3.12.12")
 }
 
