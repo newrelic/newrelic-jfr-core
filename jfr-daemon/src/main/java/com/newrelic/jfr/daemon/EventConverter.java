@@ -31,7 +31,7 @@ public class EventConverter {
   private final ToSummaryRegistry toSummaryRegistry;
   private final ToEventRegistry toEventRegistry;
 
-  private final Map<String, Integer> eventCount = new HashMap<>();
+  private final Map<String, MutableInteger> eventCount = new HashMap<>();
   private final ProfilerRegistry profilerRegistry;
 
   public EventConverter(Attributes commonAttributes, String pattern) {
@@ -90,7 +90,7 @@ public class EventConverter {
 
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
     String name = event.getEventType().getName();
-    eventCount.compute(name, (key, value) -> value == null ? 1 : value + 1);
+    eventCount.computeIfAbsent(name, (key) -> new MutableInteger()).inc();
 
     try {
       toMetricRegistry
@@ -116,6 +116,18 @@ public class EventConverter {
               + event.getEventType().getDescription()
               + " due to error",
           e);
+    }
+  }
+
+  private static class MutableInteger {
+    private int value;
+
+    public void inc() {
+      value += 1;
+    }
+
+    public String toString() {
+      return Integer.toString(value);
     }
   }
 }
