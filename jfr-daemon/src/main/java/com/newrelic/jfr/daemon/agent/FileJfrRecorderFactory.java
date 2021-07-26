@@ -4,6 +4,8 @@ import com.newrelic.jfr.daemon.JfrRecorder;
 import com.newrelic.jfr.daemon.JfrRecorderException;
 import com.newrelic.jfr.daemon.JfrRecorderFactory;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -22,7 +24,12 @@ public class FileJfrRecorderFactory implements JfrRecorderFactory {
   public JfrRecorder getRecorder() throws JfrRecorderException {
     Configuration jfrConfig;
     try {
-      jfrConfig = Configuration.getConfiguration("profile");
+      Reader reader =
+          new InputStreamReader(
+              Thread.currentThread()
+                  .getContextClassLoader()
+                  .getResourceAsStream("newrelic_jfr_profile.jfc"));
+      jfrConfig = Configuration.create(reader);
     } catch (IOException | ParseException e) {
       // This should never happen
       throw new JfrRecorderException("An error occurred getting configuration.", e);
