@@ -90,15 +90,9 @@ public class ProfileSummarizer implements EventToEventSummary {
     jfrStackTrace.put(STACK_TRACE, MethodSupport.serialize(ev.getStackTrace()));
     JvmStackTraceEvent event = stackTraceToStackFrames(jfrStackTrace);
 
-    stackTraceEventPerThread.computeIfPresent(
-        event.getThreadName(),
-        (k, list) -> {
-          list.add(event);
-          return list;
-        });
-
-    stackTraceEventPerThread.computeIfAbsent(
-        event.getThreadName(), k -> new ArrayList<>(Arrays.asList(event)));
+    stackTraceEventPerThread
+        .computeIfAbsent(event.getThreadName(), k -> new ArrayList<>())
+        .add(event);
   }
 
   @Override
