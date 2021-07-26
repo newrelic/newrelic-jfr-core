@@ -28,7 +28,7 @@ public final class MethodSupport {
   }
 
   public static String empty() {
-    List<Map<String, String>> payload = Collections.emptyList();
+    List<RecordedFrame> payload = Collections.emptyList();
     try {
       return new String(jsonWrite(payload, Optional.empty()).getBytes());
     } catch (IOException e) {
@@ -41,25 +41,15 @@ public final class MethodSupport {
       return null;
     }
 
-    List<Map<String, String>> payload = new ArrayList<>();
-    List<RecordedFrame> frames = trace.getFrames();
-    for (RecordedFrame frame : frames) {
-      Map<String, String> frameData = new HashMap<>();
-      frameData.put("desc", describeMethod(frame.getMethod()));
-      frameData.put("line", "" + frame.getLineNumber());
-      frameData.put("bytecodeIndex", "" + frame.getBytecodeIndex());
-      payload.add(frameData);
-    }
-
     try {
-      return new String(jsonWrite(payload, Optional.empty()).getBytes());
+      return new String(jsonWrite(trace.getFrames(), Optional.empty()).getBytes());
     } catch (IOException e) {
       throw new RuntimeException("Failed to generate stacktrace json", e);
     }
   }
 
-  public static String jsonWrite(
-      final List<Map<String, String>> frames, final Optional<Integer> limit) throws IOException {
+  public static String jsonWrite(final List<RecordedFrame> frames, final Optional<Integer> limit)
+      throws IOException {
     StringWriter strOut = new StringWriter();
     JsonWriter jsonWriter = new JsonWriter(strOut);
     int frameCount = Math.min(limit.orElse(frames.size()), frames.size());
@@ -71,11 +61,11 @@ public final class MethodSupport {
     jsonWriter.name("truncated").value(frameCount < frames.size());
     jsonWriter.name("payload").beginArray();
     for (int i = 0; i < frameCount; i++) {
-      Map<String, String> frame = frames.get(i);
+      RecordedFrame frame = frames.get(i);
       jsonWriter.beginObject();
-      jsonWriter.name("desc").value(frame.get("desc"));
-      jsonWriter.name("line").value(frame.get("line"));
-      jsonWriter.name("bytecodeIndex").value(frame.get("bytecodeIndex"));
+      jsonWriter.name("desc").value(describeMethod(frame.getMethod()));
+      jsonWriter.name("line").value(Integer.toString(frame.getLineNumber()));
+      jsonWriter.name("bytecodeIndex").value(Integer.toString(frame.getBytecodeIndex()));
       jsonWriter.endObject();
     }
 
