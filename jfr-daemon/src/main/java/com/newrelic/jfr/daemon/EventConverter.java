@@ -119,9 +119,7 @@ public class EventConverter {
     }
   }
 
-  /**
-   * To be used as a counter when an Object is needed, as Integer is immutable.
-   */
+  /** To be used as a counter when an Object is needed, as Integer is immutable. */
   private static class IncrementableInteger {
     private int value;
 
