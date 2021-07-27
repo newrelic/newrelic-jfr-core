@@ -310,33 +310,6 @@
     </event>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <!--
          Contents of the control element is not read by the JVM, it's used
          by Java Mission Control to change settings that carry the control attribute.
