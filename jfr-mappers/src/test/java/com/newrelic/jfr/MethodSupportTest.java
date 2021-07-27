@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import jdk.jfr.consumer.RecordedFrame;
 import jdk.jfr.consumer.RecordedMethod;
 import jdk.jfr.consumer.RecordingFile;
@@ -33,7 +32,7 @@ public class MethodSupportTest {
   @Test
   void testJsonWriteWithTruncate() throws Exception {
     var method = buildMethod("Foo", "meth", "()V");
-    
+
     var frames = new ArrayList<RecordedFrame>();
     for (int i = 0; i < 8; i++) {
       var frame = buildFrame(method, i + 10, 14);
@@ -149,9 +148,12 @@ public class MethodSupportTest {
         IntStream.range(0, 55)
             .mapToObj(
                 i ->
-                    "{\"desc\":\"Act.io" + i
-                        + "\",\"line\":\"" + (21 + i)
-                        + "\",\"bytecodeIndex\":\"" + (77 + i)
+                    "{\"desc\":\"Act.io"
+                        + i
+                        + "\",\"line\":\""
+                        + (21 + i)
+                        + "\",\"bytecodeIndex\":\""
+                        + (77 + i)
                         + "\"}")
             .collect(Collectors.joining(","));
     var expected =
@@ -193,14 +195,4 @@ public class MethodSupportTest {
     when(frame.getMethod()).thenReturn(method);
     return frame;
   }
-
-//  private Map<String, String> buildFrame(int i) {
-//    return buildFrame("action" + i, "" + (21 + i), "" + (77 + i));
-//  }
-//
-//  private RecordedFrame buildFrame(String desc, String line, String bytecodeIndex) {
-//
-//    return Map.of("desc", desc, "line", line, "bytecodeIndex", bytecodeIndex);
-//  }
-
 }
