@@ -26,8 +26,8 @@ public class FileJfrRecorderFactory implements JfrRecorderFactory {
     try {
       Reader reader =
           new InputStreamReader(
-              Thread.currentThread()
-                  .getContextClassLoader()
+              FileJfrRecorderFactory.class
+                  .getClassLoader()
                   .getResourceAsStream("newrelic_jfr_profile.jfc"));
       jfrConfig = Configuration.create(reader);
     } catch (IOException | ParseException e) {

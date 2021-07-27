@@ -31,7 +31,7 @@ public class EventConverter {
   private final ToSummaryRegistry toSummaryRegistry;
   private final ToEventRegistry toEventRegistry;
 
-  private final Map<String, MutableInteger> eventCount = new HashMap<>();
+  private final Map<String, IncrementableInteger> eventCount = new HashMap<>();
   private final ProfilerRegistry profilerRegistry;
 
   public EventConverter(Attributes commonAttributes, String pattern) {
@@ -90,7 +90,7 @@ public class EventConverter {
 
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
     String name = event.getEventType().getName();
-    eventCount.computeIfAbsent(name, (key) -> new MutableInteger()).inc();
+    eventCount.computeIfAbsent(name, (key) -> new IncrementableInteger()).inc();
 
     try {
       toMetricRegistry
@@ -119,7 +119,10 @@ public class EventConverter {
     }
   }
 
-  private static class MutableInteger {
+  /**
+   * To be used as a counter when an Object is needed, as Integer is immutable.
+   */
+  private static class IncrementableInteger {
     private int value;
 
     public void inc() {

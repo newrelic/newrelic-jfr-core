@@ -1,21 +1,24 @@
-package com.newrelic.jfr.profiler;
+package com.newrelic.jfr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import com.newrelic.jfr.MethodSupport;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import jdk.jfr.consumer.RecordedFrame;
+import jdk.jfr.consumer.RecordedMethod;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Test;
 
@@ -29,18 +32,16 @@ public class MethodSupportTest {
   @SuppressWarnings("unchecked")
   @Test
   void testJsonWriteWithTruncate() throws Exception {
-    var rf = new HashMap<String, String>();
-    rf.put("desc", "Foo.meth:()V");
-    rf.put("bytecodeIndex", "14");
-
-    var frames = new ArrayList<Map<String, String>>();
+    var method = buildMethod("Foo", "meth", "()V");
+    
+    var frames = new ArrayList<RecordedFrame>();
     for (int i = 0; i < 8; i++) {
-      rf.put("line", "" + (i + 10));
-      frames.add((Map<String, String>) rf.clone());
+      var frame = buildFrame(method, i + 10, 14);
+      frames.add(frame);
     }
 
     var expected =
-        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[{\"desc\":\"Foo.meth:()V\",\"line\":\"10\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth:()V\",\"line\":\"11\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth:()V\",\"line\":\"12\",\"bytecodeIndex\":\"14\"}]}";
+        "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":[{\"desc\":\"Foo.meth()V\",\"line\":\"10\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth()V\",\"line\":\"11\",\"bytecodeIndex\":\"14\"},{\"desc\":\"Foo.meth()V\",\"line\":\"12\",\"bytecodeIndex\":\"14\"}]}";
     var result = MethodSupport.jsonWrite(frames, Optional.of(3));
     assertEquals(expected, result);
   }
@@ -88,9 +89,10 @@ public class MethodSupportTest {
 
   @Test
   void writeJsonSimple_noLimit() throws Exception {
-    List<Map<String, String>> stack = new ArrayList<>();
-    stack.add(buildFrame("action", "21", "77"));
-    String payload = "{\"desc\":\"action\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
+    var action = buildMethod("Act", "ion", "");
+    List<RecordedFrame> stack = new ArrayList<>();
+    stack.add(buildFrame(action, 21, 77));
+    String payload = "{\"desc\":\"Act.ion\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
     var expected =
         "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":["
             + payload
@@ -101,9 +103,10 @@ public class MethodSupportTest {
 
   @Test
   void writeJsonSimple_limitMatchesFrameCount() throws Exception {
-    List<Map<String, String>> stack = new ArrayList<>();
-    stack.add(buildFrame("action", "21", "77"));
-    String payload = "{\"desc\":\"action\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
+    var action = buildMethod("Act", "ion", "()V");
+    List<RecordedFrame> stack = new ArrayList<>();
+    stack.add(buildFrame(action, 21, 77));
+    String payload = "{\"desc\":\"Act.ion()V\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
     var expected =
         "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":false,\"payload\":["
             + payload
@@ -114,12 +117,16 @@ public class MethodSupportTest {
 
   @Test
   void writeJsonSimple_withLimit() throws Exception {
-    List<Map<String, String>> stack = new ArrayList<>();
-    stack.add(buildFrame("action1", "21", "77"));
-    stack.add(buildFrame("action2", "22", "78"));
-    stack.add(buildFrame("action3", "23", "79"));
-    String payload1 = "{\"desc\":\"action1\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
-    String payload2 = "{\"desc\":\"action2\",\"line\":\"22\",\"bytecodeIndex\":\"78\"}";
+    var action1 = buildMethod("Foo", "action1", "()V");
+    var action2 = buildMethod("Foo", "action2", "()V");
+    var action3 = buildMethod("Foo", "action3", "()V");
+
+    List<RecordedFrame> stack = new ArrayList<>();
+    stack.add(buildFrame(action1, 21, 77));
+    stack.add(buildFrame(action2, 22, 78));
+    stack.add(buildFrame(action3, 23, 79));
+    String payload1 = "{\"desc\":\"Foo.action1()V\",\"line\":\"21\",\"bytecodeIndex\":\"77\"}";
+    String payload2 = "{\"desc\":\"Foo.action2()V\",\"line\":\"22\",\"bytecodeIndex\":\"78\"}";
     var expected =
         "{\"type\":\"stacktrace\",\"language\":\"java\",\"version\":1,\"truncated\":true,\"payload\":["
             + payload1
@@ -132,21 +139,19 @@ public class MethodSupportTest {
 
   @Test
   void writeLargeStack() throws Exception {
-    List<Map<String, String>> stack = new ArrayList<>();
+    List<RecordedFrame> stack = new ArrayList<>();
     for (int i = 0; i < 500; i++) {
-      stack.add(buildFrame(i));
+      var method = buildMethod("Act", "io" + i, "");
+      stack.add(buildFrame(method, 21 + i, 77 + i));
     }
 
     String payloads =
         IntStream.range(0, 55)
             .mapToObj(
                 i ->
-                    "{\"desc\":\"action"
-                        + i
-                        + "\",\"line\":\""
-                        + (21 + i)
-                        + "\",\"bytecodeIndex\":\""
-                        + (77 + i)
+                    "{\"desc\":\"Act.io" + i
+                        + "\",\"line\":\"" + (21 + i)
+                        + "\",\"bytecodeIndex\":\"" + (77 + i)
                         + "\"}")
             .collect(Collectors.joining(","));
     var expected =
@@ -159,24 +164,43 @@ public class MethodSupportTest {
 
   @Test
   void writeLargeStack_edgeCase() throws Exception {
-    List<Map<String, String>> stack = new ArrayList<>();
+    var stack = new ArrayList<RecordedFrame>();
+    var method = buildMethod("", "", "");
     // Specially crafted artisanal length in order to exercise the edge case
     // It happens on the second recursion.
     for (int i = 0; i < 75; i++) {
-      var frame = Map.of("desc", "", "line", "", "bytecodeIndex", "");
+      var frame = buildFrame(method, 0, 0);
       stack.add(frame);
     }
 
     String result = MethodSupport.jsonWrite(stack, Optional.of(74));
     assertNotNull(result);
-    assertTrue(result.length() < 3 * 1024);
+    assertTrue(result.length() <= MethodSupport.HEADROOM_75PC);
   }
 
-  private Map<String, String> buildFrame(int i) {
-    return buildFrame("action" + i, "" + (21 + i), "" + (77 + i));
+  private RecordedMethod buildMethod(String typeName, String methodName, String descriptor) {
+    RecordedMethod method = mock(RecordedMethod.class, RETURNS_DEEP_STUBS);
+    when(method.getType().getName()).thenReturn(typeName);
+    when(method.getName()).thenReturn(methodName);
+    when(method.getDescriptor()).thenReturn(descriptor);
+    return method;
   }
 
-  private Map<String, String> buildFrame(String desc, String line, String bytecodeIndex) {
-    return Map.of("desc", desc, "line", line, "bytecodeIndex", bytecodeIndex);
+  private RecordedFrame buildFrame(RecordedMethod method, int line, int bytecodeIndex) {
+    RecordedFrame frame = mock(RecordedFrame.class);
+    when(frame.getBytecodeIndex()).thenReturn(bytecodeIndex);
+    when(frame.getLineNumber()).thenReturn(line);
+    when(frame.getMethod()).thenReturn(method);
+    return frame;
   }
+
+//  private Map<String, String> buildFrame(int i) {
+//    return buildFrame("action" + i, "" + (21 + i), "" + (77 + i));
+//  }
+//
+//  private RecordedFrame buildFrame(String desc, String line, String bytecodeIndex) {
+//
+//    return Map.of("desc", desc, "line", line, "bytecodeIndex", bytecodeIndex);
+//  }
+
 }

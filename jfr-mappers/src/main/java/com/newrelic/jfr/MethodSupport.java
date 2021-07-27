@@ -17,7 +17,9 @@ import jdk.jfr.consumer.RecordedStackTrace;
 
 public final class MethodSupport {
   private static final int JSON_SCHEMA_VERSION = 1;
-  private static final int HEADROOM_75PC = 3 * 1024;
+
+  // default visibility for testing
+  static final int HEADROOM_75PC = 3 * 1024;
 
   public static String describeMethod(final RecordedMethod method) {
     if (method == null) {
