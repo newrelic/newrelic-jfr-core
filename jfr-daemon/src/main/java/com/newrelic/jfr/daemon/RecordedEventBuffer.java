@@ -45,7 +45,9 @@ public class RecordedEventBuffer {
    */
   public void bufferEvents(Path dumpFile, RecordingFile file) throws IOException {
     ctx.resetForNewFile();
-    logger.debug("Looking in " + dumpFile + " for events after: " + ctx.getLastSeen());
+    if (logger.isDebugEnabled()) {
+      logger.debug("Looking in " + dumpFile + " for events after: " + ctx.getLastSeen());
+    }
     while (file.hasMoreEvents()) {
       RecordedEvent event = file.readEvent();
       if (!handleEvent(event)) {
@@ -53,16 +55,18 @@ public class RecordedEventBuffer {
         break;
       }
     }
-    logger.debug(
-        "Queued events from: "
-            + ctx.getFirstEventTime()
-            + " to "
-            + ctx.getLastEventTime()
-            + " ["
-            + ctx.getLastSeen()
-            + "]"
-            + " in "
-            + dumpFile);
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "Queued events from: "
+              + ctx.getFirstEventTime()
+              + " to "
+              + ctx.getLastEventTime()
+              + " ["
+              + ctx.getLastSeen()
+              + "]"
+              + " in "
+              + dumpFile);
+    }
   }
 
   private boolean handleEvent(RecordedEvent event) {
