@@ -7,7 +7,6 @@
 
 package com.newrelic.jfr.tosummary;
 
-import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.metrics.Summary;
@@ -55,11 +54,11 @@ public abstract class AbstractThreadDispatchingSummarizer implements EventToSumm
   }
 
   protected Optional<String> groupedName(RecordedEvent ev) {
-    Optional<BasicThreadInfo> possibleBasicThreadInfo = Workarounds.getBasicThreadInfo(ev);
+    Optional<String> possibleThreadName = Workarounds.getThreadName(ev);
 
-    if (possibleBasicThreadInfo.isPresent()) {
-      BasicThreadInfo basicThreadInfo = possibleBasicThreadInfo.get();
-      String normalizedThreadName = nameNormalizer.getNormalizedThreadName(basicThreadInfo);
+    if (possibleThreadName.isPresent()) {
+      String normalizedThreadName =
+          nameNormalizer.getNormalizedThreadName(possibleThreadName.get());
       return Optional.ofNullable(normalizedThreadName);
     }
     return Optional.empty();

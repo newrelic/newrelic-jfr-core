@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.telemetry.Attributes;
@@ -70,12 +69,8 @@ class NetworkWriteSummarizerTest {
   void testApply() {
     var threadName1 = "spam";
     var threadName2 = "musubi";
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(
-            invocation -> {
-              BasicThreadInfo threadInfo = invocation.getArgument(0, BasicThreadInfo.class);
-              return threadInfo.getName();
-            });
+    when(tnn.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
 
     var time1 = Instant.now();
     var time2 = time1.plus(3, SECONDS);
@@ -143,7 +138,7 @@ class NetworkWriteSummarizerTest {
     var threadName1 = "thread1";
     var threadName2 = "thread2";
     var groupedThreadName = "thread#";
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class))).thenReturn(groupedThreadName);
+    when(tnn.getNormalizedThreadName(any(String.class))).thenReturn(groupedThreadName);
 
     var time1 = Instant.now();
     var time2 = time1.plus(3, SECONDS);
@@ -194,12 +189,8 @@ class NetworkWriteSummarizerTest {
 
     var event1 = buildEvent(threadName1, 13, time1, time2);
 
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(
-            invocation -> {
-              BasicThreadInfo threadInfo = invocation.getArgument(0, BasicThreadInfo.class);
-              return threadInfo.getName();
-            });
+    when(tnn.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
 
     NetworkWriteSummarizer summarizer = new NetworkWriteSummarizer(tnn);
     summarizer.accept(event1);

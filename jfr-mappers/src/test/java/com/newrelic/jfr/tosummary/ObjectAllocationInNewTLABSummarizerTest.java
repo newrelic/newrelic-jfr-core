@@ -11,7 +11,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.telemetry.Attributes;
@@ -69,12 +68,8 @@ class ObjectAllocationInNewTLABSummarizerTest {
   void testSingleEventSummary() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(
-            invocation -> {
-              BasicThreadInfo threadInfo = invocation.getArgument(0, BasicThreadInfo.class);
-              return threadInfo.getName();
-            });
+    when(tnn.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
 
     var event = mock(RecordedEvent.class);
     var numOfEvents = 1;
@@ -114,7 +109,7 @@ class ObjectAllocationInNewTLABSummarizerTest {
   void testMultipleEventSummary() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class))).thenReturn(eventThreadName);
+    when(tnn.getNormalizedThreadName(any(String.class))).thenReturn(eventThreadName);
 
     var event1 = mock(RecordedEvent.class);
     var numOfEvents = 1;
@@ -180,7 +175,7 @@ class ObjectAllocationInNewTLABSummarizerTest {
     var threadName1 = "thread1";
     var threadName2 = "thread2";
     var groupedThreadName = "thread#";
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class))).thenReturn(groupedThreadName);
+    when(tnn.getNormalizedThreadName(any(String.class))).thenReturn(groupedThreadName);
 
     var event1 = mock(RecordedEvent.class);
     var numOfEvents = 1;
@@ -245,12 +240,8 @@ class ObjectAllocationInNewTLABSummarizerTest {
   void testReset() {
     var recordedThread = mock(RecordedThread.class);
     var eventThreadName = "main";
-    when(tnn.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(
-            invocation -> {
-              BasicThreadInfo threadInfo = invocation.getArgument(0, BasicThreadInfo.class);
-              return threadInfo.getName();
-            });
+    when(tnn.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
 
     var event = mock(RecordedEvent.class);
     var eventStartTime = Instant.now().toEpochMilli();
