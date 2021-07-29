@@ -31,17 +31,6 @@ public class Workarounds {
   }
 
   /**
-   * Carefully retrieves the {@link BasicThreadInfo} from the RecordedEvent.
-   *
-   * @param ev The event from which to carefully extract the thread
-   * @return an Optional with the {@link BasicThreadInfo}, or an empty Optional if unable to extract
-   *     it
-   */
-  public static Optional<BasicThreadInfo> getBasicThreadInfo(RecordedEvent ev) {
-    return getRecordedThreadInfo(ev, BasicThreadInfo::new);
-  }
-
-  /**
    * There are cases where the event has the wrong type inside it for the thread, so calling {@link
    * RecordedEvent#getThread(String)} internally throws a {@link ClassCastException}. We work around
    * it here by just getting the raw value and checking the type.

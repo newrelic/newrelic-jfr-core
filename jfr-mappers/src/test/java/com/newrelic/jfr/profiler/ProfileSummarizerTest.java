@@ -1,11 +1,13 @@
 package com.newrelic.jfr.profiler;
 
-import static com.newrelic.jfr.profiler.ProfileSummarizer.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.newrelic.jfr.profiler.ProfileSummarizer.FLAME_VALUE;
+import static com.newrelic.jfr.profiler.ProfileSummarizer.SAMPLED_THREAD;
+import static com.newrelic.jfr.profiler.ProfileSummarizer.STATE;
+import static com.newrelic.jfr.profiler.ProfileSummarizer.THREAD_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.RecordedObjectValidators;
 import com.newrelic.jfr.ThreadNameNormalizer;
@@ -18,7 +20,11 @@ import jdk.jfr.consumer.RecordedStackTrace;
 import jdk.jfr.consumer.RecordedThread;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 class ProfileSummarizerTest {
 
@@ -56,8 +62,8 @@ class ProfileSummarizerTest {
 
   @Test
   public void acceptReturnsTwoThreadsFourEvents() {
-    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0, BasicThreadInfo.class).getName());
+    when(nameNormalizer.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
     ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
@@ -85,8 +91,8 @@ class ProfileSummarizerTest {
 
   @Test
   public void summarizesCorrectly() {
-    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0, BasicThreadInfo.class).getName());
+    when(nameNormalizer.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
     ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
@@ -126,7 +132,7 @@ class ProfileSummarizerTest {
 
   @Test
   public void summarizesGroupedThreadsCorrectly() {
-    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class))).thenReturn("thread-#");
+    when(nameNormalizer.getNormalizedThreadName(any(String.class))).thenReturn("thread-#");
     ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {
@@ -166,8 +172,8 @@ class ProfileSummarizerTest {
 
   @Test
   public void earliestEventTimestampIsSet() {
-    when(nameNormalizer.getNormalizedThreadName(any(BasicThreadInfo.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0, BasicThreadInfo.class).getName());
+    when(nameNormalizer.getNormalizedThreadName(any(String.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0, String.class));
     ProfileSummarizer testClass = ProfileSummarizer.forExecutionSample(nameNormalizer);
 
     try (MockedStatic<MethodSupport> methodSupport = Mockito.mockStatic(MethodSupport.class)) {

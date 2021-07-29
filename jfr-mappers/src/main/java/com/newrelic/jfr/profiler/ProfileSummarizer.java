@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.newrelic.jfr.BasicThreadInfo;
 import com.newrelic.jfr.MethodSupport;
 import com.newrelic.jfr.ThreadNameNormalizer;
 import com.newrelic.jfr.profiler.FlamegraphMarshaller.StackFrame;
@@ -79,8 +78,7 @@ public class ProfileSummarizer implements EventToEventSummary {
     String threadName = null;
     if (hasField(ev, SAMPLED_THREAD, SIMPLE_CLASS_NAME)) {
       RecordedThread sampledThread = ev.getThread(SAMPLED_THREAD);
-      BasicThreadInfo basicThreadInfo = new BasicThreadInfo(sampledThread);
-      threadName = nameNormalizer.getNormalizedThreadName(basicThreadInfo);
+      threadName = nameNormalizer.getNormalizedThreadName(sampledThread.getJavaName());
     }
     jfrStackTrace.put(THREAD_NAME, threadName);
 

@@ -64,11 +64,7 @@ public class ThreadNameNormalizer {
     replacementPattern = Pattern.compile(pattern);
   }
 
-  public String getNormalizedThreadName(BasicThreadInfo threadInfo) {
-    return getNormalizedThreadName(threadInfo.getName());
-  }
-
-  protected String getNormalizedThreadName(String name) {
+  public String getNormalizedThreadName(String name) {
     for (ReplacementRule rule : REPLACEMENT_RULES) {
       ReplacementResult result = rule.getResult(name);
       if (null != result) {
