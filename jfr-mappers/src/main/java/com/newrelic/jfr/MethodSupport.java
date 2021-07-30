@@ -25,8 +25,15 @@ public final class MethodSupport {
     if (method == null) {
       return "[missing]";
     }
+    String typeName = method.getType().getName();
+    String methodName = method.getName();
+    String descriptor = method.getDescriptor();
 
-    return method.getType().getName() + "." + method.getName() + method.getDescriptor();
+    // using a sized StringBuilder to prevent resizing of the internal array
+    StringBuilder sb =
+        new StringBuilder(typeName.length() + methodName.length() + descriptor.length() + 1);
+    sb.append(typeName).append('.').append(methodName).append(descriptor);
+    return sb.toString();
   }
 
   public static String empty() {
