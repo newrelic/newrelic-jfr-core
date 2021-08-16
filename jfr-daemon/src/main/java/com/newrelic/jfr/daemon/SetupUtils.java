@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 public class SetupUtils {
   private static final Logger logger = LoggerFactory.getLogger(SetupUtils.class);
-  private static final int DEFAULT_QUEUE_SIZE = 250_000;
   public static final String JFR_DAEMON = "JFR-Daemon/";
   public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
   public static final String HTTPS = "https";
@@ -85,6 +84,8 @@ public class SetupUtils {
     builder.maybeEnv(EnvironmentVars.PROXY_PASSWORD, identity(), builder::proxyPassword);
     builder.maybeEnv(EnvironmentVars.PROXY_SCHEME, identity(), builder::proxyScheme);
     builder.maybeEnv(EnvironmentVars.THREAD_NAME_PATTERN, identity(), builder::threadNamePattern);
+    builder.maybeEnv(EnvironmentVars.HARVEST_INTERVAL, Integer::parseInt, builder::harvestInterval);
+    builder.maybeEnv(EnvironmentVars.QUEUE_SIZE, Integer::parseInt, builder::queueSize);
 
     return builder.build();
   }
@@ -127,7 +128,7 @@ public class SetupUtils {
    */
   public static JFRUploader buildUploader(DaemonConfig config) {
     TelemetryClient telemetryClient = buildTelemetryClient(config);
-    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(DEFAULT_QUEUE_SIZE);
+    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(config.getQueueSize());
     RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
     return new JFRUploader(new NewRelicTelemetrySender(telemetryClient), recordedEventBuffer);
   }
