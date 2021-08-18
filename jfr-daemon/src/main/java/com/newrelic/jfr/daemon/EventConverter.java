@@ -18,6 +18,7 @@ import com.newrelic.telemetry.Attributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,8 @@ public class EventConverter {
   private final ToSummaryRegistry toSummaryRegistry;
   private final ToEventRegistry toEventRegistry;
 
-  private final Map<String, IncrementableInteger> eventCount = new HashMap<>();
+  // AtomicInteger used as a counter, not for thread safety
+  private final Map<String, AtomicInteger> eventCount = new HashMap<>();
   private final ProfilerRegistry profilerRegistry;
 
   public EventConverter(Attributes commonAttributes, String pattern) {
@@ -90,7 +92,7 @@ public class EventConverter {
 
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
     String name = event.getEventType().getName();
-    eventCount.computeIfAbsent(name, (key) -> new IncrementableInteger()).inc();
+    eventCount.computeIfAbsent(name, (key) -> new AtomicInteger()).incrementAndGet();
 
     try {
       toMetricRegistry
@@ -116,19 +118,6 @@ public class EventConverter {
               + event.getEventType().getDescription()
               + " due to error",
           e);
-    }
-  }
-
-  /** To be used as a counter when an Object is needed, as Integer is immutable. */
-  private static class IncrementableInteger {
-    private int value;
-
-    public void inc() {
-      value += 1;
-    }
-
-    public String toString() {
-      return Integer.toString(value);
     }
   }
 }
