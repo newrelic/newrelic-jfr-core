@@ -247,6 +247,9 @@ the configuration is done through the agent config mechanisms (see [configuratio
 | `PROXY_USER`            |     N     |  `null`               | Proxy user name |
 | `PROXY_PASSWORD`        |     N     |  `null`               | Proxy password  |
 | `PROXY_SCHEME`          |     N     |  `null`               | Proxy scheme (`http` or `https`) |
+| `HARVEST_INTERVAL`      |     N     |  `10`                 | How often data from JFR will be sent to New Relic |
+| `QUEUE_SIZE`            |     N     |  `250_000`            | How many events are to be sent during each harvest cycle |
+| `THREAD_NAME_PATTERN`   |     N     |  <code>((?<=[\W_]&#124;^)([0-9a-fA-F]){4,}(?=[\W_]&#124;$))&#124;\d+</code> | A regex pattern that will be run against thread names, matches will be converted to a `#` to group those threads |
 
 #### Logging
 
@@ -298,14 +301,14 @@ like the [JFR daemon](#jfr-daemon) that are built upon this library.
 <dependency>
     <groupId>com.newrelic</groupId>
     <artifactId>jfr-mappers</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
 ### Gradle dependency
 
 ```
-compile group: 'com.newrelic', name: 'jfr-mappers', version: '1.3.0'
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '1.4.0'
 ```
 
 ---

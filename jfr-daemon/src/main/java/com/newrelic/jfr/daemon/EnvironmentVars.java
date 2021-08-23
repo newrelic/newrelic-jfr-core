@@ -24,6 +24,8 @@ public class EnvironmentVars {
   public static final String PROXY_PASSWORD = "PROXY_PASSWORD";
   public static final String PROXY_SCHEME = "PROXY_SCHEME";
   public static final String THREAD_NAME_PATTERN = "THREAD_NAME_PATTERN";
+  public static final String HARVEST_INTERVAL = "HARVEST_INTERVAL";
+  public static final String QUEUE_SIZE = "QUEUE_SIZE";
 
   private EnvironmentVars() {}
 }

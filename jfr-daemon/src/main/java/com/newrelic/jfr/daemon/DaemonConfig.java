@@ -23,7 +23,10 @@ public class DaemonConfig {
   private static final boolean DEFAULT_USE_SHARED_FILESYSTEM = false;
   private static final boolean DEFAULT_USE_LICENSE_KEY = false;
   private static final boolean DEFAULT_AUDIT_LOGGING = false;
-  private static final Duration DEFAULT_HARVEST_INTERVAL = Duration.ofSeconds(10);
+  public static final int DEFAULT_HARVEST_INTERVAL = 10;
+  private static final Duration DEFAULT_HARVEST_DURATION =
+      Duration.ofSeconds(DEFAULT_HARVEST_INTERVAL);
+  public static final Integer DEFAULT_QUEUE_SIZE = 250_000;
   private static final String DEFAULT_MONITORED_APP_NAME = "My Application";
   private static final String DEFAULT_PROXY_HOST = null;
   private static final Integer DEFAULT_PROXY_PORT = null;
@@ -38,6 +41,7 @@ public class DaemonConfig {
   private final Integer jmxPort;
   private final boolean useSharedFilesystem;
   private final Duration harvestInterval;
+  private final Integer queueSize;
   private final String daemonVersion;
   private final String monitoredAppName;
   private final boolean auditLogging;
@@ -59,6 +63,7 @@ public class DaemonConfig {
     this.useSharedFilesystem = builder.useSharedFilesystem;
     this.useLicenseKey = builder.useLicenseKey;
     this.harvestInterval = builder.harvestInterval;
+    this.queueSize = builder.queueSize;
     this.daemonVersion = builder.daemonVersion;
     this.monitoredAppName = builder.monitoredAppName;
     this.proxyHost = builder.proxyHost;
@@ -109,6 +114,10 @@ public class DaemonConfig {
     return harvestInterval;
   }
 
+  public Integer getQueueSize() {
+    return queueSize;
+  }
+
   public String getDaemonVersion() {
     return daemonVersion;
   }
@@ -154,7 +163,8 @@ public class DaemonConfig {
     private String jmxHost = DEFAULT_JMX_HOST;
     private Integer jmxPort = DEFAULT_JMX_PORT;
     private boolean useSharedFilesystem = DEFAULT_USE_SHARED_FILESYSTEM;
-    private Duration harvestInterval = DEFAULT_HARVEST_INTERVAL;
+    private Duration harvestInterval = DEFAULT_HARVEST_DURATION;
+    private Integer queueSize = DEFAULT_QUEUE_SIZE;
     public String daemonVersion = DEFAULT_DAEMON_VERSION;
     public String monitoredAppName = DEFAULT_MONITORED_APP_NAME;
     private String proxyHost = DEFAULT_PROXY_HOST;
@@ -204,8 +214,17 @@ public class DaemonConfig {
       return this;
     }
 
-    public Builder harvestInterval(Duration harvestInterval) {
-      this.harvestInterval = harvestInterval;
+    public Builder harvestInterval(Integer interval) {
+      if (interval != null) {
+        this.harvestInterval = Duration.ofSeconds(interval);
+      }
+      return this;
+    }
+
+    public Builder queueSize(Integer queueSize) {
+      if (queueSize != null) {
+        this.queueSize = queueSize;
+      }
       return this;
     }
 
@@ -304,7 +323,9 @@ public class DaemonConfig {
         + ", useLicenseKey="
         + useLicenseKey
         + ", harvestInterval="
-        + harvestInterval
+        + harvestInterval.getSeconds()
+        + ", queueSize="
+        + queueSize
         + ", daemonVersion='"
         + daemonVersion
         + '\''
