@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.5.0 (2021-08-27)
+* Decreased memory consumption of the JFRController thread. This should also decrease the amount of time spent with GC. [#204](https://github.com/newrelic/newrelic-jfr-core/pull/204)
+
 ## Version 1.4.0 (2021-07-02)
 * The JFR daemon aggregates some metrics and events based on the thread name. For instance thread-1 and thread-2 will have their data in a single metric with a threadName of thread-#. [#152](https://github.com/newrelic/newrelic-jfr-core/pull/152)
 
