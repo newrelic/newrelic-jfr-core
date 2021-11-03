@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.6.0 (2021-10-03)
+* Some frequently logged lines have been moved from `INFO` to `DEBUG` level. [#208](https://github.com/newrelic/newrelic-jfr-core/pull/208)
+
 ## Version 1.5.0 (2021-08-27)
 * Decreased memory consumption of the JFRController thread. This should also decrease the amount of time spent with GC. [#204](https://github.com/newrelic/newrelic-jfr-core/pull/204)
 
