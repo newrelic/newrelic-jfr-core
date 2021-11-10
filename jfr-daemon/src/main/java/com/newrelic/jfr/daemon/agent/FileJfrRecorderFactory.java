@@ -9,11 +9,11 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.List;
-
 import jdk.jfr.Configuration;
 import jdk.jfr.Recording;
+
+import static java.util.Collections.*;
 
 public class FileJfrRecorderFactory implements JfrRecorderFactory {
 
@@ -21,7 +21,7 @@ public class FileJfrRecorderFactory implements JfrRecorderFactory {
   private final List<String> enabledJfrEvents;
 
   public FileJfrRecorderFactory(Duration harvestInterval) {
-    this(harvestInterval, Collections.EMPTY_LIST);
+    this(harvestInterval, EMPTY_LIST);
   }
 
   public FileJfrRecorderFactory(Duration harvestInterval, List<String> enabledJfrEvents) {

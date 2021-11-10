@@ -8,10 +8,12 @@
 package com.newrelic.jfr.daemon;
 
 import static com.newrelic.jfr.daemon.EnvironmentVars.INSERT_API_KEY;
+import static java.util.Collections.*;
 
 import com.newrelic.jfr.ThreadNameNormalizer;
 import java.net.URI;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -34,6 +36,7 @@ public class DaemonConfig {
   private static final String DEFAULT_PROXY_SCHEME = null;
   private static final String DEFAULT_PROXY_USER = null;
   private static final String DEFAULT_PROXY_PASSWORD = null;
+  private static final List<String> DEFAULT_ENABLE_JFR_EVENTS = EMPTY_LIST;
 
   private final String apiKey;
   private final URI metricsUri;
@@ -180,7 +183,7 @@ public class DaemonConfig {
     private String proxyPassword = DEFAULT_PROXY_PASSWORD;
     private String proxyScheme = DEFAULT_PROXY_SCHEME;
     private String threadNamePattern = ThreadNameNormalizer.DEFAULT_PATTERN;
-    private List<String> enabledJfrEvents;
+    private List<String> enabledJfrEvents = DEFAULT_ENABLE_JFR_EVENTS;
 
     public Builder auditLogging(boolean auditLogging) {
       this.auditLogging = auditLogging;
@@ -275,7 +278,7 @@ public class DaemonConfig {
       this.threadNamePattern = threadNamePattern;
       return this;
     }
-    //Todo: execute in JFRDaemon and premain of AgentMain
+    // Todo: execute in JFRDaemon
     public Builder enabledJfrEvents(List<String> enabledJfrEvents) {
       this.enabledJfrEvents = enabledJfrEvents;
       return this;
