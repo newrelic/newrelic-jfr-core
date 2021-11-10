@@ -37,6 +37,11 @@ dependencies {
 
     // Provide the newrelic-api on the runtime classpath for tests.
     testRuntimeOnly("com.newrelic.agent.java:newrelic-api:${newRelicAgentApiVersion}")
+
+    //try-xml
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.11.4")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.4")
+
 }
 
 tasks.jar {

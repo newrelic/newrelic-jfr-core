@@ -103,6 +103,10 @@ public class EventConverter {
     return toSummaryRegistry.all().anyMatch(m -> m.test(event));
   }
 
+  private boolean isProfileEvent(RecordedEvent event) {
+    return profilerRegistry.all().anyMatch(m -> m.test(event));
+  }
+
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
     String name = event.getEventType().getName();
     eventCount.computeIfAbsent(name, (key) -> new AtomicInteger()).incrementAndGet();
@@ -116,7 +120,7 @@ public class EventConverter {
             .filter(m -> m.test(event))
             .flatMap(m -> m.apply(event).stream())
             .forEach(batches::addMetric);
-        return;
+
       } else if (isEventEvent(event)) {
 
         toEventRegistry
@@ -124,15 +128,17 @@ public class EventConverter {
             .filter(m -> m.test(event))
             .flatMap((m -> m.apply(event).stream()))
             .forEach(batches::addEvent);
-        profilerRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
-        return;
+
       } else if (isSummaryEvent(event)) {
         toSummaryRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
-        return;
+
+      } else if (isProfileEvent(event)) {
+          profilerRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
+
       } else {
         GenericEventMapper gem = new GenericEventMapper();
         gem.apply(event).forEach(batches::addEvent);
-        return;
+
       }
 
     } catch (Throwable e) {
@@ -145,4 +151,6 @@ public class EventConverter {
           e);
     }
   }
+
+
 }
