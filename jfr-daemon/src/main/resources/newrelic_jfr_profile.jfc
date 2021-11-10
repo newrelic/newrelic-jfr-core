@@ -12,6 +12,10 @@
       <setting name="period">everyChunk</setting>
     </event>
 
+    <event name="jdk.ActiveSetting">
+      <setting name="enabled">true</setting>
+    </event>
+
     <event name="jdk.JavaMonitorWait">
       <setting name="enabled">true</setting>
       <setting name="stackTrace">true</setting>
@@ -30,7 +34,7 @@
     </event>
 
     <event name="jdk.ClassLoad">
-      <setting name="enabled" control="class-loading-enabled">false</setting>
+      <setting name="enabled" control="class-loading-enabled">true</setting>
       <setting name="stackTrace">true</setting>
       <setting name="threshold">0 ms</setting>
     </event>
@@ -123,12 +127,12 @@
     </event>
 
     <event name="jdk.ObjectCount">
-      <setting name="enabled" control="memory-profiling-enabled-all">false</setting>
+      <setting name="enabled" control="memory-profiling-enabled-all">true</setting>
       <setting name="period">everyChunk</setting>
     </event>
 
     <event name="jdk.ObjectCountAfterGC">
-      <setting name="enabled">false</setting>
+      <setting name="enabled">true</setting>
     </event>
 
     <event name="jdk.GCHeapSummary">
@@ -169,7 +173,7 @@
     </event>
 
     <event name="jdk.GCPhasePauseLevel3">
-      <setting name="enabled" control="gc-enabled-all">false</setting>
+      <setting name="enabled" control="gc-enabled-all">true</setting>
       <setting name="threshold">0 ms</setting>
     </event>
 

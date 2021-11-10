@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+     Recommended way to edit .jfc files is to use Java Mission Control,
+     see Window -> Flight Recorder Template Manager.
+-->
+
+<configuration version="2.0" label="Profiling" description="Low overhead configuration for profiling, typically around 2 % overhead." provider="Oracle">
+
+    <event name="jdk.ThreadAllocationStatistics">
+      <setting name="enabled">true</setting>
+      <setting name="period">everyChunk</setting>
+    </event>
+
+    <event name="jdk.JavaMonitorWait">
+      <setting name="enabled">true</setting>
+      <setting name="stackTrace">true</setting>
+      <setting name="threshold" control="synchronization-threshold">10 ms</setting>
+    </event>
+
+
+    <!--
+         Contents of the control element is not read by the JVM, it's used
+         by Java Mission Control to change settings that carry the control attribute.
+    -->
+    <control>
+
+      <selection name="gc-level" default="detailed" label="Garbage Collector">
+        <option label="Off" name="off">off</option>
+        <option label="Normal" name="detailed">normal</option>
+        <option label="All" name="all">all</option>
+      </selection>
+
+      <condition name="gc-enabled-normal" true="true" false="false">
+        <or>
+          <test name="gc-level" operator="equal" value="normal"/>
+          <test name="gc-level" operator="equal" value="all"/>
+        </or>
+      </condition>
+
+      <condition name="gc-enabled-all" true="true" false="false">
+        <test name="gc-level" operator="equal" value="all"/>
+      </condition>
+
+      <selection name="memory-profiling" default="medium" label="Memory Profiling">
+        <option label="Off" name="off">off</option>
+        <option label="Object Allocation and Promotion" name="medium">medium</option>
+        <option label="All, including Heap Statistics (May cause long full GCs)" name="all">all</option>
+      </selection>
+
+      <condition name="memory-profiling-enabled-medium" true="true" false="false">
+        <or>
+          <test name="memory-profiling" operator="equal" value="medium"/>
+          <test name="memory-profiling" operator="equal" value="all"/>
+        </or>
+      </condition>
+
+      <condition name="memory-profiling-enabled-all" true="true" false="false">
+        <test name="memory-profiling" operator="equal" value="all"/>
+      </condition>
+
+      <selection name="compiler-level" default="detailed" label="Compiler">
+        <option label="Off" name="off">off</option>
+        <option label="Normal" name="normal">normal</option>
+        <option label="Detailed" name="detailed">detailed</option>
+        <option label="All" name="all">all</option>
+      </selection>
+
+      <condition name="compiler-enabled" true="false" false="true">
+        <test name="compiler-level" operator="equal" value="off"/>
+      </condition>
+
+      <condition name="compiler-enabled-failure" true="true" false="false">
+        <or>
+          <test name="compiler-level" operator="equal" value="detailed"/>
+          <test name="compiler-level" operator="equal" value="all"/>
+        </or>
+      </condition>
+
+      <condition name="compiler-sweeper-threshold" true="0 ms" false="100 ms">
+        <test name="compiler-level" operator="equal" value="all"/>
+      </condition>
+
+      <condition name="compiler-compilation-threshold" true="1000 ms">
+        <test name="compiler-level" operator="equal" value="normal"/>
+      </condition>
+
+      <condition name="compiler-compilation-threshold" true="100 ms">
+        <test name="compiler-level" operator="equal" value="detailed"/>
+      </condition>
+
+      <condition name="compiler-compilation-threshold" true="0 ms">
+        <test name="compiler-level" operator="equal" value="all"/>
+      </condition>
+
+      <condition name="compiler-phase-threshold" true="60 s">
+        <test name="compiler-level" operator="equal" value="normal"/>
+      </condition>
+
+      <condition name="compiler-phase-threshold" true="10 s">
+        <test name="compiler-level" operator="equal" value="detailed"/>
+      </condition>
+
+      <condition name="compiler-phase-threshold" true="0 s">
+        <test name="compiler-level" operator="equal" value="all"/>
+      </condition>
+
+      <selection name="method-sampling-interval" default="normal" label="Method Sampling">
+        <option label="Off" name="off">off</option>
+        <option label="Normal" name="normal">normal</option>
+        <option label="High" name="high">high</option>
+        <option label="Ludicrous (High Overhead)" name="ludicrous">ludicrous</option>
+      </selection>
+      
+      <condition name="method-sampling-java-interval" true="999 d">
+        <test name="method-sampling-interval" operator="equal" value="off"/>
+      </condition>
+
+      <condition name="method-sampling-java-interval" true="20 ms">
+        <test name="method-sampling-interval" operator="equal" value="normal"/>
+      </condition>
+
+      <condition name="method-sampling-java-interval" true="10 ms">
+        <test name="method-sampling-interval" operator="equal" value="high"/>
+      </condition>
+
+      <condition name="method-sampling-java-interval" true="1 ms">
+        <test name="method-sampling-interval" operator="equal" value="ludicrous"/>
+      </condition>
+      
+      <condition name="method-sampling-native-interval" true="999 d">
+        <test name="method-sampling-interval" operator="equal" value="off"/>
+      </condition>
+
+      <condition name="method-sampling-native-interval" true="20 ms">
+        <or>
+          <test name="method-sampling-interval" operator="equal" value="normal"/>
+          <test name="method-sampling-interval" operator="equal" value="high"/>
+          <test name="method-sampling-interval" operator="equal" value="ludicrous"/>
+        </or>
+      </condition>    
+      
+      <condition name="method-sampling-enabled" true="false" false="true">
+        <test name="method-sampling-interval" operator="equal" value="off"/>
+      </condition>
+
+      <selection name="thread-dump-interval" default="everyMinute" label="Thread Dump">
+        <option label="Off" name="off">999 d</option>
+        <option label="At least Once" name="normal">everyChunk</option>
+        <option label="Every 60 s" name="everyMinute">60 s</option>
+        <option label="Every 10 s" name="everyTenSecond">10 s</option>
+        <option label="Every 1 s" name="everySecond">1 s</option>
+      </selection>
+
+      <condition name="thread-dump-enabled" true="false" false="true">
+        <test name="thread-dump-interval" operator="equal" value="999 d"/>
+      </condition>
+
+      <selection name="exception-level" default="errors" label="Exceptions">
+        <option label="Off" name="off">off</option>
+        <option label="Errors Only" name="errors">errors</option>
+        <option label="All Exceptions, including Errors" name="all">all</option>
+      </selection>
+
+      <condition name="enable-errors" true="true" false="false">
+        <or>
+          <test name="exception-level" operator="equal" value="errors"/>
+          <test name="exception-level" operator="equal" value="all"/>
+        </or>
+      </condition>
+
+      <condition name="enable-exceptions" true="true" false="false">
+        <test name="exception-level" operator="equal" value="all"/>
+      </condition>
+
+      <selection name="memory-leak-detection" default="medium" label="Memory Leak Detection">
+        <option label="Off" name="off">off</option>
+        <option label="Object Types" name="minimal">minimal</option>
+        <option label="Object Types + Allocation Stack Traces" name="medium">medium</option>
+        <option label="Object Types + Allocation Stack Traces + Path to GC Root" name="full">full</option>
+      </selection>
+
+      <condition name="memory-leak-detection-enabled" true="false" false="true">
+        <test name="memory-leak-detection" operator="equal" value="off"/>
+      </condition>
+
+      <condition name="memory-leak-detection-stack-trace" true="true" false="false">
+        <or>
+          <test name="memory-leak-detection" operator="equal" value="medium"/>
+          <test name="memory-leak-detection" operator="equal" value="full"/>
+        </or>
+      </condition>
+
+      <condition name="memory-leak-detection-cutoff" true="1 h" false="0 ns">
+        <test name="memory-leak-detection" operator="equal" value="full"/>
+      </condition>
+
+      <text name="synchronization-threshold" label="Synchronization Threshold" contentType="timespan" minimum="0 s">10 ms</text>
+
+      <text name="file-io-threshold" label="File I/O Threshold" contentType="timespan" minimum="0 s">10 ms</text>
+
+      <text name="socket-io-threshold" label="Socket I/O Threshold" contentType="timespan" minimum="0 s">10 ms</text>
+
+      <flag name="class-loading-enabled" label="Class Loading">false</flag>
+
+    </control>
+
+</configuration>

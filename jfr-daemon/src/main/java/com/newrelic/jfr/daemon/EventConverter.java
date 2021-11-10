@@ -13,15 +13,17 @@ import com.newrelic.jfr.ToEventRegistry;
 import com.newrelic.jfr.ToMetricRegistry;
 import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.profiler.EventToEventSummary;
+import com.newrelic.jfr.toevent.GenericEventMapper;
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.telemetry.Attributes;
+import jdk.jfr.consumer.RecordedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import jdk.jfr.consumer.RecordedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EventConverter {
 
@@ -71,7 +73,6 @@ public class EventConverter {
    */
   public BufferedTelemetry convert(RecordedEventBuffer buffer) {
     BufferedTelemetry batches = BufferedTelemetry.create(commonAttributes);
-
     buffer
         .drainToStream()
         .filter(Objects::nonNull)
@@ -90,25 +91,49 @@ public class EventConverter {
     return batches;
   }
 
+  private boolean isMetricEvent(RecordedEvent event) {
+    return toMetricRegistry.all().anyMatch(m -> m.test(event));
+  }
+
+  private boolean isEventEvent(RecordedEvent event) {
+    return toEventRegistry.all().anyMatch(m -> m.test(event));
+  }
+
+  private boolean isSummaryEvent(RecordedEvent event) {
+    return toSummaryRegistry.all().anyMatch(m -> m.test(event));
+  }
+
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
     String name = event.getEventType().getName();
     eventCount.computeIfAbsent(name, (key) -> new AtomicInteger()).incrementAndGet();
-
     try {
-      toMetricRegistry
-          .all()
-          .filter(m -> m.test(event))
-          .flatMap(m -> m.apply(event).stream())
-          .forEach(batches::addMetric);
 
-      toEventRegistry
-          .all()
-          .filter(m -> m.test(event))
-          .flatMap(m -> m.apply(event).stream())
-          .forEach(batches::addEvent);
+      if (isMetricEvent(event)) {
+        // List of metric event names. Is name in list?
 
-      toSummaryRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
-      profilerRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
+        toMetricRegistry
+            .all()
+            .filter(m -> m.test(event))
+            .flatMap(m -> m.apply(event).stream())
+            .forEach(batches::addMetric);
+        return;
+      } else if (isEventEvent(event)) {
+
+        toEventRegistry
+            .all()
+            .filter(m -> m.test(event))
+            .flatMap((m -> m.apply(event).stream()))
+            .forEach(batches::addEvent);
+        profilerRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
+        return;
+      } else if (isSummaryEvent(event)) {
+        toSummaryRegistry.all().filter(m -> m.test(event)).forEach(m -> m.accept(event));
+        return;
+      } else {
+        GenericEventMapper gem = new GenericEventMapper();
+        gem.apply(event).forEach(batches::addEvent);
+        return;
+      }
 
     } catch (Throwable e) {
       logger.error(
