@@ -9,15 +9,24 @@ import java.io.Reader;
 import java.text.ParseException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.List;
+
 import jdk.jfr.Configuration;
 import jdk.jfr.Recording;
 
 public class FileJfrRecorderFactory implements JfrRecorderFactory {
 
   private final Duration harvestInterval;
+  private final List<String> enabledJfrEvents;
 
   public FileJfrRecorderFactory(Duration harvestInterval) {
+    this(harvestInterval, Collections.EMPTY_LIST);
+  }
+
+  public FileJfrRecorderFactory(Duration harvestInterval, List<String> enabledJfrEvents) {
     this.harvestInterval = harvestInterval;
+    this.enabledJfrEvents = enabledJfrEvents;
   }
 
   @Override
@@ -35,6 +44,7 @@ public class FileJfrRecorderFactory implements JfrRecorderFactory {
       throw new JfrRecorderException("An error occurred getting configuration.", e);
     }
     Recording recording = new Recording(jfrConfig);
+    enabledJfrEvents.forEach(recording::enable);
     recording.setMaxAge(harvestInterval.plus(10, ChronoUnit.SECONDS));
     recording.setToDisk(true);
     recording.setName("New Relic JFR Agent Recording");
