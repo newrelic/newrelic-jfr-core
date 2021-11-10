@@ -10,7 +10,9 @@ package com.newrelic.jfr.tosummary;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.metrics.Summary;
 import java.time.Instant;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
@@ -26,17 +28,21 @@ import jdk.jfr.consumer.RecordedEvent;
 /**
  * Summarizes the JFR event jdk.ObjectCount. Records the count and size for the class in each event.
  * Uses the count for the count in the summary and total size for all other fields in the summary.
+ * This class is not thread safe.
  */
 public class ObjectCountSummarizer implements EventToSummary {
 
-  private final Map<String, CountSize> perClass = new HashMap<>();
-  private long endTimeMs;
   private static final String JFR_EVENT_NAME = "jdk.ObjectCount";
   private static final String OBJECT_CLASS = "objectClass";
   private static final String COUNT_FIELD = "count";
   private static final String TOTAL_SIZE_FIELD = "totalSize";
   private static final String METRIC_NAME = "jfr.ObjectCount.allocation";
   private static final String CLASS_ATTR = "class";
+
+  // Deques to be used as stacks, so whenever adding a new element, the previous one can be easily
+  // retrieved
+  private final Map<String, Deque<CountSize>> perClass = new HashMap<>();
+  private long startTimeMs;
 
   @Override
   public String getEventName() {
@@ -46,48 +52,59 @@ public class ObjectCountSummarizer implements EventToSummary {
   @Override
   public void accept(RecordedEvent ev) {
     String className = ev.getClass(OBJECT_CLASS).getName();
-    // there is a bug here in case there are 2 events for the same class in the same harvest cycle.
-    // only the 2nd datapoint will remain
-    perClass.put(className, new CountSize(ev));
+
+    Deque<CountSize> entries = perClass.computeIfAbsent(className, key -> new LinkedList<>());
+    CountSize previousEntry = entries.peekFirst();
+    entries.addFirst(new CountSize(ev, calculateNextStartTime(previousEntry)));
+  }
+
+  private long calculateNextStartTime(CountSize previousEntry) {
+    if (previousEntry != null) {
+      return previousEntry.endTimeMs;
+    }
+    return startTimeMs;
   }
 
   @Override
   public Stream<Summary> summarize() {
-    endTimeMs = Instant.now().toEpochMilli();
-    return perClass.entrySet().stream().map(this::summarizeClass);
+    return perClass.entrySet().stream().flatMap(this::summarizeClass);
   }
 
-  private Summary summarizeClass(Map.Entry<String, CountSize> entry) {
+  private Stream<Summary> summarizeClass(Map.Entry<String, Deque<CountSize>> entry) {
     String className = entry.getKey();
     Attributes atts = new Attributes().put(CLASS_ATTR, className);
-    CountSize countSize = entry.getValue();
+    return entry.getValue().stream().map(countSize -> newSummary(countSize, atts));
+  }
+
+  private Summary newSummary(CountSize countSize, Attributes atts) {
     return new Summary(
         METRIC_NAME,
         countSize.count,
         countSize.size,
         countSize.size,
         countSize.size,
-        // not entirely sure how time should work here. It will have to be refactored to fix
-        // multiple events in a single harvest cycle
-        countSize.startTime,
-        endTimeMs,
+        countSize.startTimeMs,
+        countSize.endTimeMs,
         atts);
   }
 
   @Override
   public void reset() {
     perClass.clear();
+    startTimeMs = Instant.now().toEpochMilli();
   }
 
   private static class CountSize {
     private final int count;
     private final long size;
-    private final long startTime;
+    private final long startTimeMs;
+    private final long endTimeMs;
 
-    public CountSize(RecordedEvent ev) {
+    public CountSize(RecordedEvent ev, long startTimeMs) {
       this.count = (int) ev.getLong(COUNT_FIELD);
       this.size = ev.getLong(TOTAL_SIZE_FIELD);
-      this.startTime = ev.getStartTime().toEpochMilli();
+      this.startTimeMs = startTimeMs;
+      this.endTimeMs = ev.getStartTime().toEpochMilli();
     }
   }
 }
