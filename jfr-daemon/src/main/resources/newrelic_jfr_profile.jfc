@@ -123,7 +123,7 @@
     </event>
 
     <event name="jdk.ObjectCount">
-      <setting name="enabled" control="memory-profiling-enabled-all">false</setting>
+      <setting name="enabled" control="memory-profiling-enabled-all">true</setting>
       <setting name="period">everyChunk</setting>
     </event>
 

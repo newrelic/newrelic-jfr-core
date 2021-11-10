@@ -30,7 +30,8 @@ public class ToSummaryRegistry {
         new NetworkReadSummarizer(nameNormalizer),
         new NetworkWriteSummarizer(nameNormalizer),
         new ObjectAllocationInNewTLABSummarizer(nameNormalizer),
-        new ObjectAllocationOutsideTLABSummarizer(nameNormalizer));
+        new ObjectAllocationOutsideTLABSummarizer(nameNormalizer),
+        new ObjectCountSummarizer());
   }
 
   private final List<EventToSummary> mappers;
