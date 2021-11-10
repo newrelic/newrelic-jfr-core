@@ -45,7 +45,7 @@ public class AgentMain {
     JFRUploader uploader = SetupUtils.buildUploader(config);
     uploader.readyToSend(new EventConverter(commonAttrs, config.getThreadNamePattern()));
     FileJfrRecorderFactory recorderFactory =
-        new FileJfrRecorderFactory(config.getHarvestInterval());
+        new FileJfrRecorderFactory(config.getHarvestInterval(), config.getEnabledJfrEvents());
     JfrController controller =
         new JfrController(recorderFactory, uploader, config.getHarvestInterval());
 
