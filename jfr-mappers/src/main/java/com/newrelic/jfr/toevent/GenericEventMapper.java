@@ -3,11 +3,13 @@ package com.newrelic.jfr.toevent;
 import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
+import jdk.jfr.ValueDescriptor;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+
 
 public class GenericEventMapper implements EventToEvent {
   //EVENT_NAME is not used to name the event
@@ -29,13 +31,19 @@ public class GenericEventMapper implements EventToEvent {
 
   @Override
   public List<Event> apply(RecordedEvent event) {
-
-    long timestamp = event.getStartTime().toEpochMilli();
-    Duration duration = event.getDuration();
     Attributes attr = new Attributes();
-    attr.put(DURATION, duration.toMillis());
-    attr.put(SUCCEEDED, Workarounds.getSucceeded(event));
+    event.getFields().forEach(field -> createAttributes(event, field, attr));
+    long timestamp = event.getStartTime().toEpochMilli();
     return Collections.singletonList(
         new Event(JFR_PREFIX + event.getEventType().getName().substring(4), attr, timestamp));
+  }
+
+  private void createAttributes(RecordedEvent event, ValueDescriptor field, Attributes attr) {
+    String fieldName = field.getName();
+    if(fieldName.equals("startTime")){
+      return;
+    }
+    RecordedObject fieldValue = event.getValue(fieldName);
+    attr.put(fieldName, String.valueOf(fieldValue));
   }
 }
