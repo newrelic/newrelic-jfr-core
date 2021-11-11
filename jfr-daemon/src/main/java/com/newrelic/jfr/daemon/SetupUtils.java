@@ -144,7 +144,7 @@ public class SetupUtils {
    */
   public static JfrController buildJfrController(DaemonConfig config, JFRUploader uploader) {
     FileJfrRecorderFactory recorderFactory =
-        new FileJfrRecorderFactory(config.getHarvestInterval());
+        new FileJfrRecorderFactory(config.getHarvestInterval(), config.getEnabledJfrEvents());
     return new JfrController(recorderFactory, uploader, config.getHarvestInterval());
   }
 
