@@ -40,10 +40,10 @@ public class GenericEventMapper implements EventToEvent {
 
   private void createAttributes(RecordedEvent event, ValueDescriptor field, Attributes attr) {
     String fieldName = field.getName();
-    if(fieldName.equals("startTime")){
-      return;
+    if (!fieldName.equals("startTime")) {
+      if (event.getValue(fieldName) != null) {
+        attr.put(fieldName, event.getValue(fieldName).toString());
+      }
     }
-    RecordedObject fieldValue = event.getValue(fieldName);
-    attr.put(fieldName, String.valueOf(fieldValue));
   }
 }
