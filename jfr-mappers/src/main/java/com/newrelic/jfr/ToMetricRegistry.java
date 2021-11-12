@@ -16,6 +16,7 @@ import com.newrelic.jfr.tometric.EventToMetric;
 import com.newrelic.jfr.tometric.GCHeapSummaryMapper;
 import com.newrelic.jfr.tometric.GarbageCollectionMapper;
 import com.newrelic.jfr.tometric.MetaspaceSummaryMapper;
+import com.newrelic.jfr.tometric.ObjectCountMapper;
 import com.newrelic.jfr.tometric.OverallCPULoadMapper;
 import com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class ToMetricRegistry {
           new GarbageCollectionMapper(),
           new GCHeapSummaryMapper(),
           new MetaspaceSummaryMapper(),
+          new ObjectCountMapper(),
           new OverallCPULoadMapper(),
           new ThreadAllocationStatisticsMapper());
   private final List<EventToMetric> mappers;
