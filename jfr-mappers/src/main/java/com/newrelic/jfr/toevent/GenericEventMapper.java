@@ -1,15 +1,11 @@
 package com.newrelic.jfr.toevent;
 
-import com.newrelic.jfr.Workarounds;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.events.Event;
-import jdk.jfr.ValueDescriptor;
-import jdk.jfr.consumer.RecordedEvent;
-import jdk.jfr.consumer.RecordedObject;
-
 import java.util.Collections;
 import java.util.List;
-
+import jdk.jfr.ValueDescriptor;
+import jdk.jfr.consumer.RecordedEvent;
 
 public class GenericEventMapper implements EventToEvent {
   //EVENT_NAME is not used to name the event
@@ -40,9 +36,35 @@ public class GenericEventMapper implements EventToEvent {
 
   private void createAttributes(RecordedEvent event, ValueDescriptor field, Attributes attr) {
     String fieldName = field.getName();
-    if (!fieldName.equals("startTime")) {
-      if (event.getValue(fieldName) != null) {
-        attr.put(fieldName, event.getValue(fieldName).toString());
+    if (!fieldName.equals("startTime") && event.getValue(fieldName) != null) {
+      int typeId = Math.toIntExact(field.getTypeId());
+      switch (typeId) {
+        case 4:
+          attr.put(fieldName, event.getBoolean(fieldName));
+          break;
+        case 5:
+          attr.put(fieldName, event.getString(fieldName));
+          break;
+        case 6:
+          attr.put(fieldName, event.getFloat(fieldName));
+          break;
+        case 7:
+          attr.put(fieldName, event.getDouble(fieldName));
+          break;
+        case 8:
+          attr.put(fieldName, event.getByte(fieldName));
+          break;
+        case 9:
+          attr.put(fieldName, event.getShort(fieldName));
+          break;
+        case 10:
+          attr.put(fieldName, event.getInt(fieldName));
+          break;
+        case 11:
+          attr.put(fieldName, event.getLong(fieldName));
+          break;
+        default:
+          attr.put(fieldName, event.getValue(fieldName).toString());
       }
     }
   }
