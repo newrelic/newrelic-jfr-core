@@ -19,7 +19,10 @@ public class FileJfrRecorder implements JfrRecorder {
   public Path recordToFile() throws JfrRecorderException {
     try {
       Path output = Files.createTempFile("local-recording", ".jfr");
-      recording.copy(false).dump(output);
+      // creating a copy so we dont stop the original recording while dumping to the file
+      Recording copy = recording.copy(false);
+      copy.dump(output);
+      copy.close();
       return output;
     } catch (IOException e) {
       throw new JfrRecorderException("Failed recording JFR to temp file.", e);
