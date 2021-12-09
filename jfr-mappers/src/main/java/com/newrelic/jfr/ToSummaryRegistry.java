@@ -46,8 +46,7 @@ public class ToSummaryRegistry {
   /* For testing */
   static ToSummaryRegistry create(Collection<String> eventNames) {
     List<EventToSummary> filtered =
-        allMappers()
-            .stream()
+        allMappers().stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
             .collect(toList());
     return new ToSummaryRegistry(filtered);

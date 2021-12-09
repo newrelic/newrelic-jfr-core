@@ -40,8 +40,7 @@ public class ProfilerRegistry {
   /** For testing */
   static ProfilerRegistry create(Collection<String> eventNames) {
     List<EventToEventSummary> filtered =
-        allMappers(null)
-            .stream()
+        allMappers(null).stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
             .collect(toList());
     return new ProfilerRegistry(filtered);

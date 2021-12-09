@@ -1,6 +1,6 @@
 
 plugins {
-    id("com.github.sherter.google-java-format") version "0.8" apply false
+    id("com.github.sherter.google-java-format") version "0.9" apply false
 }
 
 allprojects {
