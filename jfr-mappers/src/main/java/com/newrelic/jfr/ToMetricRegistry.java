@@ -49,8 +49,7 @@ public class ToMetricRegistry {
 
   public static ToMetricRegistry create(Collection<String> eventNames) {
     List<EventToMetric> filtered =
-        ALL_MAPPERS
-            .stream()
+        ALL_MAPPERS.stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
             .collect(toList());
     return new ToMetricRegistry(filtered);
@@ -73,8 +72,7 @@ public class ToMetricRegistry {
    * @return - an optional EventToMetric.
    */
   public Optional<EventToMetric> get(String eventName) {
-    return mappers
-        .stream()
+    return mappers.stream()
         .filter(toMetric -> toMetric.getEventName().equals(eventName))
         .findFirst();
   }

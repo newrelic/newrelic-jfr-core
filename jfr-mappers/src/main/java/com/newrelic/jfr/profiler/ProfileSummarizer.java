@@ -92,9 +92,7 @@ public class ProfileSummarizer implements EventToEventSummary {
   @Override
   public Stream<Event> summarize() {
     Stream<Event> eventStream =
-        stackTraceEventPerThread
-            .entrySet()
-            .stream()
+        stackTraceEventPerThread.entrySet().stream()
             .map(entry -> stackTraceToEvent(entry.getKey(), entry.getValue()))
             .flatMap(Collection::stream);
     return eventStream;

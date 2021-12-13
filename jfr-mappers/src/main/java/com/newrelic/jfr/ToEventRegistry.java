@@ -38,8 +38,7 @@ public class ToEventRegistry {
 
   public static ToEventRegistry create(Collection<String> eventNames) {
     List<EventToEvent> filtered =
-        ALL_MAPPERS
-            .stream()
+        ALL_MAPPERS.stream()
             .filter(mapper -> eventNames.contains(mapper.getEventName()))
             .collect(toList());
     return new ToEventRegistry(filtered);

@@ -124,15 +124,13 @@ class ProfileSummarizerTest {
     assertEquals(
         8,
         (int)
-            resultEvents
-                .stream()
+            resultEvents.stream()
                 .filter(
                     e -> e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-1"))
                 .count());
     assertEquals(
         16,
-        resultEvents
-            .stream()
+        resultEvents.stream()
             .filter(e -> e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-1"))
             .mapToInt(e -> (int) e.getAttributes().asMap().get(FLAME_VALUE))
             .sum());
@@ -159,15 +157,13 @@ class ProfileSummarizerTest {
       assertEquals(
           8,
           (int)
-              resultEvents
-                  .stream()
+              resultEvents.stream()
                   .filter(
                       e -> e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-#"))
                   .count());
       assertEquals(
           32,
-          resultEvents
-              .stream()
+          resultEvents.stream()
               .filter(e -> e.getAttributes().asMap().get(THREAD_NAME).toString().equals("thread-#"))
               .mapToInt(e -> (int) e.getAttributes().asMap().get(FLAME_VALUE))
               .sum());
