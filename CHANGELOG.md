@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.7.0 (2022-01-07)
+* Update telemetry sdk to `0.13.1`.
+* Fix memory leak by properly closing copies of JFR recordings.
+
 ## Version 1.6.0 (2021-10-03)
 * Some frequently logged lines have been moved from `INFO` to `DEBUG` level. [#208](https://github.com/newrelic/newrelic-jfr-core/pull/208)
 
