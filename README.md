@@ -301,14 +301,14 @@ like the [JFR daemon](#jfr-daemon) that are built upon this library.
 <dependency>
     <groupId>com.newrelic</groupId>
     <artifactId>jfr-mappers</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
 </dependency>
 ```
 
 ### Gradle dependency
 
 ```
-compile group: 'com.newrelic', name: 'jfr-mappers', version: '1.7.0'
+compile group: 'com.newrelic', name: 'jfr-mappers', version: '1.8.0'
 ```
 
 ---
