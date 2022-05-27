@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.8.0 (2022-05-27)
+* Update to telemetry sdk 0.13.2 to address [CVE-2022-25647](https://github.com/advisories/GHSA-4jrv-ppp4-jm57)
+
 ## Version 1.7.0 (2022-01-07)
 * Update telemetry sdk to `0.13.1`.
 * Fix memory leak by properly closing copies of JFR recordings.
