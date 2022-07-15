@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.9.0 (2022-06-15)
+* Update to telemetry-sdk `0.15.0` to address [CVE-2020-29582](https://github.com/newrelic/newrelic-telemetry-sdk-java/issues/273)
+* Also includes telemetry-sdk `0.14.0` improvement to decrease CPU utilization: "Replace UUID.randomUUID() with a faster implementation"
+
 ## Version 1.8.0 (2022-05-27)
 * Update to telemetry sdk 0.13.2 to address [CVE-2022-25647](https://github.com/advisories/GHSA-4jrv-ppp4-jm57)
 
