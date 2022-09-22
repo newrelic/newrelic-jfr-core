@@ -1,7 +1,7 @@
 import de.undercouch.gradle.tasks.download.Download
 
 plugins {
-    id("org.springframework.boot") version "2.4.8"
+    id("org.springframework.boot") version "2.6.12"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id("de.undercouch.download") version "4.1.1"
 }
@@ -41,7 +41,7 @@ dependencies {
             because("snyk violations")
         }
     }
-    testImplementation("com.squareup.okhttp3:okhttp:3.12.12")
+    testImplementation("com.squareup.okhttp3:okhttp:4.10.0")
 }
 
 tasks.test {
