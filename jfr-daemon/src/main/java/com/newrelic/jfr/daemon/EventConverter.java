@@ -15,7 +15,11 @@ import com.newrelic.jfr.ToSummaryRegistry;
 import com.newrelic.jfr.profiler.EventToEventSummary;
 import com.newrelic.jfr.tosummary.EventToSummary;
 import com.newrelic.telemetry.Attributes;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +39,7 @@ public class EventConverter {
   // AtomicInteger used as a counter, not for thread safety
   private final Map<String, AtomicInteger> eventCount = new HashMap<>();
   private final ProfilerRegistry profilerRegistry;
+  private BufferedTelemetry batches;
 
   public EventConverter(Attributes commonAttributes, String pattern) {
     this(commonAttributes, new ThreadNameNormalizer(pattern));
@@ -60,38 +65,33 @@ public class EventConverter {
     this.toSummaryRegistry = toSummaryRegistry;
     this.toEventRegistry = toEventRegistry;
     this.profilerRegistry = profilerRegistry;
+    this.batches = BufferedTelemetry.create(commonAttributes);
   }
 
   /**
    * Drain the events from the {@code buffer}, and convert them according to the configured metric,
    * event, and summary registries.
    *
-   * @param buffer the buffer
    * @return a buffered telemetry containing the converted events
    */
-  public BufferedTelemetry convert(RecordedEventBuffer buffer) {
-    BufferedTelemetry batches = BufferedTelemetry.create(commonAttributes);
+  public BufferedTelemetry harvest() {
+    BufferedTelemetry currentBatch = batches;
+    batches = BufferedTelemetry.create(commonAttributes);
 
-    buffer
-        .drainToStream()
-        .filter(Objects::nonNull)
-        .forEach(recordedEvent -> convertAndBuffer(batches, recordedEvent));
-
-    profilerRegistry.all().forEach(s -> s.summarize().forEach(batches::addEvent));
+    profilerRegistry.all().forEach(s -> s.summarize().forEach(currentBatch::addEvent));
     profilerRegistry.all().forEach(EventToEventSummary::reset);
 
-    toSummaryRegistry.all().forEach(s -> s.summarize().forEach(batches::addMetric));
+    toSummaryRegistry.all().forEach(s -> s.summarize().forEach(currentBatch::addMetric));
     toSummaryRegistry.all().forEach(EventToSummary::reset);
 
-    logger.debug("This conversion had {} events", eventCount.size());
-    logger.debug("Detailed view of event counts: {}", eventCount);
     eventCount.clear();
 
-    return batches;
+    return currentBatch;
   }
 
-  private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {
+  public void convertAndBuffer(RecordedEvent event) {
     String name = event.getEventType().getName();
+//    System.out.println("Converting and buffering: " + name);
     eventCount.computeIfAbsent(name, (key) -> new AtomicInteger()).incrementAndGet();
 
     try {
@@ -119,5 +119,14 @@ public class EventConverter {
               + " due to error",
           e);
     }
+  }
+
+  public Collection<String> getEventNames() {
+    Collection<String> eventNames = new HashSet<>();
+    eventNames.addAll(toMetricRegistry.getEventNames());
+    eventNames.addAll(toSummaryRegistry.getEventNames());
+    eventNames.addAll(toEventRegistry.getEventNames());
+    eventNames.addAll(profilerRegistry.getEventNames());
+    return eventNames;
   }
 }

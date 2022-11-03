@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ProfilerRegistry {
@@ -52,5 +53,11 @@ public class ProfilerRegistry {
 
   public Optional<EventToEventSummary> get(String eventName) {
     return mappers.stream().filter(m -> m.getEventName().equals(eventName)).findFirst();
+  }
+
+  public Collection<String> getEventNames() {
+    return mappers.stream()
+            .map(EventToEventSummary::getEventName)
+            .collect(Collectors.toSet());
   }
 }

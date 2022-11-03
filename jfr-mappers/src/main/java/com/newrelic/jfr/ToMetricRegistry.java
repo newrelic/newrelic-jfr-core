@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ToMetricRegistry {
@@ -75,5 +76,11 @@ public class ToMetricRegistry {
     return mappers.stream()
         .filter(toMetric -> toMetric.getEventName().equals(eventName))
         .findFirst();
+  }
+
+  public Collection<String> getEventNames() {
+    return mappers.stream()
+            .map(EventToMetric::getEventName)
+            .collect(Collectors.toSet());
   }
 }

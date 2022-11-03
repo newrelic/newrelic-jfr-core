@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ToEventRegistry {
@@ -66,5 +67,11 @@ public class ToEventRegistry {
    */
   public Optional<EventToEvent> get(String eventName) {
     return mappers.stream().filter(toEvent -> toEvent.getEventName().equals(eventName)).findFirst();
+  }
+
+  public Collection<String> getEventNames() {
+    return mappers.stream()
+            .map(EventToEvent::getEventName)
+            .collect(Collectors.toSet());
   }
 }

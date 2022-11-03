@@ -1,6 +1,6 @@
 
 plugins {
-    id("com.github.sherter.google-java-format") version "0.9" apply false
+//    id("com.github.sherter.google-java-format") version "0.9" apply false
 }
 
 allprojects {
@@ -9,6 +9,7 @@ allprojects {
         mavenCentral()
     }
 }
+
 
 val release: String? by project
 val junitVersion: String by project
@@ -22,8 +23,7 @@ subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "signing")
-    apply(plugin = "com.github.sherter.google-java-format")
-
+//    apply(plugin = "com.github.sherter.google-java-format")
     dependencies {
         "testImplementation"("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
         "testImplementation"("org.mockito:mockito-inline:${mockitoVersion}")

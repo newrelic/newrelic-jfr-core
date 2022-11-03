@@ -32,9 +32,8 @@ public class JFRDaemon {
         new MBeanConnectionFactory(config.getJmxHost(), config.getJmxPort());
     Attributes commonAttrs = SetupUtils.buildCommonAttributes(config);
     JFRUploader uploader = SetupUtils.buildUploader(config);
-    JmxJfrRecorderFactory recorderFactory = new JmxJfrRecorderFactory(config, connectionFactory);
     JfrController controller =
-        new JfrController(recorderFactory, uploader, config.getHarvestInterval());
+        new JfrController(uploader, config.getHarvestInterval());
 
     try {
       // Await initial connection to remote MBean Server.

@@ -28,20 +28,20 @@ public class RecordedObjectValidators {
   public static boolean hasField(
       RecordedObject recordedObject, String objectField, String callingClassName) {
     if (isRecordedObjectNull(recordedObject, callingClassName)) {
-      logger.debug(
-          "Cannot validate field '"
-              + objectField
-              + "' due to null RecordedObject in '"
-              + callingClassName
-              + "'");
+//      logger.debug(
+//          "Cannot validate field '"
+//              + objectField
+//              + "' due to null RecordedObject in '"
+//              + callingClassName
+//              + "'");
       return false;
     } else if (!recordedObject.hasField(objectField)) {
-      logger.debug(
-          "Field '"
-              + objectField
-              + "' does not exist on RecordedObject in '"
-              + callingClassName
-              + "'");
+//      logger.debug(
+//          "Field '"
+//              + objectField
+//              + "' does not exist on RecordedObject in '"
+//              + callingClassName
+//              + "'");
       return false;
     }
     return true;

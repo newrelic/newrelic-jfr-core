@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import jdk.jfr.consumer.RecordedEvent;
@@ -36,7 +37,7 @@ public class ProfileSummarizer implements EventToEventSummary {
 
   private final String eventName;
 
-  private final Map<String, List<JvmStackTraceEvent>> stackTraceEventPerThread = new HashMap<>();
+  private final Map<String, List<JvmStackTraceEvent>> stackTraceEventPerThread = new ConcurrentHashMap<>();
   private AtomicLong timestamp = new AtomicLong(Long.MAX_VALUE);
 
   // For tests
@@ -75,7 +76,9 @@ public class ProfileSummarizer implements EventToEventSummary {
     String threadName = null;
     if (hasField(ev, SAMPLED_THREAD, SIMPLE_CLASS_NAME)) {
       RecordedThread sampledThread = ev.getThread(SAMPLED_THREAD);
-      threadName = nameNormalizer.getNormalizedThreadName(sampledThread.getJavaName());
+      if (sampledThread != null) {
+        threadName = nameNormalizer.getNormalizedThreadName(sampledThread.getJavaName());
+      }
     }
 
     String threadState = null;

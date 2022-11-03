@@ -2,40 +2,44 @@ package com.newrelic.jfr.daemon;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.newrelic.jfr.profiler.ProfileSummarizer;
+import com.newrelic.jfr.tometric.ThreadAllocationStatisticsMapper;
+import jdk.jfr.EventSettings;
+import jdk.jfr.Period;
+import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordingStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Manages the continuous processing of JFR data. {@link #loop()} repeatedly calls {@link
- * JfrRecorder#recordToFile()} and uploads the data via {@link JFRUploader#handleFile(Path)}.
  */
 public class JfrController {
 
   private static final Logger logger = LoggerFactory.getLogger(JfrController.class);
 
   private final ExecutorService executorService;
-  private final JfrRecorderFactory recorderFactory;
   private final JFRUploader uploader;
   private final Duration harvestInterval;
 
   private volatile boolean shutdown = false;
-  private JfrRecorder jfrRecorder;
 
-  public JfrController(
-      JfrRecorderFactory recorderFactory, JFRUploader uploader, Duration harvestInterval) {
+  public JfrController(JFRUploader uploader, Duration harvestInterval) {
     executorService =
         Executors.newFixedThreadPool(
-            2,
+            5,
             r -> {
               Thread thread = new Thread(r, JfrController.class.getSimpleName());
               thread.setDaemon(true);
               return thread;
             });
-    this.recorderFactory = recorderFactory;
     this.uploader = uploader;
     this.harvestInterval = harvestInterval;
+    setupStreaming();
   }
 
   /** Stop the {@link #loop()}. */
@@ -47,35 +51,38 @@ public class JfrController {
   /**
    * Loop until {@link #shutdown()}, recording and handling JFR data each iteration.
    *
-   * @throws JfrRecorderException if a fatal error occurs preventing JFR recording / handling from
-   *     continuing
    */
-  public void loop() throws JfrRecorderException {
+  public void loop() {
     logger.info("Starting JfrController.");
     while (!shutdown) {
       SafeSleep.sleep(harvestInterval);
-
-      // Setup jfrRecorder if first iteration
-      if (jfrRecorder == null) {
-        resetJfrRecorder();
-      }
-
-      try {
-        Path pathToFile = jfrRecorder.recordToFile();
-        executorService.submit(() -> uploader.handleFile(pathToFile));
-      } catch (JfrRecorderException e) {
-        // If an error occurs, recording to file, attempt to reset the recorder. If
-        // resetting fails allow the exception to propagate.
-        logger.warn(
-            "An error occurred recording JFR to file, resetting recorder: {}", e.getMessage());
-        resetJfrRecorder();
-      }
+      executorService.submit(uploader::harvest);
     }
     logger.info("Stopping JfrController. Shutdown detected.");
     executorService.shutdown();
   }
 
-  private void resetJfrRecorder() throws JfrRecorderException {
-    jfrRecorder = recorderFactory.getRecorder();
+  private void setupStreaming() {
+    executorService.submit(this::subscribe);
+  }
+
+  private void subscribe() {
+    Collection<String> eventNames = uploader.getEventNames();
+    try (RecordingStream rs = new RecordingStream()) {
+      for (String eventName : eventNames) {
+        EventSettings eventSettings = rs.enable(eventName);
+        switch (eventName) {
+          case ThreadAllocationStatisticsMapper.EVENT_NAME -> eventSettings.with(Period.NAME, "1s");
+          case ProfileSummarizer.EVENT_NAME -> eventSettings.with(Period.NAME, "10ms");
+          case ProfileSummarizer.NATIVE_EVENT_NAME -> eventSettings.with(Period.NAME, "20ms");
+        }
+        rs.onEvent(eventName, this::acceptEvent);
+      }
+      rs.start();
+    }
+  }
+
+  private void acceptEvent(RecordedEvent event) {
+    executorService.submit(() -> uploader.accept(event));
   }
 }

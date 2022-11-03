@@ -128,9 +128,7 @@ public class SetupUtils {
    */
   public static JFRUploader buildUploader(DaemonConfig config) {
     TelemetryClient telemetryClient = buildTelemetryClient(config);
-    BlockingQueue<RecordedEvent> queue = new LinkedBlockingQueue<>(config.getQueueSize());
-    RecordedEventBuffer recordedEventBuffer = new RecordedEventBuffer(queue);
-    return new JFRUploader(new NewRelicTelemetrySender(telemetryClient), recordedEventBuffer);
+    return new JFRUploader(new NewRelicTelemetrySender(telemetryClient));
   }
 
   /**
@@ -143,9 +141,7 @@ public class SetupUtils {
    * @return the JfrController
    */
   public static JfrController buildJfrController(DaemonConfig config, JFRUploader uploader) {
-    FileJfrRecorderFactory recorderFactory =
-        new FileJfrRecorderFactory(config.getHarvestInterval());
-    return new JfrController(recorderFactory, uploader, config.getHarvestInterval());
+    return new JfrController(uploader, config.getHarvestInterval());
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
