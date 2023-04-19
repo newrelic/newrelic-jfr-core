@@ -1,7 +1,7 @@
 import de.undercouch.gradle.tasks.download.Download
 
 plugins {
-    id("org.springframework.boot") version "2.6.12"
+    id("org.springframework.boot") version "2.7.10"
     id("io.spring.dependency-management") version "1.0.10.RELEASE"
     id("de.undercouch.download") version "4.1.1"
 }
