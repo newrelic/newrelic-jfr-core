@@ -11,7 +11,13 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.BlockingQueue;
@@ -149,7 +155,6 @@ public class SetupUtils {
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
-    System.out.println(config.toString());
     Supplier<HttpPoster> httpPosterCreator =
         () ->
             new OkHttpPoster(
