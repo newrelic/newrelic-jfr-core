@@ -116,10 +116,12 @@ public final class JFRUploader {
 
   void deleteFile(Path dumpFile) {
     try {
+      logger.debug("Attempting to delete file/path: {}", dumpFile.toString());
       Files.delete(dumpFile);
     } catch (Exception e) {
       // TODO: I think we actually want to log an error here and exit cleanly, rather than
       // throw an exception on the executor thread
+      logger.error("Exception occurred attempting to delete file", e);
       throw new RuntimeException(e);
     }
   }
