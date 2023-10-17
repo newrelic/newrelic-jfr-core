@@ -4,11 +4,11 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *
  */
-
 package com.newrelic.jfr.daemon;
 
 import com.newrelic.telemetry.events.EventBatch;
 import com.newrelic.telemetry.metrics.MetricBatch;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -116,10 +116,19 @@ public final class JFRUploader {
 
   void deleteFile(Path dumpFile) {
     try {
+      logger.debug("Attempting to delete file/path: {}", dumpFile.toString());
       Files.delete(dumpFile);
     } catch (Exception e) {
       // TODO: I think we actually want to log an error here and exit cleanly, rather than
       // throw an exception on the executor thread
+      File file = dumpFile.toFile();
+      logger.error("Exception occurred attempting to delete file: ", e);
+      logger.error(
+          "Target file permissions: r: {}, w: {}, x: {}",
+          file.canRead(),
+          file.canWrite(),
+          file.canExecute());
+
       throw new RuntimeException(e);
     }
   }
