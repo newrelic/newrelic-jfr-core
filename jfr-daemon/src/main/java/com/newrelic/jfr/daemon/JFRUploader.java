@@ -4,12 +4,10 @@
  *  * SPDX-License-Identifier: Apache-2.0
  *
  */
-
 package com.newrelic.jfr.daemon;
 
 import com.newrelic.telemetry.events.EventBatch;
 import com.newrelic.telemetry.metrics.MetricBatch;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -125,8 +123,12 @@ public final class JFRUploader {
       // throw an exception on the executor thread
       File file = dumpFile.toFile();
       logger.error("Exception occurred attempting to delete file: ", e);
-      logger.error("Target file permissions: r: {}, w: {}, x: {}", file.canRead(), file.canWrite(), file.canExecute());
-      
+      logger.error(
+          "Target file permissions: r: {}, w: {}, x: {}",
+          file.canRead(),
+          file.canWrite(),
+          file.canExecute());
+
       throw new RuntimeException(e);
     }
   }
