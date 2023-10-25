@@ -122,8 +122,8 @@ public final class JFRUploader {
       // TODO: I think we actually want to log an error here and exit cleanly, rather than
       // throw an exception on the executor thread
       File file = dumpFile.toFile();
-      logger.error("Exception occurred attempting to delete file: ", e);
-      logger.error(
+      logger.debug("Exception occurred attempting to delete file: ", e);
+      logger.debug(
           "Target file permissions: r: {}, w: {}, x: {}",
           file.canRead(),
           file.canWrite(),
