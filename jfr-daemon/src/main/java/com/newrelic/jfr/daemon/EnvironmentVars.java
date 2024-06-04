@@ -26,6 +26,7 @@ public class EnvironmentVars {
   public static final String THREAD_NAME_PATTERN = "THREAD_NAME_PATTERN";
   public static final String HARVEST_INTERVAL = "HARVEST_INTERVAL";
   public static final String QUEUE_SIZE = "QUEUE_SIZE";
+  public static final String HOSTNAME = "HOSTNAME";
 
   private EnvironmentVars() {}
 }
