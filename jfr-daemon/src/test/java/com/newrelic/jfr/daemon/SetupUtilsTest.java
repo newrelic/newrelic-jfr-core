@@ -38,7 +38,7 @@ class SetupUtilsTest {
   void testBuildCommonAttributesWithSpecificHostname() {
     DaemonConfig config = mock(DaemonConfig.class);
     when(config.getHostname()).thenReturn("test_hostname");
-    when (config.getMonitoredAppName()).thenReturn("test_app_name");
+    when(config.getMonitoredAppName()).thenReturn("test_app_name");
 
     Attributes attributes = SetupUtils.buildCommonAttributes(config);
 
@@ -57,12 +57,13 @@ class SetupUtilsTest {
   void testBuildCommonAttributesWithNullConfigValueLocalHostResolution() throws Exception {
     DaemonConfig config = mock(DaemonConfig.class);
     when(config.getHostname()).thenReturn(null);
-    when (config.getMonitoredAppName()).thenReturn("test_app_name");
+    when(config.getMonitoredAppName()).thenReturn("test_app_name");
 
     InetAddress inetAddress = mock(InetAddress.class);
     when(inetAddress.getHostName()).thenReturn("resolved_hostname");
 
-    try (MockedStatic<InetAddress> inetAddressMockedStatic = Mockito.mockStatic(InetAddress.class)) {
+    try (MockedStatic<InetAddress> inetAddressMockedStatic =
+        Mockito.mockStatic(InetAddress.class)) {
       inetAddressMockedStatic.when(InetAddress::getLocalHost).thenReturn(inetAddress);
 
       Attributes attributes = SetupUtils.buildCommonAttributes(config);
@@ -76,21 +77,26 @@ class SetupUtilsTest {
       assertEquals("resolved_hostname", attributes.asMap().get(HOSTNAME));
       assertEquals("test_app_name", attributes.asMap().get(APP_NAME));
       assertEquals("test_app_name", attributes.asMap().get(SERVICE_NAME));
-    };
+    }
+    ;
   }
 
   @Test
   void testBuildCommonAttributesWithNullConfigValueLoopbackResolution() throws Exception {
     DaemonConfig config = mock(DaemonConfig.class);
     when(config.getHostname()).thenReturn(null);
-    when (config.getMonitoredAppName()).thenReturn("test_app_name");
+    when(config.getMonitoredAppName()).thenReturn("test_app_name");
 
     InetAddress loopbackAddress = InetAddress.getLoopbackAddress();
 
-    try (MockedStatic<InetAddress> inetAddressMockedStatic = Mockito.mockStatic(InetAddress.class)) {
-      inetAddressMockedStatic.when(InetAddress::getLocalHost).thenAnswer(invocationOnMock -> {
-        throw new RuntimeException("Hostname resolution failed");
-      });
+    try (MockedStatic<InetAddress> inetAddressMockedStatic =
+        Mockito.mockStatic(InetAddress.class)) {
+      inetAddressMockedStatic
+          .when(InetAddress::getLocalHost)
+          .thenAnswer(
+              invocationOnMock -> {
+                throw new RuntimeException("Hostname resolution failed");
+              });
       inetAddressMockedStatic.when(InetAddress::getLoopbackAddress).thenReturn(loopbackAddress);
 
       Attributes attributes = SetupUtils.buildCommonAttributes(config);
@@ -106,5 +112,4 @@ class SetupUtilsTest {
       assertEquals("test_app_name", attributes.asMap().get(SERVICE_NAME));
     }
   }
-
 }

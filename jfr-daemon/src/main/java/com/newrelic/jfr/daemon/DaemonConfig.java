@@ -153,7 +153,9 @@ public class DaemonConfig {
     return threadNamePattern;
   }
 
-  public String getHostname() { return hostname; }
+  public String getHostname() {
+    return hostname;
+  }
 
   public static Builder builder() {
     return new Builder();
