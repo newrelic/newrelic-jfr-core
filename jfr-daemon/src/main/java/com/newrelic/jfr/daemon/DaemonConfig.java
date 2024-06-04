@@ -33,6 +33,7 @@ public class DaemonConfig {
   private static final String DEFAULT_PROXY_SCHEME = null;
   private static final String DEFAULT_PROXY_USER = null;
   private static final String DEFAULT_PROXY_PASSWORD = null;
+  private static final String DEFAULT_HOSTNAME = "localhost";
 
   private final String apiKey;
   private final URI metricsUri;
@@ -52,6 +53,7 @@ public class DaemonConfig {
   private final String proxyPassword;
   private final String proxyScheme;
   private final String threadNamePattern;
+  private final String hostname;
 
   public DaemonConfig(Builder builder) {
     this.auditLogging = builder.auditLogging;
@@ -72,6 +74,7 @@ public class DaemonConfig {
     this.proxyPassword = builder.proxyPassword;
     this.proxyScheme = builder.proxyScheme;
     this.threadNamePattern = builder.threadNamePattern;
+    this.hostname = builder.hostname;
   }
 
   public boolean auditLogging() {
@@ -150,6 +153,8 @@ public class DaemonConfig {
     return threadNamePattern;
   }
 
+  public String getHostname() { return hostname; }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -173,6 +178,7 @@ public class DaemonConfig {
     private String proxyPassword = DEFAULT_PROXY_PASSWORD;
     private String proxyScheme = DEFAULT_PROXY_SCHEME;
     private String threadNamePattern = ThreadNameNormalizer.DEFAULT_PATTERN;
+    private String hostname = DEFAULT_HOSTNAME;
 
     public Builder auditLogging(boolean auditLogging) {
       this.auditLogging = auditLogging;
@@ -268,6 +274,11 @@ public class DaemonConfig {
       return this;
     }
 
+    public Builder hostname(String hostname) {
+      this.hostname = hostname;
+      return this;
+    }
+
     /**
      * Fetch the given envKey from the environment and, if set, convert it to another type and pass
      * it to the given builder method.
@@ -343,6 +354,9 @@ public class DaemonConfig {
         + '\''
         + ", proxyPassword='"
         + proxyPassword
+        + '\''
+        + ", hostname='"
+        + hostname
         + '\''
         + ", proxyScheme='"
         + proxyScheme
