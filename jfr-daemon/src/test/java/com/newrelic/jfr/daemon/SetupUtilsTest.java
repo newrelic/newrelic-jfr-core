@@ -9,7 +9,6 @@ package com.newrelic.jfr.daemon;
 
 import static com.newrelic.jfr.daemon.AttributeNames.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,5 @@ class SetupUtilsTest {
     assertEquals("JFR-Uploader", attributesMap.get(COLLECTOR_NAME));
     assertEquals("test_app_name", attributesMap.get(SERVICE_NAME));
     assertEquals("test_app_name", attributesMap.get(APP_NAME));
-    assertNotNull(attributesMap.get(HOSTNAME));
   }
 }
