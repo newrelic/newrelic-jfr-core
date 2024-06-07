@@ -11,7 +11,6 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -49,17 +48,7 @@ public class SetupUtils {
             .put(AttributeNames.INSTRUMENTATION_NAME, "JFR")
             .put(AttributeNames.INSTRUMENTATION_PROVIDER, "JFR-Uploader")
             .put(AttributeNames.COLLECTOR_NAME, "JFR-Uploader");
-    String hostname;
-    if (config.getHostname() == null) {
-      try {
-        hostname = InetAddress.getLocalHost().getHostName();
-      } catch (Exception e) {
-        hostname = InetAddress.getLoopbackAddress().toString();
-      }
-    } else {
-      hostname = config.getHostname();
-    }
-    attributes.put(AttributeNames.HOSTNAME, hostname);
+
     attributes.put(AttributeNames.APP_NAME, config.getMonitoredAppName());
     attributes.put(AttributeNames.SERVICE_NAME, config.getMonitoredAppName());
     return attributes;
