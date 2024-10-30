@@ -26,7 +26,7 @@ dependencies {
     api(project(":jfr-mappers"))
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}");
     api("com.newrelic.telemetry:telemetry-core:${newRelicTelemetryVersion}")
-    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.4")
     implementation("com.google.code.gson:gson:${gsonVersion}")
     /*
      * Only require the newrelic-api to compile but do not include the classes in the jfr-daemon jar.

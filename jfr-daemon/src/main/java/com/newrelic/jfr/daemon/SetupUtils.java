@@ -17,14 +17,10 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
-import okhttp3.Authenticator;
-import okhttp3.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,12 +143,10 @@ public class SetupUtils {
   }
 
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
-    Supplier<HttpPoster> httpPosterCreator =
-        () ->
-            new OkHttpPoster(
-                buildProxy(config),
-                buildProxyAuthenticator(config),
-                Duration.of(10, ChronoUnit.SECONDS));
+
+    HttpPoster httpPoster = new ApachePoster(config);
+    Supplier<HttpPoster> httpPosterCreator = () -> httpPoster;
+
     MetricBatchSender metricBatchSender = buildMetricBatchSender(config, httpPosterCreator);
     EventBatchSender eventBatchSender = buildEventBatchSender(config, httpPosterCreator);
     return new TelemetryClient(metricBatchSender, null, eventBatchSender, null);
@@ -227,22 +221,5 @@ public class SetupUtils {
             + ":"
             + proxyPort);
     return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-  }
-
-  private static Authenticator buildProxyAuthenticator(DaemonConfig config) {
-    String proxyUser = config.getProxyUser();
-    String proxyPassword = config.getProxyPassword();
-
-    if (proxyUser == null || proxyPassword == null) {
-      return null;
-    }
-
-    logger.info("JFR HttpPoster configured with proxy user and proxy password.");
-    return (route, response) ->
-        response
-            .request()
-            .newBuilder()
-            .header(PROXY_AUTHORIZATION, Credentials.basic(proxyUser, proxyPassword))
-            .build();
   }
 }

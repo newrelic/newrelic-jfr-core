@@ -30,7 +30,7 @@ sourceSets {
 dependencies {
     implementation("com.google.code.gson:gson:${gsonVersion}")
     implementation("com.newrelic.telemetry:telemetry-all:${newRelicTelemetryVersion}")
-    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.4")
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
 }
 
