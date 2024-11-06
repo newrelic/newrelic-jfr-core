@@ -1,8 +1,17 @@
+/*
+ *
+ *  * Copyright 2024 New Relic Corporation. All rights reserved.
+ *  * SPDX-License-Identifier: Apache-2.0
+ *
+ */
+
 package com.newrelic.jfr.daemon;
 
 import static java.util.function.Function.identity;
 
 import com.newrelic.jfr.daemon.agent.FileJfrRecorderFactory;
+import com.newrelic.jfr.daemon.httpclient.ApacheHttpPoster;
+import com.newrelic.jfr.daemon.httpclient.ApacheProxyManager;
 import com.newrelic.telemetry.Attributes;
 import com.newrelic.telemetry.EventBatchSenderFactory;
 import com.newrelic.telemetry.MetricBatchSenderFactory;
@@ -11,36 +20,29 @@ import com.newrelic.telemetry.TelemetryClient;
 import com.newrelic.telemetry.events.EventBatchSender;
 import com.newrelic.telemetry.http.HttpPoster;
 import com.newrelic.telemetry.metrics.MetricBatchSender;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 import jdk.jfr.consumer.RecordedEvent;
-import okhttp3.Authenticator;
-import okhttp3.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SetupUtils {
   private static final Logger logger = LoggerFactory.getLogger(SetupUtils.class);
   public static final String JFR_DAEMON = "JFR-Daemon/";
-  public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
-  public static final String HTTPS = "https";
+  public static final int DEFAULT_HTTP_POSTER_TIMEOUT_MILLIS = 120_000;
 
   private SetupUtils() {}
 
   /**
    * Build a base set of common attributes.
    *
-   * @return the attributes
    * @param config the daemon config
+   * @return the attributes
    */
   public static Attributes buildCommonAttributes(DaemonConfig config) {
     Attributes attributes =
@@ -149,10 +151,9 @@ public class SetupUtils {
   private static TelemetryClient buildTelemetryClient(DaemonConfig config) {
     Supplier<HttpPoster> httpPosterCreator =
         () ->
-            new OkHttpPoster(
-                buildProxy(config),
-                buildProxyAuthenticator(config),
-                Duration.of(10, ChronoUnit.SECONDS));
+            new ApacheHttpPoster(
+                new ApacheProxyManager(config), null, DEFAULT_HTTP_POSTER_TIMEOUT_MILLIS);
+
     MetricBatchSender metricBatchSender = buildMetricBatchSender(config, httpPosterCreator);
     EventBatchSender eventBatchSender = buildEventBatchSender(config, httpPosterCreator);
     return new TelemetryClient(metricBatchSender, null, eventBatchSender, null);
@@ -202,47 +203,5 @@ public class SetupUtils {
 
   private static String makeUserAgent(DaemonConfig config) {
     return JFR_DAEMON + config.getDaemonVersion();
-  }
-
-  private static Proxy buildProxy(DaemonConfig config) {
-    String proxyHost = config.getProxyHost();
-    Integer proxyPort = config.getProxyPort();
-    String proxyScheme = config.getProxyScheme();
-
-    if (proxyHost == null || proxyPort == null || proxyScheme == null) {
-      return null;
-    }
-
-    if (proxyScheme.equalsIgnoreCase(HTTPS)) {
-      // TODO See FIXME in OkHttpPoster
-      logger.error("HTTPS proxy is not currently supported.");
-      return null;
-    }
-
-    logger.info(
-        "JFR HttpPoster configured to use "
-            + proxyScheme
-            + " proxy: "
-            + proxyHost
-            + ":"
-            + proxyPort);
-    return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-  }
-
-  private static Authenticator buildProxyAuthenticator(DaemonConfig config) {
-    String proxyUser = config.getProxyUser();
-    String proxyPassword = config.getProxyPassword();
-
-    if (proxyUser == null || proxyPassword == null) {
-      return null;
-    }
-
-    logger.info("JFR HttpPoster configured with proxy user and proxy password.");
-    return (route, response) ->
-        response
-            .request()
-            .newBuilder()
-            .header(PROXY_AUTHORIZATION, Credentials.basic(proxyUser, proxyPassword))
-            .build();
   }
 }

@@ -10,4 +10,6 @@ module com.newrelic.jfr.daemon {
   requires com.newrelic.telemetry;
   requires com.google.gson;
   requires java.instrument;
+  requires org.apache.httpcomponents.httpclient;
+  requires org.apache.httpcomponents.httpcore;
 }

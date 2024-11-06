@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
+## Version 1.13.0 (2024-11-6)
+* Changed the JFR daemon `HttpPoster` implementation to use the Apache Http instead of OkHttp.
+
+## Version 1.12.0 (2024-06-07)
+* Remove hostname property setting logic.
+
+## Version 1.11.1 (2023-10-25)
+* Changing log level for an exceptional path.
+
+## Version 1.11.0 (2023-10-20)
+* `Warning`: This version spews a lot of logs. It is recommended to use version 1.11.1 instead.
+* Upgrading okhttp and telemetry sdk [#245](https://github.com/newrelic/newrelic-jfr-core/pull/245)
+
+## Version 1.10.0 (2023-10-17)
+* `Warning`: This version spews a lot of logs. It is recommended to use version 1.11.1 instead.
+* Additional logging for file delete errors. [#243](https://github.com/newrelic/newrelic-jfr-core/pull/243)
+
+## Version 1.9.1 (2023-05-05)
+* Removed debug code that printed configuration options to STDOUT.
+
 ## Version 1.9.0 (2022-06-15)
 * Update to telemetry-sdk `0.15.0` to address [CVE-2020-29582](https://github.com/newrelic/newrelic-telemetry-sdk-java/issues/273)
 * Also includes telemetry-sdk `0.14.0` improvement to decrease CPU utilization: "Replace UUID.randomUUID() with a faster implementation"
