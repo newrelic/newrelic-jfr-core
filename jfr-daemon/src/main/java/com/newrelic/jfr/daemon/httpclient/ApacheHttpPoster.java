@@ -164,6 +164,7 @@ public class ApacheHttpPoster implements HttpPoster {
             responseHeaders);
       }
     } catch (URISyntaxException e) {
+      logger.info("JFR HttpPoster: Exception posting data.", e);
       return null;
     }
   }
