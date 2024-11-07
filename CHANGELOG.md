@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
-## Version 1.13.0 (2024-11-6)
-* Changed the JFR daemon `HttpPoster` implementation to use the Apache Http instead of OkHttp.
+## Version 1.13.0 (2024-11-7)
+* Changed the JFR daemon `HttpPoster` implementation to use Apache Http instead of OkHttp.
 * Prevent the JFR daemon from throwing an exception when failing to delete a temp file.
 
 ## Version 1.12.0 (2024-06-07)
