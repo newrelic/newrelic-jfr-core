@@ -35,7 +35,7 @@ dependencies {
         exclude(group = "org.glassfish", module = "jakarta.el")
     }
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
-    testImplementation("org.testcontainers:testcontainers:1.15.1")
+    testImplementation("org.testcontainers:testcontainers:1.19.8")
     constraints {
         testImplementation("org.apache.commons:commons-compress:1.21") {
             because("snyk violations")

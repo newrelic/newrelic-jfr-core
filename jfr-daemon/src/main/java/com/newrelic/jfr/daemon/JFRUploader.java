@@ -116,20 +116,16 @@ public final class JFRUploader {
 
   void deleteFile(Path dumpFile) {
     try {
-      logger.debug("Attempting to delete file/path: {}", dumpFile.toString());
       Files.delete(dumpFile);
+      logger.debug("JFR daemon deleted file/path: {}", dumpFile);
     } catch (Exception e) {
-      // TODO: I think we actually want to log an error here and exit cleanly, rather than
-      // throw an exception on the executor thread
       File file = dumpFile.toFile();
-      logger.debug("Exception occurred attempting to delete file: ", e);
       logger.debug(
-          "Target file permissions: r: {}, w: {}, x: {}",
+          "JFR daemon did not delete file/path {} with permissions: r: {}, w: {}, x: {}",
+          file,
           file.canRead(),
           file.canWrite(),
           file.canExecute());
-
-      throw new RuntimeException(e);
     }
   }
 

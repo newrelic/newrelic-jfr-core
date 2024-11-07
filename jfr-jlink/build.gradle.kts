@@ -1,6 +1,6 @@
 val gsonVersion: String by project
 val newRelicTelemetryVersion: String by project
-val okhttpVersion: String by project
+val apachehttpVersion: String by project
 val slf4jVersion: String by project
 
 plugins {
@@ -30,7 +30,7 @@ sourceSets {
 dependencies {
     implementation("com.google.code.gson:gson:${gsonVersion}")
     implementation("com.newrelic.telemetry:telemetry-all:${newRelicTelemetryVersion}")
-    implementation("com.squareup.okhttp3:okhttp:${okhttpVersion}")
+    implementation("org.apache.httpcomponents:httpclient:${apachehttpVersion}")
     implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
 }
 
