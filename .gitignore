@@ -24,3 +24,4 @@ buildNumber.properties
 
 jfr-daemon.log
 logs/
+bin/
