@@ -52,7 +52,49 @@ public class SetupUtils {
             .put(AttributeNames.COLLECTOR_NAME, "JFR-Uploader");
     attributes.put(AttributeNames.APP_NAME, config.getMonitoredAppName());
     attributes.put(AttributeNames.SERVICE_NAME, config.getMonitoredAppName());
+
+    String serviceInstanceId = getServiceInstanceIdFromEnvironment();
+    if (serviceInstanceId != null) {
+      attributes.put(AttributeNames.SERVICE_INSTANCE_ID, serviceInstanceId);
+    }
+
     return attributes;
+  }
+
+  /**
+   * Get service.instance.id from environment variables. First tries OTEL_RESOURCE_ATTRIBUTES, then
+   * falls back to SERVICE_INSTANCE_ID.
+   */
+  private static String getServiceInstanceIdFromEnvironment() {
+    // First try to get it from OTEL_RESOURCE_ATTRIBUTES
+    String otelResourceAttributes = System.getenv("OTEL_RESOURCE_ATTRIBUTES");
+    if (otelResourceAttributes != null) {
+      String serviceInstanceId = extractServiceInstanceId(otelResourceAttributes);
+      if (serviceInstanceId != null) {
+        return serviceInstanceId;
+      }
+    }
+
+    // Fallback to SERVICE_INSTANCE_ID environment variable
+    return System.getenv("SERVICE_INSTANCE_ID");
+  }
+
+  /**
+   * Extract service.instance.id from OTEL_RESOURCE_ATTRIBUTES string.
+   */
+  private static String extractServiceInstanceId(String otelResourceAttributes) {
+    if (otelResourceAttributes == null || otelResourceAttributes.isEmpty()) {
+      return null;
+    }
+
+    String[] pairs = otelResourceAttributes.split(",");
+    for (String pair : pairs) {
+      String[] keyValue = pair.split("=", 2);
+      if (keyValue.length == 2 && AttributeNames.SERVICE_INSTANCE_ID.equals(keyValue[0].trim())) {
+        return keyValue[1].trim();
+      }
+    }
+    return null;
   }
 
   /**
