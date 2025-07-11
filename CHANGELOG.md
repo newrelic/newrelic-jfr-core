@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Coming soon
 * tbd
 
-## Version 1.14.0 (2025-07-xxxxxxxxxxxxxxxxx)
+## Version 1.14.0 (2025-07-25)
 * Implement support for configuring service.instance.id value when running in stand-alone mode.
 
 ## Version 1.13.0 (2024-11-7)
