@@ -52,6 +52,7 @@ public class DaemonConfig {
   private final String proxyPassword;
   private final String proxyScheme;
   private final String threadNamePattern;
+  private final String serviceInstanceId;
 
   public DaemonConfig(Builder builder) {
     this.auditLogging = builder.auditLogging;
@@ -72,6 +73,7 @@ public class DaemonConfig {
     this.proxyPassword = builder.proxyPassword;
     this.proxyScheme = builder.proxyScheme;
     this.threadNamePattern = builder.threadNamePattern;
+    this.serviceInstanceId = builder.serviceInstanceId;
   }
 
   public boolean auditLogging() {
@@ -150,6 +152,10 @@ public class DaemonConfig {
     return threadNamePattern;
   }
 
+  public String getServiceInstanceId() {
+    return serviceInstanceId;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -173,6 +179,8 @@ public class DaemonConfig {
     private String proxyPassword = DEFAULT_PROXY_PASSWORD;
     private String proxyScheme = DEFAULT_PROXY_SCHEME;
     private String threadNamePattern = ThreadNameNormalizer.DEFAULT_PATTERN;
+    private String serviceInstanceId = null;
+    private String otelResourceAttributes = null;
 
     public Builder auditLogging(boolean auditLogging) {
       this.auditLogging = auditLogging;
@@ -268,6 +276,16 @@ public class DaemonConfig {
       return this;
     }
 
+    public Builder serviceInstanceId(String serviceInstanceId) {
+      this.serviceInstanceId = serviceInstanceId;
+      return this;
+    }
+
+    public Builder otelResourceAttributes(String otelResourceAttributes) {
+      this.otelResourceAttributes = otelResourceAttributes;
+      return this;
+    }
+
     /**
      * Fetch the given envKey from the environment and, if set, convert it to another type and pass
      * it to the given builder method.
@@ -299,6 +317,21 @@ public class DaemonConfig {
       if (apiKey == null) {
         throw new RuntimeException(INSERT_API_KEY + " environment variable is required!");
       }
+
+      // Attempt to extract the service instance id from the OTel resource attributes.
+      // If it doesn't exist we'll default to the explicitly set value.
+      if (otelResourceAttributes != null && !otelResourceAttributes.isEmpty()) {
+        String[] keysAndValues = otelResourceAttributes.split(",");
+        for (String pair : keysAndValues) {
+          String[] keyValue = pair.split("=", 2);
+          if (keyValue.length == 2
+              && AttributeNames.SERVICE_INSTANCE_ID.equals(keyValue[0].trim())) {
+            this.serviceInstanceId = keyValue[1].trim();
+            break;
+          }
+        }
+      }
+
       return new DaemonConfig(this);
     }
   }

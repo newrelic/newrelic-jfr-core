@@ -9,6 +9,7 @@ package com.newrelic.jfr.daemon;
 
 import static com.newrelic.jfr.daemon.AttributeNames.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -26,5 +27,15 @@ class SetupUtilsTest {
     assertEquals("JFR-Uploader", attributesMap.get(COLLECTOR_NAME));
     assertEquals("test_app_name", attributesMap.get(SERVICE_NAME));
     assertEquals("test_app_name", attributesMap.get(APP_NAME));
+    assertNull(attributesMap.get(SERVICE_INSTANCE_ID));
+  }
+
+  @Test
+  void buildCommonAttributesWithServiceId() {
+    var mockConfig = Mockito.mock(DaemonConfig.class);
+    when(mockConfig.getMonitoredAppName()).thenReturn("test_app_name");
+    when(mockConfig.getServiceInstanceId()).thenReturn("abcd");
+    var attributesMap = SetupUtils.buildCommonAttributes(mockConfig).asMap();
+    assertEquals("abcd", attributesMap.get(SERVICE_INSTANCE_ID));
   }
 }

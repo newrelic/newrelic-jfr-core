@@ -3,6 +3,7 @@ package com.newrelic.jfr.daemon;
 import static com.newrelic.jfr.daemon.DaemonConfig.DEFAULT_JMX_PORT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -59,5 +60,38 @@ class DaemonConfigTest {
     assertFalse(config.streamFromJmx());
     config = DaemonConfig.builder().apiKey("a").useSharedFilesystem(false).build();
     assertTrue(config.streamFromJmx());
+  }
+
+  @Test
+  void assigningServiceIdFromOtelResourceString() {
+    DaemonConfig config =
+        DaemonConfig.builder()
+            .apiKey("a")
+            .otelResourceAttributes(
+                "service.name=myApp,deployment.environment=production,service.version=1.0,service.instance.id=abcd")
+            .serviceInstanceId("12345")
+            .build();
+    assertEquals("abcd", config.getServiceInstanceId());
+
+    config =
+        DaemonConfig.builder()
+            .apiKey("a")
+            .otelResourceAttributes(
+                "service.name=myApp,deployment.environment=production,service.version=1.0")
+            .serviceInstanceId("12345")
+            .build();
+    assertEquals("12345", config.getServiceInstanceId());
+  }
+
+  @Test
+  void assigningServiceIdExplicitly() {
+    DaemonConfig config = DaemonConfig.builder().apiKey("a").serviceInstanceId("12345").build();
+    assertEquals("12345", config.getServiceInstanceId());
+
+    config = DaemonConfig.builder().apiKey("a").serviceInstanceId(null).build();
+    assertNull(config.getServiceInstanceId()); // Random UUID
+
+    config = DaemonConfig.builder().apiKey("a").build();
+    assertNull(config.getServiceInstanceId()); // Random UUID
   }
 }

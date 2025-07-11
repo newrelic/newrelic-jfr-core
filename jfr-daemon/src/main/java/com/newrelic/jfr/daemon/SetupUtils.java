@@ -52,6 +52,11 @@ public class SetupUtils {
             .put(AttributeNames.COLLECTOR_NAME, "JFR-Uploader");
     attributes.put(AttributeNames.APP_NAME, config.getMonitoredAppName());
     attributes.put(AttributeNames.SERVICE_NAME, config.getMonitoredAppName());
+
+    if (config.getServiceInstanceId() != null) {
+      attributes.put(AttributeNames.SERVICE_INSTANCE_ID, config.getServiceInstanceId());
+    }
+
     return attributes;
   }
 
@@ -86,6 +91,9 @@ public class SetupUtils {
     builder.maybeEnv(EnvironmentVars.THREAD_NAME_PATTERN, identity(), builder::threadNamePattern);
     builder.maybeEnv(EnvironmentVars.HARVEST_INTERVAL, Integer::parseInt, builder::harvestInterval);
     builder.maybeEnv(EnvironmentVars.QUEUE_SIZE, Integer::parseInt, builder::queueSize);
+    builder.maybeEnv(EnvironmentVars.SERVICE_INSTANCE_ID, identity(), builder::serviceInstanceId);
+    builder.maybeEnv(
+        EnvironmentVars.OTEL_RESOURCE_ATTRIBUTES, identity(), builder::otelResourceAttributes);
 
     return builder.build();
   }
