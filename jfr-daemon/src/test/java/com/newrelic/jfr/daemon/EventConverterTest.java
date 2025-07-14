@@ -94,6 +94,13 @@ class EventConverterTest {
     attributes = new Attributes();
     new EventConverter(attributes, "");
     assertTrue(attributes.asMap().containsKey("service.instance.id"));
+
+    // Both attributes are present
+    attributes = new Attributes();
+    attributes.put("service.instance.id", "foo");
+    attributes.put("entity.guid", "bar");
+    assertFalse(attributes.asMap().containsKey("service.entity.id"));
+    assertTrue(attributes.asMap().containsKey("entity.guid"));
   }
 
   @Test

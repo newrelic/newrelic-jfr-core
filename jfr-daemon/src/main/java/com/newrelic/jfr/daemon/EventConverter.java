@@ -95,7 +95,7 @@ public class EventConverter {
    * This is gross. If the entity.guid AND service.instance.id keys are missing, we need to assign a
    * random UUID to the service.instance.id key. The presence of entity.guid indicates we're running
    * embedded in the agent. If it's not there, we're running stand alone and the service.instance.id
-   * is required.
+   * is required. If both attributes are present, entity.guid wins.
    *
    * @param attributes the Attributes instance to update
    * @return the updated Attribute instance
@@ -105,6 +105,9 @@ public class EventConverter {
     if (!attributesAsMap.containsKey(AttributeNames.ENTITY_GUID)
         && !attributesAsMap.containsKey(AttributeNames.SERVICE_INSTANCE_ID)) {
       attributes.put(AttributeNames.SERVICE_INSTANCE_ID, UUID.randomUUID().toString());
+    } else if (attributesAsMap.containsKey(AttributeNames.ENTITY_GUID)
+        && attributesAsMap.containsKey(AttributeNames.SERVICE_INSTANCE_ID)) {
+      attributes.remove(AttributeNames.SERVICE_INSTANCE_ID);
     }
 
     return attributes;
