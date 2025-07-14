@@ -8,7 +8,9 @@
 package com.newrelic.jfr.daemon;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -78,6 +80,20 @@ class EventConverterTest {
     assertEquals(2, metricBatch.getTelemetry().size());
     assertEquals(metric, new ArrayList<>(metricBatch.getTelemetry()).get(0));
     assertEquals(summary, new ArrayList<>(metricBatch.getTelemetry()).get(1));
+  }
+
+  @Test
+  void validateAttributesProperlyRecognizesEntityGuid() {
+    Attributes attributes = new Attributes();
+    attributes.put("entity.guid", "foo");
+
+    new EventConverter(attributes, "");
+    assertFalse(attributes.asMap().containsKey("service.entity.id"));
+
+    // Make sure we create a random UUID if entity.guid and service.entity.id are empty
+    attributes = new Attributes();
+    new EventConverter(attributes, "");
+    assertTrue(attributes.asMap().containsKey("service.instance.id"));
   }
 
   @Test
