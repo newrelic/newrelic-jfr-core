@@ -89,9 +89,8 @@ class DaemonConfigTest {
     assertEquals("12345", config.getServiceInstanceId());
 
     config = DaemonConfig.builder().apiKey("a").serviceInstanceId(null).build();
-    assertNull(config.getServiceInstanceId()); // Random UUID
-
+    assertNull(config.getServiceInstanceId());
     config = DaemonConfig.builder().apiKey("a").build();
-    assertNull(config.getServiceInstanceId()); // Random UUID
+    assertNull(config.getServiceInstanceId());
   }
 }
