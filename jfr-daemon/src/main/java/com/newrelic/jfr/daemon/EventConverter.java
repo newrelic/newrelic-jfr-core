@@ -18,6 +18,7 @@ import com.newrelic.telemetry.Attributes;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import jdk.jfr.consumer.RecordedEvent;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class EventConverter {
       ToSummaryRegistry toSummaryRegistry,
       ToEventRegistry toEventRegistry,
       ProfilerRegistry profilerRegistry) {
-    this.commonAttributes = commonAttributes;
+    this.commonAttributes = validateAttributes(commonAttributes);
     this.toMetricRegistry = toMetricRegistry;
     this.toSummaryRegistry = toSummaryRegistry;
     this.toEventRegistry = toEventRegistry;
@@ -88,6 +89,28 @@ public class EventConverter {
     eventCount.clear();
 
     return batches;
+  }
+
+  /**
+   * This is gross. If the entity.guid AND service.instance.id keys are missing, we need to assign a
+   * random UUID to the service.instance.id key. The presence of entity.guid indicates we're running
+   * embedded in the agent. If it's not there, we're running stand alone and the service.instance.id
+   * is required. If both attributes are present, entity.guid wins.
+   *
+   * @param attributes the Attributes instance to update
+   * @return the updated Attribute instance
+   */
+  private Attributes validateAttributes(Attributes attributes) {
+    Map<String, Object> attributesAsMap = attributes.asMap();
+    if (!attributesAsMap.containsKey(AttributeNames.ENTITY_GUID)
+        && !attributesAsMap.containsKey(AttributeNames.SERVICE_INSTANCE_ID)) {
+      attributes.put(AttributeNames.SERVICE_INSTANCE_ID, UUID.randomUUID().toString());
+    } else if (attributesAsMap.containsKey(AttributeNames.ENTITY_GUID)
+        && attributesAsMap.containsKey(AttributeNames.SERVICE_INSTANCE_ID)) {
+      attributes.remove(AttributeNames.SERVICE_INSTANCE_ID);
+    }
+
+    return attributes;
   }
 
   private void convertAndBuffer(BufferedTelemetry batches, RecordedEvent event) {

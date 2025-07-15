@@ -162,12 +162,19 @@ The `jfr-daemon` standalone process has the following requirements:
 
 The minimum requirements to use the `jfr-daemon` as standalone process are as follows.
 
-Set the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`):
+Set service instance id, the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`):
 
 ```
 export NEW_RELIC_APP_NAME=<NAME>
 export INSIGHTS_INSERT_KEY=<KEY>
 ```
+
+The service instance id will be configured from one of the following sources, in order of precedence:
+- If the environment variable `OTEL_RESOURCE_ATTRIBUTES` is present and contains the key `service.instance.id`, the value assigned to this
+  key will be used. For example, a value of `service.name=myApp,deployment.environment=production,service.version=1.0,service.instance.id=abcd` would
+  assign the `service.instance.id` value to `abcd`.
+- If the environment variable `SERVICE_INSTANCE_ID` is present, the value of the environment variable will be used.
+- The JFR daemon will generate a random id 
 
 Start the `jfr-daemon` standalone process, it will attempt to connect to your application's remote JMX MBean server:
 
@@ -208,12 +215,19 @@ The `jfr-daemon` standalone Java agent has the following requirements:
 
 The minimum requirements to use the `jfr-daemon` as standalone Java agent are as follows.
 
-Set the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`): 
+Set service instance id, the app name that the JFR data should be reported to, and an Insights insert key (to use an APM license key also add `export USE_LICENSE_KEY=true`):
 
 ```
 export NEW_RELIC_APP_NAME=<NAME>
 export INSIGHTS_INSERT_KEY=<KEY>
 ```
+
+The service instance id will be configured from one of the following sources, in order of precedence:
+- If the environment variable `OTEL_RESOURCE_ATTRIBUTES` is present and contains the key `service.instance.id`, the value assigned to this
+  key will be used. For example, a value of `service.name=myApp,deployment.environment=production,service.version=1.0,service.instance.id=abcd` would
+  assign the `service.instance.id` value to `abcd`.
+- If the environment variable `SERVICE_INSTANCE_ID` is present, the value of the environment variable will be used.
+- The JFR daemon will generate a random id
 
 Add the `-javaagent` parameter to your JVM properties:
 
