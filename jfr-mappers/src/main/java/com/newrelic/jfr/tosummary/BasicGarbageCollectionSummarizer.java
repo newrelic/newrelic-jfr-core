@@ -127,7 +127,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
         majorGcDurationSummarizer.accept(ev);
         majorGcCount.incrementAndGet();
       } else
-        // Ignore events unexpected name
+        // Ignore events with an unexpected name
         logger.warn("Ignoring unsupported " + EVENT_NAME + " event: " + name);
     }
   }
