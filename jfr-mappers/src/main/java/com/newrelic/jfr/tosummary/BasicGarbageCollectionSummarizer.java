@@ -43,6 +43,10 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
   public static final String G1_OLD = "G1Old";
   public static final String PARALLEL_OLD = "ParallelOld";
   public static final String SERIAL_OLD = "SerialOld";
+  public static final String ZGC = "Z";
+  public static final String ZGC_MAJOR = "ZGC Major";
+  public static final String ZGC_MINOR = "ZGC Minor";
+  public static final String SHENANDOAH = "Shenandoah";
 
   private static final Logger logger =
       LoggerFactory.getLogger(BasicGarbageCollectionSummarizer.class);
@@ -63,6 +67,9 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
               add(PARALLEL_SCAVENGE);
               add(PAR_NEW);
               add(PS_MARK_SWEEP);
+              add(ZGC);
+              add(ZGC_MAJOR);
+              add(SHENANDOAH);
             }
           });
 
@@ -75,6 +82,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
               add(G1_OLD);
               add(PARALLEL_OLD);
               add(SERIAL_OLD);
+              add(ZGC_MINOR);
             }
           });
 
@@ -119,7 +127,7 @@ public final class BasicGarbageCollectionSummarizer implements EventToSummary {
         majorGcDurationSummarizer.accept(ev);
         majorGcCount.incrementAndGet();
       } else
-        // Ignore events with GC name: GCNameEndSentinel, N/A, Shenandoah, Z or anything unexpected
+        // Ignore events with an unexpected name
         logger.warn("Ignoring unsupported " + EVENT_NAME + " event: " + name);
     }
   }
