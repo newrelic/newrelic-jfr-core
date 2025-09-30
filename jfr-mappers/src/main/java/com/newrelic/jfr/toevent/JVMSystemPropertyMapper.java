@@ -50,7 +50,7 @@ public class JVMSystemPropertyMapper implements EventToEvent {
       attr.put(JVM_PROPERTY, event.getString(KEY));
     }
     if (hasField(event, VALUE, SIMPLE_CLASS_NAME)) {
-      valueSplitter.maybeSplit(attr, JVM_PROPERTY_VALUE, event.getString(VALUE));
+      attr.put(JVM_PROPERTY_VALUE, "obfuscated");
     }
     return Collections.singletonList(new Event(JFR_JVM_INFORMATION, attr, timestamp));
   }
