@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Coming soon
 * tbd
+## Version 1.14.0 (2025-07-25)
+* Add ZGC and Shenandoah GC reporting support
+* Obfuscate all reported java sys properties
 
 ## Version 1.14.0 (2025-07-25)
 * Implement support for configuring service.instance.id value when running in stand-alone mode.
