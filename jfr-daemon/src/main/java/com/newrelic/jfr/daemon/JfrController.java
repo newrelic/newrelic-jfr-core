@@ -67,7 +67,7 @@ public class JfrController {
         // If an error occurs, recording to file, attempt to reset the recorder. If
         // resetting fails allow the exception to propagate.
         logger.warn(
-            "An error occurred recording JFR to file, resetting recorder: {}", e.getMessage());
+            "An error occurred recording JFR to file, resetting recorder: {}", e.getMessage(), e);
         resetJfrRecorder();
       }
     }
