@@ -3,11 +3,7 @@
 # Trigger: This workflow runs on every merge to the main branch.
 #
 # Purpose: It generates and submits a dependency graph to the GitHub Dependency Submission API. The graph is used to
-# trigger Dependabot Alerts for vulnerable dependencies, and to populate the Dependency Graph insights view in GitHub.
-#
-# Excludes:
-# - Test-only dependencies
-# - Module with name 'smoke-tests'
+# trigger Dependabot Alerts for vulnerable dependencies, and to populate the Dependency Graph insights view in GitHub.gi
 
 name: Dependency Submission
 
@@ -32,8 +28,6 @@ jobs:
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@d156388eb19639ec20ade50009f3d199ce1e2808 # pin@v4
         with:
-          dependency-graph-exclude-configurations: '.*[Tt]est(Compile|Runtime)Classpath'
-          dependency-graph-exclude-projects: ':smoke-tests'
           build-scan-publish: true
-          build-scan-terms-of-use-url: "https://gralde.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
           build-scan-terms-of-use-agree: "yes"
